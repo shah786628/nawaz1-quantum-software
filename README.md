@@ -1,16 +1,10 @@
 # Nawaz1 Quantum VQE Engine - Usage Guide
 
-> **Multidimensional L6→L3 Quantum Pipeline** — A production-grade quantum VQE engine supporting 16 domains, **51+ algorithms**, data persistence, and real-time streaming.
+> **Multidimensional L6→L3 Quantum Pipeline** — A production-grade quantum VQE engine supporting 16 domains, **62 algorithms across 13 categories**, data persistence, and real-time streaming.
 
 **Author:** Shahnawaz Alam  
 **License:** Proprietary  
 **Copyright (c) 2026 Shahnawaz Alam. All rights reserved.**
-
----
-
-## Key Architecture: Unified L3 Substrate
-
-All 51+ algorithms route through the **Algorithm Bridge → execute_l3()** on the pre-built VQE circuit substrate. The `algorithm` field is metadata for orchestration — all execution goes through the **same unified L3 quantum substrate**. The engine automatically selects the optimal algorithm based on domain and problem type when not explicitly specified.
 
 ---
 
@@ -22,7 +16,7 @@ The VQE engine uses **amplitude encoding**: the number of qubits is determined b
 num_qubits = input_data.len().next_power_of_two()
 ```
 
-For **65536 qubits**, provide **65536 amplitude values** in the `input_data` array.
+For **65536 qubits**, you must provide **65536 amplitude values** in the `input_data` array. Each value represents one amplitude in a 65536-dimensional Hilbert space.
 
 | Domain | Problem Scale for 65536 Qubits |
 |--------|-------------------------------|
@@ -48,10 +42,10 @@ For **65536 qubits**, provide **65536 amplitude values** in the `input_data` arr
 ## Table of Contents
 
 - [Quick Start](#quick-start)
-- [All 51+ Algorithms](#all-51-algorithms)
+- [Environment Variables](#environment-variables)
 - [API Endpoints](#api-endpoints)
-- [All 16 Quantum Domains](#all-16-quantum-domains)
-- [Algorithm Categories (A–J)](#algorithm-categories-aj)
+- [Complete Algorithm Reference (62 Algorithms)](#complete-algorithm-reference-62-algorithms)
+- [Algorithm Summary Table](#algorithm-summary-table)
 - [Data Import Guide](#data-import-guide)
 - [Authentication & Security](#authentication--security)
 - [Running the Examples](#running-the-examples)
@@ -85,7 +79,9 @@ curl http://localhost:8080/api/v1/health
 ```python
 import numpy as np, requests
 
-data = np.random.RandomState(42).normal(0, 1, 65536)
+# Generate 65536 molecular orbital amplitudes for hemoglobin
+rng = np.random.RandomState(42)
+data = rng.normal(0, 1, 65536)
 data = (data / np.linalg.norm(data)).tolist()
 
 resp = requests.post("http://localhost:8080/api/v1/quantum/execute", json={
@@ -102,342 +98,9 @@ print(resp.json())
 
 ```bash
 pip install numpy requests
-python quantum_usage_examples.py              # All demos
-python quantum_usage_examples.py algorithms   # All 51+ algorithm demos
-python quantum_usage_examples.py --list       # Show all options
-```
-
----
-
-## All 51+ Algorithms
-
-### A. Core API-Routable Algorithms (`POST /api/v1/quantum/execute`)
-
-| # | Algorithm | Description | Best For |
-|---|-----------|-------------|----------|
-| 1 | **VQE** | Variational Quantum Eigensolver | Energy minimization, ground states |
-| 2 | **QAOA** | Quantum Approximate Optimization | Combinatorial optimization |
-| 3 | **HHL** | Harrow-Hassidim-Lloyd | Linear systems Ax=b |
-| 4 | **Grover** | Grover Search | Unstructured search O(√N) |
-
-### B. QAOA Variants (via `qaoa_variant` field)
-
-| # | Variant | Description |
-|---|---------|-------------|
-| 5 | Standard QAOA | Fixed p-layer schedule |
-| 6 | Adaptive QAOA | Dynamically adds layers until convergence |
-| 7 | Continuous QAOA | Continuous-time quantum walk formulation |
-| 8 | Multi-Angle QAOA | Independent angle per constraint |
-| 9 | Warm-Start QAOA | Initialized from classical relaxation |
-
-### C. VQE Advanced Optimizers (`POST /api/v1/quantum/optimizer/run`)
-
-| # | Optimizer | Description |
-|---|-----------|-------------|
-| 10 | SPSA | Simultaneous Perturbation Stochastic Approximation |
-| 11 | CMAES | Covariance Matrix Adaptation Evolution Strategy |
-| 12 | L-BFGS-B | Limited-memory Broyden-Fletcher-Goldfarb-Shanno |
-| 13 | ADAM | Adaptive Moment Estimation |
-| 14 | COBYLA | Constrained Optimization by Linear Approximation |
-| 15 | QNG | Quantum Natural Gradient |
-| 16 | Rotosolve | Analytical parameter rotation |
-| 17 | Nelder-Mead | Simplex direct search |
-
-### D. VQE Ansatz Types (via `ansatz` field)
-
-| # | Ansatz | Description |
-|---|--------|-------------|
-| 18 | UCCSD | Unitary Coupled Cluster Singles & Doubles |
-| 19 | Qubit-Adapt VQE | Iteratively grows operator pool |
-| 20 | Symmetry-Preserving | Respects system symmetries |
-| 21 | Hardware-Efficient | Shallow circuit, native gates |
-| 22 | LDCA | Low-Depth Circuit Ansatz |
-
-### E. Error Mitigation Algorithms (via `mitigation_method` field)
-
-| # | Method | Description |
-|---|--------|-------------|
-| 23 | ZNE | Zero Noise Extrapolation (Richardson) |
-| 24 | PEC | Probabilistic Error Cancellation |
-| 25 | Virtual Distillation | Multi-copy purification |
-| 26 | CDR | Clifford Data Regression |
-| 27 | Readout Mitigation | Measurement error correction |
-
-### F. Quantum Simulation
-
-| # | Algorithm | Endpoint | Description |
-|---|-----------|----------|-------------|
-| 28 | VQS Time Evolution | `POST /api/v1/quantum/vqs/evolve` | Variational quantum simulation |
-| 29 | Lindblad Solver | `POST /api/v1/quantum/execute` | Open quantum system dynamics |
-| 30 | Quantum Monte Carlo | `POST /api/v1/quantum/execute` | Projector/diffusion MC |
-
-### G. Auto-Selected by Orchestration (`algorithm: "auto"` or omitted)
-
-| # | Algorithm | Auto-Selected When |
-|---|-----------|-------------------|
-| 31 | QPE | Phase estimation / eigenvalue problems |
-| 32 | QFT | Frequency analysis / Fourier transforms |
-| 33 | Shor | Integer factoring |
-| 34 | Boson Sampling | Photonic quantum advantage |
-| 35 | Gaussian Boson Sampling | Molecular vibronic spectra |
-| 36 | Conformal Field Theory | Critical systems |
-| 37 | Renormalization Group | Scale-dependent physics |
-| 38 | Quantum Thermodynamics | Partition functions, free energy |
-| 39 | Quantum Metrology | Heisenberg-limited sensing |
-| 40 | Measurement-Based QC | Cluster-state computation |
-
-### H. Numerical/Scientific Algorithms
-
-| # | Algorithm | Description |
-|---|-----------|-------------|
-| 41 | PDE Solvers | FDM, FEM, FVM for fluid/heat/structural |
-| 42 | SINDy | Sparse Identification of Nonlinear Dynamics |
-| 43 | Uncertainty Quantification | Bayesian, Monte Carlo, Polynomial Chaos |
-
-### I. Machine Learning Algorithms
-
-| # | Algorithm | Description |
-|---|-----------|-------------|
-| 44 | QNN | Quantum Neural Networks (variational classifier) |
-| 45 | QPINN | Quantum Physics-Informed Neural Networks |
-| 46 | Quantum Kernel Methods | Projected quantum kernel SVM |
-
-### J. Advanced Quantum Algorithms
-
-| # | Algorithm | Description |
-|---|-----------|-------------|
-| 47 | Belief Propagation | Quantum message passing on factor graphs |
-| 48 | Knowledge Compilation | Boolean to quantum circuit compilation |
-| 49 | Circuit Optimization | Gate synthesis and simplification |
-| 50 | Quantum Error Correction | Surface code decoding |
-| 51 | Quantum Teleportation | Multi-qubit state transfer protocol |
-
----
-
-## API Endpoints
-
-### Core Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/v1/health` | Health check |
-| `GET` | `/api/v1/quantum/status` | Engine status |
-| `GET` | `/api/v1/quantum/domains` | List available domains |
-| `POST` | `/api/v1/quantum/execute` | **Execute quantum computation** (all algorithms) |
-| `POST` | `/api/v1/quantum/optimizer/run` | VQE optimizer loop (Section C) |
-| `POST` | `/api/v1/quantum/vqs/evolve` | VQS time evolution (Section F) |
-| `POST` | `/api/v1/quantum/pipeline/execute` | Full L1→L2→L3 pipeline |
-| `POST` | `/api/v1/multidimensional/query` | Multidimensional range query |
-
-### Data Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/auth/register` | Register new user |
-| `POST` | `/api/v1/auth/login` | Login (returns JWT) |
-| `POST` | `/api/v1/query` | Execute SQL query |
-| `POST` | `/api/v1/bulk-import` | Bulk data import |
-
----
-
-## Algorithm Categories (A–J)
-
-### A. Core Algorithms — Request Examples
-
-```json
-// VQE (default)
-{"domain": "chemistry", "algorithm": "vqe", "molecule": "hemoglobin", "atoms": 8738, "input_data": [...]}
-
-// QAOA
-{"domain": "finance", "algorithm": "qaoa", "problem_type": "portfolio_optimization", "num_assets": 65536, "input_data": [...]}
-
-// HHL
-{"domain": "mathematics", "algorithm": "hhl", "problem_type": "linear_system", "matrix_size": 65536, "input_data": [...]}
-
-// Grover
-{"domain": "core_gates", "algorithm": "grover", "search_space_size": 65536, "target_states": [42, 1337], "input_data": [...]}
-```
-
-### B. QAOA Variants
-
-```json
-{"domain": "finance", "algorithm": "qaoa", "qaoa_variant": "standard", "p_layers": 8, "input_data": [...]}
-{"domain": "logistics", "algorithm": "qaoa", "qaoa_variant": "adaptive", "max_layers": 20, "input_data": [...]}
-{"domain": "finance", "algorithm": "qaoa", "qaoa_variant": "continuous", "time_limit": 5.0, "input_data": [...]}
-{"domain": "logistics", "algorithm": "qaoa", "qaoa_variant": "multi_angle", "angles_per_layer": 4, "input_data": [...]}
-{"domain": "finance", "algorithm": "qaoa", "qaoa_variant": "warm_start", "classical_solution": "greedy_relaxation", "input_data": [...]}
-```
-
-### C. VQE Optimizers (`POST /api/v1/quantum/optimizer/run`)
-
-```json
-{"domain": "chemistry", "algorithm": "vqe", "optimizer": "spsa", "max_iterations": 500, "input_data": [...]}
-{"domain": "chemistry", "algorithm": "vqe", "optimizer": "cmaes", "max_iterations": 500, "input_data": [...]}
-{"domain": "chemistry", "algorithm": "vqe", "optimizer": "l_bfgs_b", "max_iterations": 500, "input_data": [...]}
-{"domain": "chemistry", "algorithm": "vqe", "optimizer": "adam", "max_iterations": 500, "input_data": [...]}
-{"domain": "chemistry", "algorithm": "vqe", "optimizer": "cobyla", "max_iterations": 500, "input_data": [...]}
-{"domain": "chemistry", "algorithm": "vqe", "optimizer": "qng", "max_iterations": 500, "input_data": [...]}
-{"domain": "chemistry", "algorithm": "vqe", "optimizer": "rotosolve", "max_iterations": 500, "input_data": [...]}
-{"domain": "chemistry", "algorithm": "vqe", "optimizer": "nelder_mead", "max_iterations": 500, "input_data": [...]}
-```
-
-### D. VQE Ansatz Types
-
-```json
-{"algorithm": "vqe", "ansatz": "uccsd", "excitation_order": "singles_doubles", "input_data": [...]}
-{"algorithm": "vqe", "ansatz": "qubit_adapt", "operator_pool": "full_pauli", "input_data": [...]}
-{"algorithm": "vqe", "ansatz": "symmetry_preserving", "symmetry_sector": "zero_magnetization", "input_data": [...]}
-{"algorithm": "vqe", "ansatz": "hardware_efficient", "circuit_depth": 6, "input_data": [...]}
-{"algorithm": "vqe", "ansatz": "ldca", "input_data": [...]}
-```
-
-### E. Error Mitigation
-
-```json
-{"mitigation_method": "zne", "noise_factors": [1.0, 1.5, 2.0, 2.5, 3.0], "extrapolation": "richardson", "input_data": [...]}
-{"mitigation_method": "pec", "num_calibration_circuits": 256, "input_data": [...]}
-{"mitigation_method": "virtual_distillation", "num_copies": 3, "input_data": [...]}
-{"mitigation_method": "cdr", "num_training_circuits": 100, "input_data": [...]}
-{"mitigation_method": "readout_mitigation", "calibration_shots": 8192, "input_data": [...]}
-```
-
-### F. Quantum Simulation
-
-```json
-// VQS Time Evolution (POST /api/v1/quantum/vqs/evolve)
-{"num_sites": 65536, "time_steps": 50, "dt_seconds": 0.02, "hamiltonian": "heisenberg_xxz", "input_data": [...]}
-
-// Lindblad Solver
-{"simulation_type": "lindblad", "dissipation_rate": 0.01, "lindblad_operators": ["sigma_minus"], "input_data": [...]}
-
-// Quantum Monte Carlo
-{"simulation_type": "quantum_monte_carlo", "num_walkers": 10000, "projection_time": 20.0, "input_data": [...]}
-```
-
-### G. Auto-Selected Algorithms
-
-```json
-// Engine picks the best algorithm automatically
-{"domain": "chemistry", "algorithm": "auto", "problem_type": "phase_estimation", "input_data": [...]}
-{"domain": "mathematics", "algorithm": "auto", "problem_type": "integer_factoring", "number_to_factor": 18446744073709551557, "input_data": [...]}
-{"domain": "physics", "algorithm": "auto", "problem_type": "boson_sampling", "num_modes": 65536, "input_data": [...]}
-```
-
-### H. Numerical/Scientific
-
-```json
-// PDE Solvers
-{"problem_type": "pde_solver", "pde_method": "fdm", "equation": "navier_stokes_2d", "grid_size": [256, 256], "input_data": [...]}
-{"problem_type": "pde_solver", "pde_method": "fem", "equation": "heat_equation_3d", "num_elements": 65536, "input_data": [...]}
-{"problem_type": "pde_solver", "pde_method": "fvm", "equation": "euler_equations", "num_cells": 65536, "input_data": [...]}
-
-// SINDy
-{"problem_type": "sindy", "time_series_length": 65536, "sparsity_threshold": 0.01, "input_data": [...]}
-
-// Uncertainty Quantification
-{"problem_type": "uncertainty_quantification", "uq_method": "polynomial_chaos", "samples": 65536, "input_data": [...]}
-```
-
-### I. Machine Learning
-
-```json
-{"problem_type": "qnn", "num_features": 65536, "num_layers": 12, "input_data": [...]}
-{"problem_type": "qpinn", "physics_equation": "schrodinger", "num_collocation_points": 65536, "input_data": [...]}
-{"problem_type": "quantum_kernel", "kernel_type": "projected_quantum", "num_features": 65536, "input_data": [...]}
-```
-
-### J. Advanced Quantum
-
-```json
-{"problem_type": "belief_propagation", "num_variables": 65536, "factor_graph_type": "ising", "input_data": [...]}
-{"problem_type": "knowledge_compilation", "num_variables": 65536, "target_representation": "obdd", "input_data": [...]}
-{"problem_type": "circuit_optimization", "circuit_gates": 65536, "optimization_level": 3, "input_data": [...]}
-{"problem_type": "quantum_error_correction", "code_type": "surface_code", "code_distance": 7, "input_data": [...]}
-{"problem_type": "quantum_teleportation", "num_qubits_to_teleport": 65536, "input_data": [...]}
-```
-
----
-
-## All 16 Quantum Domains
-
-### 1. Chemistry
-```json
-{"domain": "chemistry", "algorithm": "vqe", "molecule": "hemoglobin", "atoms": 8738, "basis_set": "STO-6G", "input_data": [...]}
-```
-
-### 2. Physics
-```json
-{"domain": "physics", "algorithm": "vqe", "model": "heisenberg_xxz", "lattice_size": 256, "input_data": [...]}
-```
-
-### 3. Finance
-```json
-{"domain": "finance", "algorithm": "qaoa", "problem_type": "portfolio_optimization", "num_assets": 65536, "input_data": [...]}
-```
-
-### 4. Materials Science
-```json
-{"domain": "materials_science", "algorithm": "vqe", "material": "YBCO", "lattice_atoms": 65536, "input_data": [...]}
-```
-
-### 5. Biomolecules
-```json
-{"domain": "biomolecules", "algorithm": "vqe", "problem_type": "protein_folding", "protein": "hemoglobin_tetramer", "input_data": [...]}
-```
-
-### 6. Machine Learning
-```json
-{"domain": "machine_learning", "algorithm": "vqe", "problem_type": "quantum_kernel_svm", "num_features": 65536, "input_data": [...]}
-```
-
-### 7. Logistics
-```json
-{"domain": "logistics", "algorithm": "qaoa", "problem_type": "vehicle_routing", "num_nodes": 65536, "input_data": [...]}
-```
-
-### 8. Nuclear
-```json
-{"domain": "nuclear", "algorithm": "vqe", "nucleus": "uranium-238", "protons": 92, "neutrons": 146, "input_data": [...]}
-```
-
-### 9. Mathematics
-```json
-{"domain": "mathematics", "algorithm": "hhl", "problem_type": "linear_system", "matrix_size": 65536, "input_data": [...]}
-```
-
-### 10. Error Mitigation
-```json
-{"domain": "error_mitigation", "mitigation_method": "zne", "noise_factors": [1.0, 1.5, 2.0, 2.5, 3.0], "input_data": [...]}
-```
-
-### 11. Graphics
-```json
-{"domain": "graphics", "algorithm": "grover", "problem_type": "ray_tracing", "resolution": [256, 256], "input_data": [...]}
-```
-
-### 12. Real-Time
-```json
-{"domain": "real_time", "problem_type": "state_evolution", "num_sites": 65536, "input_data": [...]}
-```
-
-### 13. Fluid Mechanics
-```json
-{"domain": "fluid_mechanics", "problem_type": "navier_stokes", "grid_size": [256, 256], "reynolds_number": 1000, "input_data": [...]}
-```
-
-### 14. Turbulence CFD
-```json
-{"domain": "turbulence_cfd", "problem_type": "dns_turbulence", "grid_points": 65536, "reynolds_number": 10000, "input_data": [...]}
-```
-
-### 15. Heat Transfer
-```json
-{"domain": "heat_transfer", "algorithm": "hhl", "problem_type": "conduction", "grid_size": [256, 256], "input_data": [...]}
-```
-
-### 16. Core Gates
-```json
-{"domain": "core_gates", "algorithm": "grover", "problem_type": "quantum_search", "search_space_size": 65536, "input_data": [...]}
+python quantum_usage_examples.py              # Run all 62 algorithms
+python quantum_usage_examples.py --list       # List all categories
+python quantum_usage_examples.py vqe_family   # Run single category
 ```
 
 ---
@@ -449,27 +112,307 @@ python quantum_usage_examples.py --list       # Show all options
 | `NAWAZ1_HOST` | `0.0.0.0` | Server bind address |
 | `NAWAZ1_PORT` | `8080` | Server port |
 | `NAWAZ1_TIER` | `free` | Tier: `free`, `pro`, `enterprise` |
-| `NAWAZ1_API_KEY` | *(unset)* | When set, requires `X-API-Key` header |
-| `RUST_LOG` | `info` | Log verbosity |
+| `NAWAZ1_API_KEY` | *(unset)* | When set, requires `X-API-Key` header on all quantum endpoints |
+| `RUST_LOG` | `info` | Log verbosity: `error`, `warn`, `info`, `debug`, `trace` |
 | `JWT_SECRET` | *(auto)* | Secret for JWT token signing |
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/health` | Health check |
+| `GET` | `/api/v1/quantum/status` | Engine status (qubits, memory, tier) |
+| `GET` | `/api/v1/quantum/domains` | List available domains |
+| `POST` | `/api/v1/quantum/execute` | **Execute quantum computation** |
+| `POST` | `/api/v1/quantum/optimizer/run` | Run VQE with specific optimizer |
+| `POST` | `/api/v1/quantum/vqs/evolve` | VQS time evolution |
+| `POST` | `/api/v1/quantum/pipeline/execute` | Full L1→L2→L3 pipeline |
+| `POST` | `/api/v1/multidimensional/query` | Multidimensional range query |
+
+---
+
+## Complete Algorithm Reference (62 Algorithms)
+
+**ARCHITECTURAL KEY POINT:** All algorithms route through the **Algorithm Bridge → execute_l3()** on the pre-built VQE circuit substrate. The `algorithm` field is metadata for orchestration — execution always goes through the same unified L3 parametric circuit. Only the parameter vector changes.
+
+---
+
+### Category A: VQE Family (8 variants)
+
+The core variational quantum eigensolver and its specialized variants.
+
+| # | Algorithm | Description | When to Use | Key Fields |
+|---|-----------|-------------|-------------|------------|
+| A1 | Standard VQE | Variational ground-state energy solver | Default for energy minimization | `"algorithm": "vqe"` |
+| A2 | ADAPT-VQE | Iteratively grows ansatz from operator pool | When circuit depth must be minimized | `"algorithm": "adapt_vqe"` |
+| A3 | Subspace VQE | Solves multiple eigenstates simultaneously | Excited states, spectroscopy | `"algorithm": "subspace_vqe", "num_eigenstates": 6` |
+| A4 | Hardware-Aware VQE | Circuit adapted to device connectivity | Noisy hardware deployment | `"algorithm": "hardware_aware_vqe", "topology": "heavy_hex"` |
+| A5 | VQE + Measurement Reduction | Fewer shots via Pauli grouping | Large Hamiltonians (many terms) | `"algorithm": "vqe_measurement_reduction"` |
+| A6 | VQE + Quantum Fisher | Natural gradient using Fisher information | Barren plateau avoidance | `"algorithm": "vqe_quantum_fisher"` |
+| A7 | VQE + Error Mitigation | Built-in noise correction | Noisy intermediate-scale | `"algorithm": "vqe_error_mitigated", "mitigation": "zne"` |
+| A8 | VQE + Advanced Optimizer | Meta-learned optimization | Fast convergence on new molecules | `"algorithm": "vqe_advanced_optimizer"` |
+
+---
+
+### Category B: VQE Advanced Optimizers (6)
+
+Classical optimizers that drive the VQE variational loop. Use endpoint `/api/v1/quantum/optimizer/run`.
+
+| # | Optimizer | Description | When to Use |
+|---|-----------|-------------|-------------|
+| B1 | SPSA | Simultaneous Perturbation Stochastic Approximation | Noisy cost functions, hardware |
+| B2 | CMA-ES | Covariance Matrix Adaptation Evolution Strategy | Global optimization, few parameters |
+| B3 | L-BFGS-B | Limited-memory BFGS with box constraints | Smooth landscapes, many parameters |
+| B4 | QNG | Quantum Natural Gradient (Fisher metric) | Avoiding barren plateaus |
+| B5 | Rotosolve | Analytical single-parameter rotation | Rz/Ry gates, exact 1D minima |
+| B6 | Nelder-Mead | Simplex direct search (derivative-free) | Non-differentiable landscapes |
+
+```json
+{"algorithm": "vqe", "optimizer": "qng", "max_iterations": 500}
+```
+
+---
+
+### Category C: VQE Advanced Ansätze (5)
+
+Parametric circuit structures for the VQE substrate.
+
+| # | Ansatz | Description | When to Use |
+|---|--------|-------------|-------------|
+| C1 | UCCSD | Unitary Coupled Cluster Singles & Doubles | Chemistry (gold standard) |
+| C2 | QubitAdapt-VQE | Iteratively grows qubit operator pool | Minimal circuit depth |
+| C3 | Symmetry-Preserving | Respects molecular/system symmetries | Symmetry-constrained problems |
+| C4 | k-UpCCGSD | k-fold Unitary pair Coupled Cluster GSD | Strongly correlated systems |
+| C5 | LDCA | Low-Depth Circuit Ansatz (log-depth) | Hardware with limited coherence |
+
+```json
+{"algorithm": "vqe", "ansatz": "uccsd", "excitation_order": "singles_doubles"}
+```
+
+---
+
+### Category D: QAOA Variants (5)
+
+Quantum Approximate Optimization Algorithm variants for combinatorial problems.
+
+| # | Variant | Description | When to Use |
+|---|---------|-------------|-------------|
+| D1 | Standard QAOA | Fixed p-layer mixer/cost schedule | General combinatorial optimization |
+| D2 | Adaptive QAOA | Dynamically adds layers until convergence | Unknown optimal depth |
+| D3 | Continuous QAOA | Continuous-time quantum walk formulation | Time-continuous cost functions |
+| D4 | Multi-Angle QAOA | Independent angle per constraint | Problems with many constraints |
+| D5 | Warm-Start QAOA | Initialized from classical relaxation | When classical approximation exists |
+
+```json
+{"algorithm": "qaoa", "qaoa_variant": "adaptive", "max_layers": 20}
+```
+
+---
+
+### Category E: HHL Family (4)
+
+Quantum linear algebra algorithms with exponential speedup for sparse systems.
+
+| # | Algorithm | Description | When to Use |
+|---|-----------|-------------|-------------|
+| E1 | Standard HHL | Harrow-Hassidim-Lloyd for Ax=b | Sparse well-conditioned systems |
+| E2 | Preconditioned HHL | Better conditioned linear solve | Ill-conditioned matrices |
+| E3 | QSVT | Quantum Singular Value Transformation | General matrix functions |
+| E4 | Quantum Regression | Quantum-enhanced least squares | Regression/fitting |
+
+```json
+{"algorithm": "qsvt", "problem_type": "matrix_function", "function": "matrix_inversion"}
+```
+
+---
+
+### Category F: Grover Search (1)
+
+| # | Algorithm | Description | When to Use |
+|---|-----------|-------------|-------------|
+| F1 | Grover Search | O(√N) unstructured quantum search | Unstructured search, database queries |
+
+```json
+{"algorithm": "grover", "search_space_size": 65536, "target_states": [42, 1337]}
+```
+
+---
+
+### Category G: Error Mitigation (5)
+
+Post-processing techniques to reduce noise in quantum results.
+
+| # | Method | Description | When to Use |
+|---|--------|-------------|-------------|
+| G1 | ZNE | Zero-Noise Extrapolation (Richardson) | General noise reduction |
+| G2 | PEC | Probabilistic Error Cancellation | Known noise model |
+| G3 | Virtual Distillation | Multi-copy state purification | High-fidelity required |
+| G4 | CDR | Clifford Data Regression | Near-Clifford circuits |
+| G5 | Readout Mitigation | Measurement error correction | Readout-dominated noise |
+
+```json
+{"mitigation_method": "zne", "noise_factors": [1.0, 1.5, 2.0, 2.5, 3.0]}
+```
+
+---
+
+### Category H: Measurement Reduction (3)
+
+Reduce measurement overhead for expectation value estimation.
+
+| # | Method | Description | When to Use |
+|---|--------|-------------|-------------|
+| H1 | Term Grouper | Groups commuting Pauli terms | Large Hamiltonians |
+| H2 | Classical Shadow | Randomized measurements for many observables | Many observables simultaneously |
+| H3 | Adaptive Shot Allocator | Variance-aware shot budget distribution | Fixed shot budget optimization |
+
+```json
+{"measurement_strategy": "classical_shadow", "num_shadows": 10000}
+```
+
+---
+
+### Category I: Numerical/Scientific Solvers (7)
+
+PDE solvers and scientific computing on the L3 quantum substrate.
+
+| # | Method | Description | When to Use |
+|---|--------|-------------|-------------|
+| I1 | FDM | Finite Difference Method | Structured grids, simple domains |
+| I2 | FEM | Finite Element Method | Complex geometries, unstructured mesh |
+| I3 | FVM | Finite Volume Method | Conservation laws, compressible flow |
+| I4 | IMEX | Implicit-Explicit time stepping | Stiff reaction-diffusion systems |
+| I5 | Multigrid | Hierarchical elliptic PDE solver | Elliptic equations, fast convergence |
+| I6 | PDE General | General quantum-accelerated PDE framework | Heat/wave/diffusion equations |
+| I7 | SINDy | Sparse Identification of Nonlinear Dynamics | Data-driven model discovery |
+
+```json
+{"problem_type": "pde_solver", "pde_method": "fem", "equation": "heat_equation_3d"}
+```
+
+---
+
+### Category J: Specialized Quantum (5)
+
+Domain-specific quantum primitives and algorithms.
+
+| # | Algorithm | Description | When to Use |
+|---|-----------|-------------|-------------|
+| J1 | QFT | Quantum Fourier Transform | Frequency analysis, phase kickback |
+| J2 | QPE | Quantum Phase Estimation | Eigenvalue extraction |
+| J3 | Quantum Monte Carlo | Projector/diffusion Monte Carlo | Ground states of lattice models |
+| J4 | Belief Propagation | Quantum message passing on factor graphs | Graphical model inference |
+| J5 | Knowledge Compilation | Boolean function to quantum circuit | Circuit synthesis |
+
+```json
+{"algorithm": "qpe", "problem_type": "phase_estimation", "precision_bits": 16}
+```
+
+---
+
+### Category K: Condensed Matter (4)
+
+Lattice quantum many-body models at scale.
+
+| # | Model | Description | When to Use |
+|---|-------|-------------|-------------|
+| K1 | Heisenberg | XXZ antiferromagnet on square lattice | Magnetic materials |
+| K2 | Hubbard | Strongly correlated electron model | High-Tc superconductors |
+| K3 | Ising | Transverse-field quantum spin chain | Phase transitions |
+| K4 | Lattice Gauge Theory | SU(3) gauge field on lattice | QCD, nuclear physics |
+
+```json
+{"problem_type": "condensed_matter", "model": "hubbard", "hopping_t": 1.0, "interaction_u": 4.0}
+```
+
+---
+
+### Category L: Time Evolution (3)
+
+Quantum dynamics simulation algorithms.
+
+| # | Algorithm | Description | When to Use |
+|---|-----------|-------------|-------------|
+| L1 | VQS | Variational Quantum Simulation (McLachlan) | Real-time dynamics |
+| L2 | TEBD | Time-Evolving Block Decimation (MPS) | 1D systems, long times |
+| L3 | QITE | Quantum Imaginary Time Evolution | Ground state preparation, thermal states |
+
+```json
+// VQS endpoint:
+POST /api/v1/quantum/vqs/evolve
+{"num_sites": 65536, "time_steps": 50, "dt_seconds": 0.02, "hamiltonian": "heisenberg_xxz"}
+```
+
+---
+
+### Category M: Advanced Quantum (6)
+
+Cutting-edge quantum algorithms for specialized applications.
+
+| # | Algorithm | Description | When to Use |
+|---|-----------|-------------|-------------|
+| M1 | Shor's Algorithm | Integer factorization (exponential speedup) | Cryptanalysis, number theory |
+| M2 | Quantum Lindblad Solver | Open quantum system dynamics | Decoherence, dissipation |
+| M3 | Quantum Thermodynamics | Partition function & free energy | Thermal equilibrium properties |
+| M4 | Quantum Metrology | Heisenberg-limited parameter estimation | Precision sensing |
+| M5 | QNN | Quantum Neural Network (variational classifier) | Classification, generative models |
+| M6 | QPINN | Quantum Physics-Informed Neural Network | PDE solving with physics constraints |
+
+```json
+{"algorithm": "shor", "problem_type": "integer_factoring", "number_to_factor": 18446744073709551557}
+```
+
+---
+
+## Algorithm Summary Table
+
+| Category | Count | Algorithms |
+|----------|-------|------------|
+| A. VQE Family | 8 | Standard, ADAPT, Subspace, Hardware-Aware, Measurement Reduction, Quantum Fisher, Error Mitigated, Advanced Optimizer |
+| B. VQE Optimizers | 6 | SPSA, CMA-ES, L-BFGS-B, QNG, Rotosolve, Nelder-Mead |
+| C. VQE Ansätze | 5 | UCCSD, QubitAdapt, Symmetry-Preserving, k-UpCCGSD, LDCA |
+| D. QAOA Variants | 5 | Standard, Adaptive, Continuous, Multi-Angle, Warm-Start |
+| E. HHL Family | 4 | Standard HHL, Preconditioned HHL, QSVT, Quantum Regression |
+| F. Grover | 1 | Grover Search |
+| G. Error Mitigation | 5 | ZNE, PEC, Virtual Distillation, CDR, Readout Mitigation |
+| H. Measurement Reduction | 3 | Term Grouper, Classical Shadow, Adaptive Shot Allocator |
+| I. Numerical/Scientific | 7 | FDM, FEM, FVM, IMEX, Multigrid, PDE General, SINDy |
+| J. Specialized Quantum | 5 | QFT, QPE, Quantum Monte Carlo, Belief Propagation, Knowledge Compilation |
+| K. Condensed Matter | 4 | Heisenberg, Hubbard, Ising, Lattice Gauge Theory |
+| L. Time Evolution | 3 | VQS, TEBD, QITE |
+| M. Advanced Quantum | 6 | Shor, Lindblad Solver, Thermodynamics, Metrology, QNN, QPINN |
+| **TOTAL** | **62** | |
 
 ---
 
 ## Data Import Guide
 
-### Register & Login
+### 1. Register & Login
 
 ```bash
+# Register
 curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username":"myuser","password":"MyPass123!","email":"me@example.com"}'
 
+# Login (get JWT token)
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"myuser","password":"MyPass123!"}'
 ```
 
-### Bulk Import
+### 2. Create Table & Insert
+
+```bash
+curl -X POST http://localhost:8080/api/v1/query \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{"query":"CREATE TABLE experiments (id INT, domain TEXT, energy REAL, fidelity REAL)"}'
+```
+
+### 3. Bulk Import
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/bulk-import \
@@ -488,27 +431,20 @@ curl -X POST http://localhost:8080/api/v1/bulk-import \
 
 ### API Key Mode
 
+When `NAWAZ1_API_KEY` is set, all quantum endpoints require `X-API-Key` header:
+
 ```bash
 NAWAZ1_API_KEY=my-secret-key-123 ./nawaz1-server
 
 curl -X POST http://localhost:8080/api/v1/quantum/execute \
-  -H "X-API-Key: my-secret-key-123" \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: my-secret-key-123" \
   -d '{"domain":"chemistry","algorithm":"vqe","input_data":[...]}'
 ```
 
-### JWT Authentication (for data operations)
+### JWT Authentication
 
-```bash
-TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}' | jq -r '.token')
-
-curl -X POST http://localhost:8080/api/v1/query \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"query":"SELECT * FROM experiments"}'
-```
+For data operations (query, import), use JWT tokens obtained from `/api/v1/auth/login`.
 
 ---
 
@@ -518,21 +454,35 @@ curl -X POST http://localhost:8080/api/v1/query \
 
 | File | Description |
 |------|-------------|
-| `quantum_usage_examples.py` | **All 51+ algorithms** at 65536-qubit scale (Python + numpy) |
+| `quantum_usage_examples.py` | All **62 algorithms** at 65536-qubit scale (Python + numpy) |
 | `data_import_examples.py` | Auth, tables, import, query (Python) |
-| `run_all_demos.sh` | Demo runner (Bash) |
-| `run_all_demos.ps1` | Demo runner (PowerShell) |
+| `run_all_demos.sh` | Full demo runner (Bash) |
+| `run_all_demos.ps1` | Full demo runner (PowerShell) |
 | `README.md` | This documentation |
 
-### Run Individual Sections
+### Prerequisites
+
+- **Server:** nawaz1-server binary running
+- **Python:** 3.8+ with `numpy` and `requests` (`pip install numpy requests`)
+
+### Run Individual Categories
 
 ```bash
+python quantum_usage_examples.py vqe_family          # Category A
+python quantum_usage_examples.py vqe_optimizers      # Category B
+python quantum_usage_examples.py vqe_ansatz          # Category C
+python quantum_usage_examples.py qaoa_variants       # Category D
+python quantum_usage_examples.py hhl_family          # Category E
+python quantum_usage_examples.py grover              # Category F
+python quantum_usage_examples.py error_mitigation    # Category G
+python quantum_usage_examples.py measurement_reduction  # Category H
+python quantum_usage_examples.py numerical_solvers   # Category I
+python quantum_usage_examples.py specialized_quantum # Category J
+python quantum_usage_examples.py condensed_matter    # Category K
+python quantum_usage_examples.py time_evolution      # Category L
+python quantum_usage_examples.py advanced_quantum    # Category M
+python quantum_usage_examples.py algorithms          # ALL categories
 python quantum_usage_examples.py --list              # Show all options
-python quantum_usage_examples.py algorithms          # All 51+ algorithms
-python quantum_usage_examples.py algorithms_core     # Section A only
-python quantum_usage_examples.py algorithms_qaoa     # Section B only
-python quantum_usage_examples.py algorithms_optimizers  # Section C only
-python quantum_usage_examples.py chemistry           # Single domain
 ```
 
 ### Expected Response Format
