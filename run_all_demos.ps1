@@ -2,6 +2,8 @@
 # Nawaz1 Quantum VQE Engine - Run All Demos (PowerShell)
 # =============================================================================
 # Runs all quantum domain examples at REAL 65536-qubit scale.
+# Covers ALL 62 algorithms across 13 categories (A-M) via the Python script,
+# with inline 1024-qubit PowerShell demos for quick API validation.
 #
 # The VQE engine uses amplitude encoding: num_qubits is determined by the
 # input_data array length (data.len().next_power_of_two()). For 65536 qubits,
@@ -71,7 +73,7 @@ function Invoke-Quantum($payload, $label) {
 Write-Host ""
 Write-Host "========================================================================" -ForegroundColor Yellow
 Write-Host "  NAWAZ1 QUANTUM VQE ENGINE - Demo Runner (65536-Qubit Scale)"
-Write-Host "  All 16 Domains + 4 Algorithms + Data Import + Pipeline"
+Write-Host "  62 Algorithms | 13 Categories (A-M) | Unified L3 VQE Substrate"
 Write-Host "  Data SIZE determines qubit count (amplitude encoding)"
 Write-Host "========================================================================" -ForegroundColor Yellow
 Write-Host ""
@@ -178,14 +180,46 @@ Invoke-Quantum @{ domain="heat_transfer"; algorithm="hhl"; problem_type="conduct
 Invoke-Quantum @{ domain="core_gates"; algorithm="grover"; problem_type="quantum_fourier_transform"; register_size=1024; search_space_size=1024; target_states=@(42); input_data=$gateData } "Core Gates: QFT + Grover (1024 qubits)"
 
 # =============================================================================
-# Step 3: Algorithm Bridge Demos (1024-qubit inline)
+# Step 3: Algorithm Bridge Demos — Selected from 13 Categories (1024-qubit inline)
+# Full 62-algorithm coverage runs via Python in Step 7.
+# Categories: A(VQE×8), B(Optimizers×6), C(Ansatze×5), D(QAOA×5),
+#             E(HHL×4), F(Grover×1), G(ErrMit×5), H(MeasRed×3),
+#             I(Numerical×7), J(Specialized×5), K(CondMatter×4),
+#             L(TimeEvol×3), M(Advanced×6)
 # =============================================================================
-Write-Host "`n[3/7] Algorithm Bridge - All 4 algorithms (1024-qubit demo)..." -ForegroundColor Yellow
+Write-Host "`n[3/7] Algorithm Bridge - Sample from 13 categories (1024-qubit demo)..." -ForegroundColor Yellow
+Write-Host "       (Full 62 algorithms at 65536-qubit scale run in Step 7 via Python)" -ForegroundColor Gray
 
-Invoke-Quantum @{ domain="chemistry"; algorithm="vqe"; molecule="hemoglobin"; atoms=8738; input_data=$chemData } "Algorithm: VQE — Hemoglobin (1024 amplitudes)"
-Invoke-Quantum @{ domain="finance"; algorithm="qaoa"; problem_type="portfolio_optimization"; num_assets=1024; input_data=$finData } "Algorithm: QAOA — 1024-asset portfolio"
-Invoke-Quantum @{ domain="mathematics"; algorithm="hhl"; problem_type="linear_system"; matrix_size=1024; input_data=$mathData } "Algorithm: HHL — 1024×1024 linear system"
-Invoke-Quantum @{ domain="core_gates"; algorithm="grover"; search_space_size=1024; target_states=@(42); input_data=$gateData } "Algorithm: Grover — 1024-element search"
+# A: VQE Family
+Invoke-Quantum @{ domain="chemistry"; algorithm="vqe"; molecule="hemoglobin"; atoms=8738; input_data=$chemData } "Cat A: VQE — Hemoglobin ground state (1024 amplitudes)"
+Invoke-Quantum @{ domain="chemistry"; algorithm="adapt_vqe"; molecule="hemoglobin"; atoms=8738; operator_pool="fermionic"; input_data=$chemData } "Cat A: ADAPT-VQE — iterative ansatz growth"
+
+# B: VQE Optimizers
+Invoke-Quantum @{ domain="chemistry"; algorithm="vqe"; optimizer="spsa"; molecule="hemoglobin"; atoms=8738; max_iterations=500; input_data=$chemData } "Cat B: VQE+SPSA optimizer"
+
+# C: VQE Ansatze
+Invoke-Quantum @{ domain="chemistry"; algorithm="vqe"; ansatz="uccsd"; molecule="hemoglobin"; atoms=8738; input_data=$chemData } "Cat C: VQE+UCCSD ansatz"
+
+# D: QAOA Variants
+Invoke-Quantum @{ domain="finance"; algorithm="qaoa"; qaoa_variant="standard"; problem_type="portfolio_optimization"; num_assets=1024; p_layers=8; input_data=$finData } "Cat D: QAOA — 1024-asset portfolio"
+
+# E: HHL Family
+Invoke-Quantum @{ domain="mathematics"; algorithm="hhl"; problem_type="linear_system"; matrix_size=1024; input_data=$mathData } "Cat E: HHL — 1024×1024 linear system"
+
+# F: Grover Search
+Invoke-Quantum @{ domain="core_gates"; algorithm="grover"; search_space_size=1024; target_states=@(42); input_data=$gateData } "Cat F: Grover — 1024-element search"
+
+# G: Error Mitigation
+Invoke-Quantum @{ domain="error_mitigation"; algorithm="vqe"; mitigation_method="pec"; num_calibration_circuits=256; input_data=$errData } "Cat G: PEC — Probabilistic Error Cancellation"
+
+# I: Numerical Solvers
+Invoke-Quantum @{ domain="fluid_mechanics"; algorithm="vqe"; problem_type="pde_solver"; pde_method="fdm"; equation="navier_stokes_2d"; grid_size=@(32,32); input_data=$fluidData } "Cat I: FDM — Navier-Stokes (32×32)"
+
+# K: Condensed Matter
+Invoke-Quantum @{ domain="physics"; algorithm="vqe"; problem_type="condensed_matter"; model="hubbard"; lattice_size=32; hopping_t=1.0; interaction_u=4.0; input_data=$physData } "Cat K: Hubbard Model — 32×32 lattice"
+
+# M: Advanced Quantum
+Invoke-Quantum @{ domain="machine_learning"; algorithm="vqe"; problem_type="qnn"; num_features=1024; num_layers=12; input_data=$mlData } "Cat M: QNN — Quantum Neural Network"
 
 # =============================================================================
 # Step 4: VQS Time Evolution (1024-site demo)
@@ -282,12 +316,21 @@ Write-Host "       Each domain sends 65536 amplitude values → engine allocates
 $pythonCmd = if (Get-Command python3 -ErrorAction SilentlyContinue) { "python3" } elseif (Get-Command python -ErrorAction SilentlyContinue) { "python" } else { $null }
 
 if ($pythonCmd) {
-    Write-Host "  Running quantum_usage_examples.py (65536-qubit scale)..." -ForegroundColor Cyan
-    & $pythonCmd quantum_usage_examples.py 2>&1 | Select-Object -First 100
+    Write-Host "  Running quantum_usage_examples.py --list (category overview)..." -ForegroundColor Cyan
+    & $pythonCmd quantum_usage_examples.py --list 2>&1
+    Write-Host ""
+    Write-Host "  Running quantum_usage_examples.py (ALL 62 algorithms, 65536-qubit scale)..." -ForegroundColor Cyan
+    & $pythonCmd quantum_usage_examples.py 2>&1 | Select-Object -First 200
     Write-Host "`n  Running data_import_examples.py..." -ForegroundColor Cyan
     & $pythonCmd data_import_examples.py 2>&1 | Select-Object -First 50
 } else {
     Write-Host "  Python not found. Install Python 3.8+ with numpy to run 65536-qubit examples." -ForegroundColor Red
+    Write-Host "  The Python script demonstrates all 62 algorithms across 13 categories (A-M):" -ForegroundColor Red
+    Write-Host "    A: VQE Family (8)        B: VQE Optimizers (6)   C: VQE Ansatze (5)" -ForegroundColor Gray
+    Write-Host "    D: QAOA Variants (5)     E: HHL Family (4)       F: Grover (1)" -ForegroundColor Gray
+    Write-Host "    G: Error Mitigation (5)  H: Meas. Reduction (3)  I: Numerical (7)" -ForegroundColor Gray
+    Write-Host "    J: Specialized (5)       K: Condensed Matter (4)  L: Time Evol (3)" -ForegroundColor Gray
+    Write-Host "    M: Advanced Quantum (6)" -ForegroundColor Gray
 }
 
 # =============================================================================
@@ -298,8 +341,15 @@ Write-Host "====================================================================
 Write-Host "  ALL DEMOS COMPLETE" -ForegroundColor Green
 Write-Host ""
 Write-Host "  QUBIT SCALING (amplitude encoding):"
-Write-Host "    PowerShell inline: 1024 data points → 1024 qubits (quick demo)"
-Write-Host "    Python full scale: 65536 data points → 65536 qubits"
+Write-Host "    PowerShell inline: 1024 data points -> 1024 qubits (quick demo)"
+Write-Host "    Python full scale: 65536 data points -> 65536 qubits"
+Write-Host ""
+Write-Host "  ALGORITHMS: 62 total across 13 categories (A-M):"
+Write-Host "    A: VQE Family (8)        B: VQE Optimizers (6)   C: VQE Ansatze (5)"
+Write-Host "    D: QAOA Variants (5)     E: HHL Family (4)       F: Grover (1)"
+Write-Host "    G: Error Mitigation (5)  H: Meas. Reduction (3)  I: Numerical (7)"
+Write-Host "    J: Specialized (5)       K: Condensed Matter (4)  L: Time Evol (3)"
+Write-Host "    M: Advanced Quantum (6)"
 Write-Host ""
 Write-Host "  Domains:    16 (chemistry, physics, finance, materials,"
 Write-Host "              biomolecules, ML, logistics, nuclear, math,"
@@ -307,7 +357,11 @@ Write-Host "              error_mitigation, graphics, real_time,"
 Write-Host "              fluid_mechanics, turbulence_cfd, heat_transfer,"
 Write-Host "              core_gates)"
 Write-Host ""
-Write-Host "  Algorithms: VQE, QAOA, HHL, Grover"
 Write-Host "  Features:   VQS evolution, Pipeline, Multidimensional"
 Write-Host "  Data:       Import, Batch, Query, Auth"
+Write-Host ""
+Write-Host "  Run individual categories:"
+Write-Host "    python quantum_usage_examples.py --list        # List all categories"
+Write-Host "    python quantum_usage_examples.py vqe_family    # Run single category"
+Write-Host "    python quantum_usage_examples.py algorithms    # Run all 62 algorithms"
 Write-Host "========================================================================" -ForegroundColor Green
