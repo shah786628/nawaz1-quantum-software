@@ -24,7 +24,7 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 | Physics | 256×256 Heisenberg lattice (65536 sites) |
 | Finance | 65536 financial instruments (global portfolio) |
 | Materials | 65536-atom YBCO superconductor crystal |
-| Biomolecules | Hemoglobin tetramer (4532 atoms, 65536 conformations) |
+| Biomolecules | Hemoglobin tetramer (4532 atoms, 65536 conformations) — **14 sub-modules** |
 | Machine Learning | 65536-feature quantum kernel SVM |
 | Logistics | 65536-node global supply chain |
 | Nuclear | Uranium-238 (238 nucleons, 65536 basis states) |
@@ -36,6 +36,42 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 | Turbulence CFD | 65536-point DNS turbulence (Re=10000) |
 | Heat Transfer | 256×256 thermal conduction grid (65536 nodes) |
 | Core Gates | 65536-qubit quantum Fourier transform |
+
+---
+
+## Biomolecules Domain — 14 Quantum Biology Sub-Modules
+
+The **biomolecules** domain contains 14 specialized sub-modules (~460 KB total) providing comprehensive quantum biology coverage:
+
+| # | Sub-Module | Key Capabilities |
+|---|-----------|------------------|
+| 1 | **DNA/RNA** | Nucleotide base encoding, Watson-Crick pairing, hybridization thermodynamics |
+| 2 | **Drug Discovery** | Lipinski's Rule of Five, Veber rules, Ghose filter, QED scoring |
+| 3 | **Enzyme Catalysis** | Michaelis-Menten kinetics, inhibition types, diffusion-limited catalysis |
+| 4 | **Glycobiology** | Monosaccharide classification, glycosidic bonds, lectin binding |
+| 5 | **Membrane Biophysics** | Ion channels, Nernst/Goldman equations, membrane potential |
+| 6 | **Metabolic Networks** | Flux balance analysis, Gibbs free energy, compartment modeling |
+| 7 | **Molecular Dynamics** | Force fields (AMBER/CHARMM), Lennard-Jones, Coulomb, trajectory integration |
+| 8 | **Neurochemistry** | 10 neurotransmitter types, receptor binding, synaptic dynamics |
+| 9 | **Photosynthesis** | Chromophore types, quantum yield, exciton energy transfer |
+| 10 | **Protein Folding** | 20 amino acids, Ramachandran analysis, energy landscapes |
+| 11 | **Protein-Protein Interactions** | Interface properties, SASA, binding free energy |
+| 12 | **Quantum Virology** | Capsid geometry, icosahedral symmetry, T-number classification |
+| 13 | **Structural Biology** | X-ray scattering factors, structure factor calculations |
+| 14 | **Systems Biology** | Hill functions, gene regulatory networks, cooperativity |
+
+**Usage:** Set `"config": {"sub_module": "<name>"}` in the execute request body. See [`packages/biology/README.md`](packages/biology/README.md) for full API documentation per sub-module.
+
+```json
+{
+  "domain": "biomolecules",
+  "algorithm": "vqe",
+  "input_data": ["...65536 floats..."],
+  "config": { "sub_module": "drug_discovery", "task": "drug_likeness" }
+}
+```
+
+**Demo endpoint:** `POST /api/v1/quantum/biomolecules/demo`
 
 ---
 
