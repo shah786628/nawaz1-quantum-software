@@ -21,14 +21,14 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 | Domain | Problem Scale for 65536 Qubits |
 |--------|-------------------------------|
 | Chemistry | Hemoglobin protein (8738 atoms, 65536 orbital amplitudes) |
-| Physics | 256×256 Heisenberg lattice (65536 sites) |
+| Physics | 256×256 Heisenberg lattice (65536 sites) — **13 sub-modules** |
 | Finance | 65536 financial instruments (global portfolio) |
 | Materials | 65536-atom YBCO superconductor crystal |
 | Biomolecules | Hemoglobin tetramer (4532 atoms, 65536 conformations) — **14 sub-modules** |
 | Machine Learning | 65536-feature quantum kernel SVM |
 | Logistics | 65536-node global supply chain |
 | Nuclear | Uranium-238 (238 nucleons, 65536 basis states) |
-| Mathematics | 65536×65536 sparse linear system |
+| Mathematics | 65536×65536 sparse linear system — **11 sub-modules** |
 | Error Mitigation | 65536-amplitude noisy state correction |
 | Graphics | 256×256 = 65536-pixel quantum ray tracing |
 | Real-Time | 65536-site quantum state evolution |
@@ -72,6 +72,74 @@ The **biomolecules** domain contains 14 specialized sub-modules (~460 KB total) 
 ```
 
 **Demo endpoint:** `POST /api/v1/quantum/biomolecules/demo`
+
+---
+
+## Physics Domain — 13 Quantum Physics Sub-Modules
+
+The **physics** domain contains 13 specialized sub-modules providing comprehensive quantum physics coverage from field theory to cosmology:
+
+| # | Sub-Module | Key Capabilities |
+|---|-----------|------------------|
+| 1 | **Quantum Field Theory** | Lorentz 4-vectors, Dirac spinors, Feynman diagrams, renormalization, scattering amplitudes |
+| 2 | **Quantum Electrodynamics** | Vacuum polarization, anomalous magnetic moment (5-loop), Lamb shift, Schwinger effect |
+| 3 | **Quantum Chromodynamics** | SU(3) color algebra, running α_s (4-loop), confinement, DGLAP splitting, jet physics |
+| 4 | **Relativistic Quantum Mechanics** | Klein-Gordon, Dirac hydrogen, Zitterbewegung, Klein paradox, Mott scattering |
+| 5 | **Quantum Gravity** | Hawking radiation, black hole entropy, Unruh effect, Loop Quantum Gravity, GUP |
+| 6 | **Quantum Entanglement Theory** | CHSH/Mermin/Svetlichny Bell tests, concurrence, negativity, teleportation, distillation |
+| 7 | **Quantum Optics** | Fock/coherent/squeezed states, Jaynes-Cummings, g⁽²⁾ correlations, HOM effect |
+| 8 | **Quantum Thermodynamics** | Quantum Otto/Carnot cycles, Jarzynski equality, Landauer's principle, quantum batteries |
+| 9 | **Quantum Chaos** | RMT ensembles (GOE/GUE/GSE), OTOC, ETH, spectral form factor, SYK model |
+| 10 | **Open Quantum Systems** | Lindblad master equation, T₁/T₂ decoherence, quantum channels, Zeno effect |
+| 11 | **Quantum Phase Transitions** | Transverse-field Ising, critical exponents, BKT transition, Kibble-Zurek mechanism |
+| 12 | **Quantum Metrology** | Quantum Fisher information, SQL vs Heisenberg limit, Ramsey interferometry |
+| 13 | **Quantum Cosmology** | Wheeler-DeWitt equation, inflation observables, primordial power spectrum, quantum bounce |
+
+**Usage:** Set `"config": {"sub_module": "<name>"}` in the execute request body. See [`packages/physics/README.md`](packages/physics/README.md) for full API documentation per sub-module.
+
+```json
+{
+  "domain": "physics",
+  "algorithm": "vqe",
+  "input_data": ["...65536 floats..."],
+  "config": { "sub_module": "quantum_field_theory", "task": "scattering_amplitude" }
+}
+```
+
+**Demo endpoint:** `POST /api/v1/quantum/physics/demo`
+
+---
+
+## Mathematics Domain — 11 Quantum Mathematics Sub-Modules
+
+The **mathematics** domain contains 11 specialized sub-modules providing comprehensive quantum mathematical foundations:
+
+| # | Sub-Module | Key Capabilities |
+|---|-----------|------------------|
+| 1 | **Quantum Algebra** | Lie algebras (SU, SO, Sp, E₆-E₈), Clifford algebras, Pauli/Weyl algebras |
+| 2 | **Quantum Information Theory** | Von Neumann/Rényi entropy, quantum channels, Fisher information, Holevo bound |
+| 3 | **Quantum Topology** | Jones polynomial, braid groups, Chern-Simons theory, TQFT partition functions |
+| 4 | **Quantum Differential Geometry** | Fiber bundles, gauge fields, Berry connection, Fubini-Study metric, Chern numbers |
+| 5 | **Quantum Functional Analysis** | Hilbert space, spectral decomposition, trace class operators, POVM |
+| 6 | **Quantum Probability** | Quantum random walks, quantum Markov chains, non-commutative probability |
+| 7 | **Quantum Harmonic Analysis** | Wigner function, Husimi Q, Glauber P, Moyal star product |
+| 8 | **Quantum Category Theory** | Monoidal/dagger categories, quantum logic lattice, Frobenius algebras |
+| 9 | **Quantum Optimization Theory** | SDP relaxations, quantum game theory, Nash equilibrium, QAOA mapping |
+| 10 | **Quantum Number Theory** | Shor's factoring, discrete logarithm, Stabilizer/CSS/Toric/Surface codes |
+| 11 | **Advanced Quantum Probability** | Free probability, Wigner semicircle, Marchenko-Pastur, Tracy-Widom |
+
+**Usage:** Set `"config": {"sub_module": "<name>"}` in the execute request body. See [`packages/mathematics/README.md`](packages/mathematics/README.md) for full API documentation per sub-module.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "vqe",
+  "input_data": ["...65536 floats..."],
+  "config": { "sub_module": "quantum_topology", "task": "jones_polynomial" }
+}
+```
+
+**Demo endpoint:** `POST /api/v1/quantum/mathematics/demo`
 
 ---
 
