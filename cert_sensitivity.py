@@ -39,7 +39,7 @@ print("\n--- Same data, different domains ---")
 data = np.random.randn(N)
 data /= np.linalg.norm(data)
 
-for dom in ["chemistry", "physics", "nuclear", "biology", "finance", "mathematics"]:
+for dom in ["chemistry", "physics", "biology", "finance", "mathematics"]:
     alg = "vqe" if dom not in ["mathematics", "finance"] else ("hhl" if dom == "mathematics" else "qaoa")
     r = query(dom, alg, data)
     e = r["result"]["aggregate_energy"]

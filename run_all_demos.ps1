@@ -105,11 +105,11 @@ try {
 } catch {}
 
 # =============================================================================
-# Step 2: All 16 Quantum Domains (1024-point inline demo)
+# Step 2: All 15 Quantum Domains (1024-point inline demo)
 # Qubit count = input_data.length = 1024 for inline speed.
 # Full 65536-qubit scale runs in Step 7 via Python.
 # =============================================================================
-Write-Host "`n[2/7] Running all 16 quantum domains (1024-qubit inline demo)..." -ForegroundColor Yellow
+Write-Host "`n[2/7] Running all 15 quantum domains (1024-qubit inline demo)..." -ForegroundColor Yellow
 Write-Host "       (Full 65536-qubit scale runs in Step 7 via Python)" -ForegroundColor Gray
 
 # Generate 1024-point data arrays for inline demos
@@ -121,7 +121,6 @@ $matData = Generate-Data 45 1024
 $bioData = Generate-Data 46 1024
 $mlData = Generate-Data 47 1024
 $logData = Generate-Data 48 1024
-$nucData = Generate-Data 49 1024
 $mathData = Generate-Data 50 1024
 $errData = Generate-Data 51 1024
 $gfxData = Generate-Data 52 1024
@@ -152,31 +151,28 @@ Invoke-Quantum @{ domain="machine_learning"; algorithm="vqe"; problem_type="quan
 # 7. Logistics — 1024-node routing
 Invoke-Quantum @{ domain="logistics"; algorithm="qaoa"; problem_type="vehicle_routing"; num_nodes=1024; description="1024-node supply chain (demo)"; input_data=$logData } "Logistics: 1024-Node Routing (1024 qubits)"
 
-# 8. Nuclear — U-238 (1024 basis states)
-Invoke-Quantum @{ domain="nuclear"; algorithm="vqe"; nucleus="uranium-238"; protons=92; neutrons=146; nucleons=238; description="U-238 shell model (1024 basis states demo)"; input_data=$nucData } "Nuclear: Uranium-238 (1024 qubits)"
-
-# 9. Mathematics — 1024×1024 linear system
+# 8. Mathematics — 1024×1024 linear system
 Invoke-Quantum @{ domain="mathematics"; algorithm="hhl"; problem_type="linear_system"; matrix_size=1024; description="1024x1024 sparse system (demo)"; input_data=$mathData } "Mathematics: HHL 1024×1024 (1024 qubits)"
 
-# 10. Error Mitigation — 1024-qubit ZNE
+# 9. Error Mitigation — 1024-qubit ZNE
 Invoke-Quantum @{ domain="error_mitigation"; algorithm="vqe"; mitigation_method="zero_noise_extrapolation"; noise_factors=@(1.0, 1.5, 2.0, 2.5); description="1024-qubit ZNE (demo)"; input_data=$errData } "Error Mitigation: ZNE (1024 qubits)"
 
-# 11. Graphics — 32×32 ray tracing
+# 10. Graphics — 32×32 ray tracing
 Invoke-Quantum @{ domain="graphics"; algorithm="grover"; problem_type="ray_tracing"; resolution=@(32, 32); scene_objects=4096; description="32x32 quantum ray tracing (demo)"; input_data=$gfxData } "Graphics: Ray Tracing (1024 pixels → 1024 qubits)"
 
-# 12. Real-Time — 1024-site state evolution
+# 11. Real-Time — 1024-site state evolution
 Invoke-Quantum @{ domain="real_time"; algorithm="vqe"; problem_type="state_evolution"; num_sites=1024; description="1024-site real-time evolution (demo)"; input_data=$rtData } "Real-Time: State Evolution (1024 qubits)"
 
-# 13. Fluid Mechanics — 32×32 Navier-Stokes
+# 12. Fluid Mechanics — 32×32 Navier-Stokes
 Invoke-Quantum @{ domain="fluid_mechanics"; algorithm="vqe"; problem_type="navier_stokes"; grid_size=@(32, 32); reynolds_number=1000; description="32x32 NS grid (demo)"; input_data=$fluidData } "Fluid Mechanics: 32×32 NS (1024 qubits)"
 
-# 14. Turbulence CFD — 1024-point DNS
+# 13. Turbulence CFD — 1024-point DNS
 Invoke-Quantum @{ domain="turbulence_cfd"; algorithm="vqe"; problem_type="dns_turbulence"; grid_points=1024; reynolds_number=10000; description="1024-point DNS Re=10000 (demo)"; input_data=$turbData } "Turbulence: 1024-Point DNS (1024 qubits)"
 
-# 15. Heat Transfer — 32×32 thermal grid
+# 14. Heat Transfer — 32×32 thermal grid
 Invoke-Quantum @{ domain="heat_transfer"; algorithm="hhl"; problem_type="conduction"; grid_size=@(32, 32); thermal_conductivity=237; description="32x32 heat grid (demo)"; input_data=$heatData } "Heat Transfer: 32×32 Grid (1024 qubits)"
 
-# 16. Core Gates — 1024-element Grover search
+# 15. Core Gates — 1024-element Grover search
 Invoke-Quantum @{ domain="core_gates"; algorithm="grover"; problem_type="quantum_fourier_transform"; register_size=1024; search_space_size=1024; target_states=@(42); input_data=$gateData } "Core Gates: QFT + Grover (1024 qubits)"
 
 # =============================================================================
@@ -351,8 +347,8 @@ Write-Host "    G: Error Mitigation (5)  H: Meas. Reduction (3)  I: Numerical (7
 Write-Host "    J: Specialized (5)       K: Condensed Matter (4)  L: Time Evol (3)"
 Write-Host "    M: Advanced Quantum (6)"
 Write-Host ""
-Write-Host "  Domains:    16 (chemistry, physics, finance, materials,"
-Write-Host "              biomolecules, ML, logistics, nuclear, math,"
+Write-Host "  Domains:    15 (chemistry, physics, finance, materials,"
+Write-Host "              biomolecules, ML, logistics, math,"
 Write-Host "              error_mitigation, graphics, real_time,"
 Write-Host "              fluid_mechanics, turbulence_cfd, heat_transfer,"
 Write-Host "              core_gates)"

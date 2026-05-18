@@ -156,18 +156,7 @@ for i in range(N):
 mat_data = mat_data / np.linalg.norm(mat_data)
 test_domain("materials_science", "vqe", mat_data, "YBCO d-wave superconductor gap function (65536 k-points)")
 
-# 8. NUCLEAR
-nuc_data = np.zeros(N)
-R = 1.2 * 238**(1/3)
-a = 0.65
-V0 = -50.0
-for i in range(N):
-    r = (i / N) * 20.0
-    nuc_data[i] = V0 / (1 + np.exp((r - R) / a))
-nuc_data = nuc_data / np.linalg.norm(nuc_data)
-test_domain("nuclear", "vqe", nuc_data, "U-238 Woods-Saxon nuclear potential (65536 radial points)")
-
-# 9. LOGISTICS
+# 8. LOGISTICS
 log_data = np.zeros(N)
 for i in range(N):
     city_a = i % 256
@@ -179,7 +168,7 @@ for i in range(N):
 log_data = log_data / np.linalg.norm(log_data)
 test_domain("logistics", "qaoa", log_data, "256-city TSP distance matrix (65536 pairwise distances)")
 
-# 10. GRAPHICS
+# 9. GRAPHICS
 gfx_data = np.zeros(N)
 for i in range(N):
     ray_x = (i % 256) / 256.0 - 0.5
@@ -188,7 +177,7 @@ for i in range(N):
 gfx_data = gfx_data / (np.linalg.norm(gfx_data) + 1e-10)
 test_domain("graphics", "grover", gfx_data, "256x256 ray-sphere intersection amplitudes")
 
-# 11. ERROR MITIGATION
+# 10. ERROR MITIGATION
 err_data = np.zeros(N)
 ideal = np.random.randn(N)
 ideal = ideal / np.linalg.norm(ideal)
@@ -197,7 +186,7 @@ err_data = ideal * (1 - noise_rate) + np.random.randn(N) * noise_rate
 err_data = err_data / np.linalg.norm(err_data)
 test_domain("error_mitigation", "vqe", err_data, "Depolarizing noise-corrupted state (2% error rate)")
 
-# 12. REAL TIME
+# 11. REAL TIME
 rt_data = np.zeros(N)
 for i in range(N):
     x = (i - N/2) / (N/10)
@@ -205,7 +194,7 @@ for i in range(N):
 rt_data = rt_data / np.linalg.norm(rt_data)
 test_domain("real_time", "vqe", rt_data, "Gaussian wavepacket initial state (momentum k=5)")
 
-# 13. FLUID MECHANICS
+# 12. FLUID MECHANICS
 fluid_data = np.zeros(N)
 for i in range(N):
     x = (i % 256) / 256.0
@@ -214,7 +203,7 @@ for i in range(N):
 fluid_data = fluid_data / np.linalg.norm(fluid_data)
 test_domain("fluid_mechanics", "hhl", fluid_data, "Lid-driven cavity Stokes flow (256x256, Re=100)")
 
-# 14. TURBULENCE CFD
+# 13. TURBULENCE CFD
 turb_data = np.zeros(N)
 for i in range(1, N):
     k = i
@@ -222,7 +211,7 @@ for i in range(1, N):
 turb_data = turb_data / np.linalg.norm(turb_data)
 test_domain("turbulence_cfd", "vqe", turb_data, "Kolmogorov -5/3 turbulence energy spectrum (65536 modes)")
 
-# 15. HEAT TRANSFER
+# 14. HEAT TRANSFER
 heat_data = np.zeros(N)
 for i in range(N):
     x = (i % 256) / 256.0
@@ -231,7 +220,7 @@ for i in range(N):
 heat_data = heat_data / np.linalg.norm(heat_data)
 test_domain("heat_transfer", "hhl", heat_data, "Steady-state heat equation (100C top, 0C sides)")
 
-# 16. CORE GATES
+# 15. CORE GATES
 gate_data = np.zeros(N)
 gate_data[0] = 1.0 / np.sqrt(2)
 gate_data[N-1] = 1.0 / np.sqrt(2)

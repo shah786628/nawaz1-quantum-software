@@ -580,3 +580,28 @@ print(response.json())
 | **Glycoscience** | Glycobiology, Structural Biology |
 | **Biophysics** | Molecular Dynamics, Membrane Biophysics |
 | **Synthetic Biology** | Systems Biology, Metabolic Networks, Enzyme Catalysis |
+
+---
+
+### Continuum QFT for Biological Solvation
+
+- Quantum field theoretic treatment of biological solvation environments
+- Protein-water quantum interactions at continuum level
+- Applications: enzyme catalysis in aqueous environment, membrane-solvent interfaces, drug bioavailability
+- Enables accurate modeling of biological systems in their native aqueous environment
+
+```json
+{
+  "domain": "biomolecules",
+  "algorithm": "vqe",
+  "input_data": [/* 65536 amplitude floats */],
+  "config": {
+    "sub_module": "molecular_dynamics",
+    "task": "solvated_simulation",
+    "protein_pdb": "4HHB",
+    "solvent_model": "continuum_qft",
+    "ionic_strength": 0.15,
+    "temperature": 310.15
+  }
+}
+```

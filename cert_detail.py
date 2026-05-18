@@ -29,15 +29,6 @@ for i in range(65536):
 phys /= np.linalg.norm(phys)
 r2 = make_req("physics", "vqe", phys, "Heisenberg AFM")
 
-# Nuclear
-nuc = np.zeros(N)
-R = 1.2*238**(1/3); a=0.65
-for i in range(N):
-    r = (i/N)*20.0
-    nuc[i] = -50.0/(1+np.exp((r-R)/a))
-nuc /= np.linalg.norm(nuc)
-r3 = make_req("nuclear", "vqe", nuc, "U-238 Woods-Saxon")
-
 # Core gates (GHZ)
 ghz = np.zeros(N)
 ghz[0] = 1/np.sqrt(2)
@@ -49,7 +40,7 @@ print("\n" + "="*70)
 print("CROSS-DOMAIN ENERGY COMPARISON (Authenticity Check)")
 print("="*70)
 energies = {}
-for label, r in [("chemistry", r1), ("physics", r2), ("nuclear", r3), ("core_gates", r4)]:
+for label, r in [("chemistry", r1), ("physics", r2), ("core_gates", r4)]:
     e = r.get("result", {}).get("aggregate_energy", "N/A")
     qr = r.get("num_qubits_requested", "?")
     qs = r.get("num_qubits_simulated", "?")

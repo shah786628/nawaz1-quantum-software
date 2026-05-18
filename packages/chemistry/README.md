@@ -302,3 +302,27 @@ print(response.json())
 | **Battery Materials** | VQE Chemistry, Molecular, Orbital Optimization |
 | **Photochemistry & Excited States** | VQE Chemistry, Algorithms |
 | **Protein-Ligand Interactions** | Molecular, VQE Chemistry, Geometry |
+
+---
+
+### Continuum QFT for Solvation Chemistry
+
+- Quantum Field Theory approach to solvation: treats solvent as a continuum quantum field rather than discrete molecules
+- Enables accurate solvation free energy calculations at quantum level
+- Applications: drug-solvent interactions, reaction kinetics in solution, electrochemistry
+- Combines with VQE chemistry for full solvated molecular simulation
+
+```json
+{
+  "domain": "chemistry",
+  "algorithm": "vqe",
+  "input_data": [/* 65536 amplitude floats */],
+  "config": {
+    "sub_module": "vqe_chemistry",
+    "task": "solvation_free_energy",
+    "solute": "acetaminophen",
+    "solvent_model": "continuum_qft",
+    "dielectric": 78.4
+  }
+}
+```

@@ -1,10 +1,32 @@
 # Nawaz1 Quantum VQE Engine - Usage Guide
 
-> **Multidimensional L6→L3 Quantum Pipeline** — A production-grade quantum VQE engine supporting 16 domains, **62 algorithms across 13 categories**, data persistence, and real-time streaming.
+> **Multidimensional L6→L3 Quantum Pipeline** — A production-grade quantum VQE engine supporting 15 domains, **62 algorithms across 13 categories**, data persistence, and real-time streaming.
 
 **Author:** Shahnawaz Alam  
 **License:** Proprietary  
 **Copyright (c) 2026 Shahnawaz Alam. All rights reserved.**
+
+---
+
+> **⚠️ IMPORTANT — Hardware Security Requirements for Launch**
+>
+> This software **MUST** be launched on a **Linux VM** with a CPU that supports at least one of the following hardware security extensions:
+>
+> | Technology | Vendor | Minimum Requirement |
+> |-----------|--------|-------------------|
+> | **Intel TDX** | Intel | Trust Domain Extensions — 4th Gen Xeon (Sapphire Rapids) or newer |
+> | **AMD SEV-SNP** | AMD | Secure Encrypted Virtualization — EPYC 7003 (Milan) or newer |
+> | **Intel SGX** | Intel | Software Guard Extensions — 6th Gen Core or Xeon E3 v6+ |
+>
+> **Why?** The quantum engine uses hardware-isolated trusted execution environments (TEEs) for:
+> - Protecting quantum state data in memory (encrypted RAM)
+> - Secure key management and rotation
+> - Side-channel attack resistance
+> - Tamper-proof execution of quantum algorithms
+>
+> **Verification:** Run `dmesg | grep -i "tdx\|sev\|sgx"` to check hardware support.
+>
+> Launching on unsupported hardware will result in degraded security posture.
 
 ---
 
@@ -35,6 +57,8 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 | Turbulence CFD | 65536-point DNS turbulence (Re=10000) |
 | Heat Transfer | 256×256 thermal conduction grid (65536 nodes) |
 | Core Gates | 65536-qubit quantum Fourier transform |
+| SDK | Python, C++, Rust, Julia client libraries |
+| Cross-Domain | Multi-physics pipeline for complex problems |
 
 ---
 
