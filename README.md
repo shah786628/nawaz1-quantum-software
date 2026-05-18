@@ -143,6 +143,89 @@ The **mathematics** domain contains 11 specialized sub-modules providing compreh
 
 ---
 
+## Chemistry Domain — 5 Quantum Chemistry Sub-Modules
+
+The **chemistry** domain contains 5 specialized sub-modules (~147 KB total) providing comprehensive quantum chemistry coverage from electronic structure to variational eigensolvers:
+
+| # | Sub-Module | Key Capabilities |
+|---|-----------|------------------|
+| 1 | **Algorithms** | VQE, QPE, ADAPT-VQE, QITE, quantum dynamics, excited state VQE, subspace VQE |
+| 2 | **Geometry** | 3D vector operations, bond length/angle computations, molecular geometry analysis |
+| 3 | **Molecular** | Hamiltonian construction, Jordan-Wigner mapping, 1e/2e integrals, expectation values |
+| 4 | **Orbital Optimization** | Active space selection (CAS, SCI, natural orbital, entanglement-based), embedding engines |
+| 5 | **VQE Chemistry** | UCCSD/HEA/k-UpCCGSD ansatz, ground & excited state energy computation |
+
+**Usage:** Set `"config": {"sub_module": "<name>"}` in the execute request body. See [`packages/chemistry/README.md`](packages/chemistry/README.md) for full API documentation per sub-module.
+
+```json
+{
+  "domain": "chemistry",
+  "algorithm": "vqe",
+  "input_data": ["...65536 floats..."],
+  "config": { "sub_module": "vqe_chemistry", "task": "ground_state_energy", "molecule": "C6H6" }
+}
+```
+
+**Demo endpoint:** `POST /api/v1/quantum/chemistry/demo`
+
+---
+
+## Finance Domain — 6 Quantum Finance Sub-Modules
+
+The **finance** domain contains 6 specialized sub-modules providing comprehensive quantum-accelerated financial modeling, from market data ingestion to portfolio optimization and trading execution:
+
+| # | Sub-Module | Key Capabilities |
+|---|-----------|------------------|
+| 1 | **Market Data** | Bloomberg, Refinitiv, Yahoo Finance, Alpha Vantage feed integration, real-time ingestion |
+| 2 | **Monte Carlo** | Control variates, antithetic, importance sampling, GBM, Ornstein-Uhlenbeck, Heston |
+| 3 | **Portfolio** | Markowitz, risk parity, min variance, max Sharpe, Black-Litterman, hierarchical risk parity |
+| 4 | **Quantum Algorithms** | Quantum Amplitude Estimation (QAE), QSVM, Quantum Generative Models |
+| 5 | **Risk Metrics** | VaR, CVaR/Expected Shortfall, max drawdown, Sharpe ratio, Sortino ratio |
+| 6 | **Trading System** | Order types (market, limit, stop, FOK, IOC), risk management, trade execution |
+
+**Usage:** Set `"config": {"sub_module": "<name>"}` in the execute request body. See [`packages/finance/README.md`](packages/finance/README.md) for full API documentation per sub-module.
+
+```json
+{
+  "domain": "finance",
+  "algorithm": "vqe",
+  "input_data": ["...65536 floats..."],
+  "config": { "sub_module": "portfolio", "task": "markowitz_optimization", "num_assets": 65536 }
+}
+```
+
+**Demo endpoint:** `POST /api/v1/quantum/finance/demo`
+
+---
+
+## Fluid Mechanics Domain — 6 Quantum CFD Sub-Modules
+
+The **fluid_mechanics** domain contains 6 specialized sub-modules (~210 KB total) providing comprehensive quantum-accelerated computational fluid dynamics from incompressible Navier-Stokes to quantum-native linear solvers:
+
+| # | Sub-Module | Key Capabilities |
+|---|-----------|------------------|
+| 1 | **Navier-Stokes** | Incompressible/compressible solver, multi-regime (subsonic to hypersonic), FVM |
+| 2 | **Turbulence** | DNS, RANS (k-ε, k-ω, k-ω SST), LES (Smagorinsky, WALE, dynamic), DES/DDES/IDDES |
+| 3 | **Compressible** | Euler/Navier-Stokes/LES with Roe, HLLC, AUSM+ flux schemes for shock-capturing |
+| 4 | **Multiphase** | VOF, level set, CLSVOF, phase field, front tracking, CSF/CSS surface tension |
+| 5 | **Heat Transfer** | Conduction, convection, conjugate, radiation (S2S, discrete ordinates, P1) |
+| 6 | **Quantum CFD** | HHL, VQLS, QSVT, VQE solvers for fluid mechanics, error mitigation |
+
+**Usage:** Set `"config": {"sub_module": "<name>"}` in the execute request body. See [`packages/fluid_mechanics/README.md`](packages/fluid_mechanics/README.md) for full API documentation per sub-module.
+
+```json
+{
+  "domain": "fluid_mechanics",
+  "algorithm": "vqe",
+  "input_data": ["...65536 floats..."],
+  "config": { "sub_module": "turbulence", "task": "les_simulation", "model": "k_omega_sst" }
+}
+```
+
+**Demo endpoint:** `POST /api/v1/quantum/fluid_mechanics/demo`
+
+---
+
 ## Table of Contents
 
 - [Quick Start](#quick-start)

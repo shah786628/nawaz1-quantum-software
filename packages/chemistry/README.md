@@ -2,29 +2,251 @@
 
 ## Overview
 
-The Chemistry package provides quantum-native molecular simulation capabilities through the unified L3 VQE circuit operating at 65536-qubit scale. It enables electronic structure calculations, molecular dynamics, drug discovery pipelines, and protein folding simulations — all executed via the Algorithm Bridge on 7 tensor network experts running in unconditional superposition.
+The Chemistry package provides quantum-native molecular simulation capabilities through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **5 specialized sub-modules** covering electronic structure calculations, molecular Hamiltonian construction, orbital optimization, and variational quantum chemistry — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
 
-## Key Features
+## Architecture
 
-- **Full molecular Hamiltonian construction** — automatic generation from atomic coordinates
-- **Hemoglobin-scale simulation** — up to 8738 atoms with full electronic correlation
-- **Drug discovery pipeline** — binding affinity, ADMET properties, molecular docking
-- **Protein folding** — energy landscape exploration at quantum accuracy
-- **Reaction pathway mapping** — transition state search and activation energy computation
-- **Electronic structure** — ground state, excited states, and spectral properties
-- **Basis set support** — STO-3G through cc-pVQZ equivalents in quantum encoding
-- **Geometry optimization** — quantum gradient-based structure relaxation
+```
+POST /api/v1/quantum/execute
+  → L6 Encoder (65536 amplitudes)
+    → MoE Router (7 tensor experts)
+      → L3 VQE Circuit (unified substrate)
+        → Chemistry Domain Handler
+          → Sub-module dispatch (5 modules)
+```
 
-## Supported Algorithms
+**API Endpoint:** `POST http://localhost:8080/api/v1/quantum/execute`
 
-| Algorithm | Use Case |
-|-----------|----------|
-| **VQE** | Ground state energy of molecular systems |
-| **ADAPT-VQE** | Adaptive ansatz construction for chemical accuracy |
-| **UCCSD** | Unitary Coupled Cluster Singles and Doubles |
-| **QPE** | Quantum Phase Estimation for exact eigenvalues |
-| **Quantum Monte Carlo** | Electron correlation in large systems |
-| **QITE** | Imaginary time evolution for thermal states |
+**Demo Endpoint:** `POST http://localhost:8080/api/v1/quantum/chemistry/demo`
+
+---
+
+## The 5 Quantum Chemistry Sub-Modules
+
+| # | Sub-Module | Source | Size | Key Domain |
+|---|-----------|--------|------|------------|
+| 1 | Algorithms | `algorithms.rs` | 22.4 KB | Algorithm Types |
+| 2 | Geometry | `geometry.rs` | 18.7 KB | Molecular Geometry |
+| 3 | Molecular | `molecular.rs` | 35.2 KB | Hamiltonian Construction |
+| 4 | Orbital Optimization | `orbital_optimization.rs` | 29.6 KB | Active Space Selection |
+| 5 | VQE Chemistry | `vqe_chemistry.rs` | 41.3 KB | Variational Eigensolver |
+
+---
+
+## 1. Algorithms
+
+**Source:** `algorithms.rs` (22.4 KB)
+
+Defines chemistry algorithm types and molecular system representations for quantum simulation, providing the foundational data structures for all chemistry computations.
+
+**Key Capabilities:**
+- VQE (Variational Quantum Eigensolver) algorithm configuration
+- QPE (Quantum Phase Estimation) for exact eigenvalue extraction
+- ADAPT-VQE with iterative operator pool growth
+- QITE (Quantum Imaginary Time Evolution) for thermal state preparation
+- Quantum dynamics simulation protocols
+- Excited state VQE and subspace VQE variants
+- Molecular system representation with atom types, coordinates, and properties
+
+**When to Use:** Selecting and configuring the quantum chemistry algorithm for a given molecular problem, defining molecular systems with atomic coordinates and properties.
+
+```json
+{
+  "domain": "chemistry",
+  "algorithm": "vqe",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "algorithms",
+    "algorithm_type": "adapt_vqe",
+    "molecule": "H2O",
+    "atoms": [
+      {"element": "O", "x": 0.0, "y": 0.0, "z": 0.0},
+      {"element": "H", "x": 0.757, "y": 0.586, "z": 0.0},
+      {"element": "H", "x": -0.757, "y": 0.586, "z": 0.0}
+    ]
+  }
+}
+```
+
+---
+
+## 2. Geometry
+
+**Source:** `geometry.rs` (18.7 KB)
+
+Implements molecular geometry calculations including 3D vector operations, bond length and angle computations, and geometry analysis for quantum chemistry simulations.
+
+**Key Capabilities:**
+- 3D vector operations (dot product, cross product, normalization)
+- Bond length computation between atom pairs
+- Bond angle calculation (three-atom angle)
+- Dihedral angle measurement (four-atom torsion)
+- Molecular geometry analysis and symmetry detection
+- Center of mass and moment of inertia computation
+- Geometry optimization coordinate transformations
+
+**When to Use:** Preparing molecular geometries for Hamiltonian construction, computing structural properties, geometry optimization, and validating molecular configurations.
+
+```json
+{
+  "domain": "chemistry",
+  "algorithm": "vqe",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "geometry",
+    "task": "bond_analysis",
+    "atoms": [
+      {"element": "C", "x": 0.0, "y": 0.0, "z": 0.0},
+      {"element": "C", "x": 1.54, "y": 0.0, "z": 0.0},
+      {"element": "H", "x": -0.63, "y": 0.89, "z": 0.0}
+    ],
+    "compute": ["bond_lengths", "bond_angles", "dihedrals"]
+  }
+}
+```
+
+---
+
+## 3. Molecular
+
+**Source:** `molecular.rs` (35.2 KB)
+
+Provides molecular Hamiltonian construction with Jordan-Wigner fermion-to-qubit mapping, one-electron and two-electron integral energy calculations, and statevector-based expectation value computation.
+
+**Key Capabilities:**
+- Molecular Hamiltonian construction from atomic coordinates
+- Jordan-Wigner transformation (fermion-to-qubit mapping)
+- One-electron integrals (kinetic energy + nuclear attraction)
+- Two-electron integrals (electron-electron repulsion)
+- Statevector-based expectation value computation
+- Nuclear repulsion energy calculation
+- Spin-orbital indexing and mapping
+
+**When to Use:** Building and evaluating molecular Hamiltonians for VQE ground state calculations, computing electronic structure properties, and evaluating molecular energies.
+
+```json
+{
+  "domain": "chemistry",
+  "algorithm": "vqe",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "molecular",
+    "task": "hamiltonian_construction",
+    "molecule": "LiH",
+    "basis": "sto-3g",
+    "charge": 0,
+    "multiplicity": 1,
+    "mapping": "jordan_wigner"
+  }
+}
+```
+
+---
+
+## 4. Orbital Optimization
+
+**Source:** `orbital_optimization.rs` (29.6 KB)
+
+Handles active space selection and orbital optimization for molecular orbital space reduction, supporting multiple selection strategies and embedding engines.
+
+**Key Capabilities:**
+- Manual active space selection (user-specified orbitals)
+- Automatic active space selection (energy-based criteria)
+- Natural orbital-based selection (occupation number thresholds)
+- Entanglement-based selection (mutual information ranking)
+- Complete Active Space (CAS) configuration
+- Selected Configuration Interaction (SCI) methods
+- Orbital optimization configuration and convergence control
+- Embedding engines for large-molecule orbital reduction
+
+**When to Use:** Reducing the orbital space for large molecular systems, selecting chemically relevant orbitals for VQE, and configuring active space for strongly correlated systems.
+
+```json
+{
+  "domain": "chemistry",
+  "algorithm": "vqe",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "orbital_optimization",
+    "task": "active_space_selection",
+    "molecule": "Fe2S2",
+    "method": "entanglement_based",
+    "num_active_electrons": 12,
+    "num_active_orbitals": 12,
+    "embedding": "dmet"
+  }
+}
+```
+
+---
+
+## 5. VQE Chemistry
+
+**Source:** `vqe_chemistry.rs` (41.3 KB)
+
+Core variational quantum eigensolver for chemistry with configuration management, ansatz types, optimization protocols, and integration with molecular Hamiltonian for ground and excited state energy computations.
+
+**Key Capabilities:**
+- UCCSD (Unitary Coupled Cluster Singles and Doubles) ansatz
+- HEA (Hardware-Efficient Ansatz) for near-term devices
+- k-UpCCGSD (k-fold Unitary pair Coupled Cluster GSD) for strong correlation
+- Ground state energy minimization with convergence control
+- Excited state calculations via folded spectrum and subspace methods
+- Optimization protocol configuration (SPSA, L-BFGS-B, CMA-ES, QNG)
+- Integration with molecular Hamiltonian construction
+- Chemical accuracy targeting (< 1 kcal/mol)
+
+**When to Use:** Computing ground state and excited state energies of molecular systems, benchmarking quantum chemistry methods, and production molecular energy calculations.
+
+```json
+{
+  "domain": "chemistry",
+  "algorithm": "vqe",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "vqe_chemistry",
+    "task": "ground_state_energy",
+    "molecule": "C6H6",
+    "basis": "cc-pvdz",
+    "ansatz": "uccsd",
+    "active_space": [6, 6],
+    "optimizer": "l_bfgs_b",
+    "convergence_threshold": 1e-9,
+    "max_iterations": 1000
+  }
+}
+```
+
+---
+
+## General Request Format
+
+All sub-modules are accessed through the unified quantum execution endpoint:
+
+```
+POST http://localhost:8080/api/v1/quantum/execute
+```
+
+**Request body:**
+
+```json
+{
+  "domain": "chemistry",
+  "algorithm": "vqe",
+  "input_data": [/* 65536 float amplitude values */],
+  "config": {
+    "sub_module": "<feature_name>"
+  }
+}
+```
+
+**Demo endpoint (no input_data required):**
+
+```
+POST http://localhost:8080/api/v1/quantum/chemistry/demo
+```
+
+---
 
 ## Scale
 
@@ -33,108 +255,64 @@ The Chemistry package provides quantum-native molecular simulation capabilities 
 - **Basis functions:** Up to 32768 spin-orbitals
 - **Bond dimension:** Adaptive χ = ln(Q) per geometry
 - **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
+- **Total chemistry source:** ~147 KB across 5 modules
 
-## Input Data Format
+---
 
-The input data array encodes molecular information as 65536 floating-point amplitudes representing the quantum state of the molecular system.
-
-```json
-{
-  "domain": "chemistry",
-  "algorithm": "vqe",
-  "input_data": [/* 65536 float values: amplitude-encoded molecular Hamiltonian */],
-  "config": {
-    "molecule": "hemoglobin",
-    "basis": "sto-3g",
-    "charge": 0,
-    "multiplicity": 1,
-    "convergence_threshold": 1e-8
-  }
-}
-```
-
-**Input encoding:**
-- Amplitudes represent the second-quantized Hamiltonian mapped to qubit space
-- Jordan-Wigner or Bravyi-Kitaev transformation applied internally
-- Raw atomic coordinates can be provided in `config` for automatic Hamiltonian construction
-
-## Example API Request
-
-```bash
-curl -X POST http://localhost:8080/api/v1/quantum/execute \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $NAWAZ1_API_KEY" \
-  -d '{
-    "domain": "chemistry",
-    "algorithm": "vqe",
-    "input_data": [0.0023, -0.0041, 0.0015, ... /* 65536 amplitude values */],
-    "config": {
-      "molecule": "C6H6",
-      "task": "ground_state_energy",
-      "basis": "cc-pvdz",
-      "active_space": [6, 6],
-      "convergence_threshold": 1e-9,
-      "max_iterations": 1000
-    }
-  }'
-```
-
-**Python Example:**
+## Python Example (Full Workflow)
 
 ```python
 import requests
 import numpy as np
 
-# Encode benzene molecule as 65536-qubit amplitude vector
-amplitudes = np.random.randn(65536).tolist()  # Replace with actual molecular encoding
+API = "http://localhost:8080/api/v1/quantum/execute"
+HEADERS = {"Authorization": "Bearer YOUR_API_KEY", "Content-Type": "application/json"}
 
-response = requests.post(
-    "http://localhost:8080/api/v1/quantum/execute",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-    json={
-        "domain": "chemistry",
-        "algorithm": "vqe",
-        "input_data": amplitudes,
-        "config": {
-            "molecule": "C6H6",
-            "task": "ground_state_energy",
-            "basis": "cc-pvdz",
-            "active_space": [6, 6]
-        }
+# Generate 65536 amplitude-encoded molecular state
+rng = np.random.RandomState(42)
+amplitudes = rng.normal(0, 1, 65536)
+amplitudes = (amplitudes / np.linalg.norm(amplitudes)).tolist()
+
+# Example: VQE ground state energy for benzene
+response = requests.post(API, headers=HEADERS, json={
+    "domain": "chemistry",
+    "algorithm": "vqe",
+    "input_data": amplitudes,
+    "config": {
+        "sub_module": "vqe_chemistry",
+        "task": "ground_state_energy",
+        "molecule": "C6H6",
+        "ansatz": "uccsd"
     }
-)
+})
+print(response.json())
+
+# Example: Orbital optimization for iron-sulfur cluster
+response = requests.post(API, headers=HEADERS, json={
+    "domain": "chemistry",
+    "algorithm": "vqe",
+    "input_data": amplitudes,
+    "config": {
+        "sub_module": "orbital_optimization",
+        "task": "active_space_selection",
+        "molecule": "Fe2S2",
+        "method": "entanglement_based"
+    }
+})
 print(response.json())
 ```
 
-## Example Response
-
-```json
-{
-  "status": "success",
-  "result": {
-    "energy": -232.15847362,
-    "unit": "hartree",
-    "convergence": true,
-    "iterations": 47,
-    "fidelity": 0.99999847,
-    "observables": {
-      "dipole_moment": [0.0, 0.0, 0.0],
-      "bond_order_matrix": [[1.0, 1.5, ...], ...],
-      "mulliken_charges": [-0.12, 0.12, ...]
-    },
-    "tensor_expert_used": "MERA",
-    "qubit_count": 65536,
-    "wall_time_ms": 1247
-  }
-}
-```
+---
 
 ## Use Cases
 
-1. **Drug Discovery** — Screen millions of candidate molecules for binding affinity to protein targets at quantum accuracy
-2. **Catalyst Design** — Compute reaction barriers and transition states for industrial catalysis (Haber-Bosch, Fischer-Tropsch)
-3. **Battery Materials** — Simulate lithium-ion intercalation, solid electrolyte interfaces, and electrode degradation
-4. **Protein-Ligand Interaction** — Full quantum treatment of binding pockets with 8738-atom capacity
-5. **Photochemistry** — Excited state dynamics, conical intersections, and photodissociation pathways
-6. **Materials Discovery** — Predict novel molecular crystals, polymers, and supramolecular assemblies
-7. **Environmental Chemistry** — Model atmospheric reactions, pollutant degradation, and carbon capture mechanisms
+| Research Area | Relevant Sub-Modules |
+|---------------|---------------------|
+| **Drug Discovery & Binding Affinity** | VQE Chemistry, Molecular, Algorithms |
+| **Catalyst Design** | VQE Chemistry, Orbital Optimization, Geometry |
+| **Electronic Structure** | Molecular, VQE Chemistry, Algorithms |
+| **Strongly Correlated Systems** | Orbital Optimization, VQE Chemistry |
+| **Molecular Geometry Analysis** | Geometry, Molecular |
+| **Battery Materials** | VQE Chemistry, Molecular, Orbital Optimization |
+| **Photochemistry & Excited States** | VQE Chemistry, Algorithms |
+| **Protein-Ligand Interactions** | Molecular, VQE Chemistry, Geometry |
