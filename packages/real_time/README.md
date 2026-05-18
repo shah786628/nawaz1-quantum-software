@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Real-Time package provides quantum time evolution, dynamics simulation, and Lindblad open quantum system solvers through the unified L3 VQE circuit at 65536-qubit scale. It enables real-time and imaginary-time evolution, non-equilibrium dynamics, and dissipative quantum systems — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Real-Time package provides quantum time evolution, dynamics simulation, and Lindblad open quantum system solvers through the unified L3 VQE circuit at 65536-qubit scale. It enables real-time and imaginary-time evolution, non-equilibrium dynamics, and dissipative quantum systems.
 
 ## Key Features
 
@@ -31,8 +31,6 @@ The Real-Time package provides quantum time evolution, dynamics simulation, and 
 - **Qubits:** 65536
 - **Maximum time steps:** Unlimited streaming evolution
 - **System size:** 65536 sites for 1D, 256×256 for 2D
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 

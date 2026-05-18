@@ -2,18 +2,7 @@
 
 ## Overview
 
-The Chemistry package provides quantum-native molecular simulation capabilities through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **5 specialized sub-modules** covering electronic structure calculations, molecular Hamiltonian construction, orbital optimization, and variational quantum chemistry — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
-
-## Architecture
-
-```
-POST /api/v1/quantum/execute
-  → L6 Encoder (65536 amplitudes)
-    → MoE Router (7 tensor experts)
-      → L3 VQE Circuit (unified substrate)
-        → Chemistry Domain Handler
-          → Sub-module dispatch (5 modules)
-```
+The Chemistry package provides quantum-native molecular simulation capabilities through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **5 specialized sub-modules** covering electronic structure calculations, molecular Hamiltonian construction, orbital optimization, and variational quantum chemistry.
 
 **API Endpoint:** `POST http://localhost:8080/api/v1/quantum/execute`
 
@@ -23,19 +12,19 @@ POST /api/v1/quantum/execute
 
 ## The 5 Quantum Chemistry Sub-Modules
 
-| # | Sub-Module | Source | Size | Key Domain |
-|---|-----------|--------|------|------------|
-| 1 | Algorithms | `algorithms.rs` | 22.4 KB | Algorithm Types |
-| 2 | Geometry | `geometry.rs` | 18.7 KB | Molecular Geometry |
-| 3 | Molecular | `molecular.rs` | 35.2 KB | Hamiltonian Construction |
-| 4 | Orbital Optimization | `orbital_optimization.rs` | 29.6 KB | Active Space Selection |
-| 5 | VQE Chemistry | `vqe_chemistry.rs` | 41.3 KB | Variational Eigensolver |
+| # | Sub-Module | Source | Key Domain |
+|---|-----------|--------|------------|
+| 1 | Algorithms | `algorithms.rs` | Algorithm Types |
+| 2 | Geometry | `geometry.rs` | Molecular Geometry |
+| 3 | Molecular | `molecular.rs` | Hamiltonian Construction |
+| 4 | Orbital Optimization | `orbital_optimization.rs` | Active Space Selection |
+| 5 | VQE Chemistry | `vqe_chemistry.rs` | Variational Eigensolver |
 
 ---
 
 ## 1. Algorithms
 
-**Source:** `algorithms.rs` (22.4 KB)
+**Source:** `algorithms.rs`
 
 Defines chemistry algorithm types and molecular system representations for quantum simulation, providing the foundational data structures for all chemistry computations.
 
@@ -72,7 +61,7 @@ Defines chemistry algorithm types and molecular system representations for quant
 
 ## 2. Geometry
 
-**Source:** `geometry.rs` (18.7 KB)
+**Source:** `geometry.rs`
 
 Implements molecular geometry calculations including 3D vector operations, bond length and angle computations, and geometry analysis for quantum chemistry simulations.
 
@@ -109,7 +98,7 @@ Implements molecular geometry calculations including 3D vector operations, bond 
 
 ## 3. Molecular
 
-**Source:** `molecular.rs` (35.2 KB)
+**Source:** `molecular.rs`
 
 Provides molecular Hamiltonian construction with Jordan-Wigner fermion-to-qubit mapping, one-electron and two-electron integral energy calculations, and statevector-based expectation value computation.
 
@@ -145,7 +134,7 @@ Provides molecular Hamiltonian construction with Jordan-Wigner fermion-to-qubit 
 
 ## 4. Orbital Optimization
 
-**Source:** `orbital_optimization.rs` (29.6 KB)
+**Source:** `orbital_optimization.rs`
 
 Handles active space selection and orbital optimization for molecular orbital space reduction, supporting multiple selection strategies and embedding engines.
 
@@ -182,7 +171,7 @@ Handles active space selection and orbital optimization for molecular orbital sp
 
 ## 5. VQE Chemistry
 
-**Source:** `vqe_chemistry.rs` (41.3 KB)
+**Source:** `vqe_chemistry.rs`
 
 Core variational quantum eigensolver for chemistry with configuration management, ansatz types, optimization protocols, and integration with molecular Hamiltonian for ground and excited state energy computations.
 
@@ -253,9 +242,6 @@ POST http://localhost:8080/api/v1/quantum/chemistry/demo
 - **Qubits:** 65536
 - **Maximum atoms:** 8738 (hemoglobin-scale)
 - **Basis functions:** Up to 32768 spin-orbitals
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
-- **Total chemistry source:** ~147 KB across 5 modules
 
 ---
 

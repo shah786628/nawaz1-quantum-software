@@ -2,18 +2,7 @@
 
 ## Overview
 
-The Mathematics package provides quantum-accelerated mathematical computations through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **11 specialized sub-modules** covering the full spectrum of mathematical physics foundations — from quantum algebra and topology to optimization theory and number theory — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
-
-## Architecture
-
-```
-POST /api/v1/quantum/execute
-  → L6 Encoder (65536 amplitudes)
-    → MoE Router (7 tensor experts)
-      → L3 VQE Circuit (unified substrate)
-        → Mathematics Domain Handler
-          → Sub-module dispatch (11 modules)
-```
+The Mathematics package provides quantum-accelerated mathematical computations through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **11 specialized sub-modules** covering the full spectrum of mathematical physics foundations — from quantum algebra and topology to optimization theory and number theory.
 
 **API Endpoint:** `POST http://localhost:8080/api/v1/quantum/execute`
 
@@ -456,8 +445,6 @@ POST http://localhost:8080/api/v1/quantum/mathematics/demo
 - **Qubits:** 65536
 - **Maximum matrix dimension:** 65536×65536
 - **Integer factorization:** Up to 65536-bit numbers
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 - **Total mathematics source:** 11 modules covering all quantum mathematical foundations
 
 ---

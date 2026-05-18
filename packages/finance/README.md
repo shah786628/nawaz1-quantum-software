@@ -2,18 +2,7 @@
 
 ## Overview
 
-The Finance package provides quantum-accelerated financial computation through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **6 specialized sub-modules** covering market data integration, Monte Carlo simulation, portfolio optimization, quantum financial algorithms, risk analytics, and trading systems — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
-
-## Architecture
-
-```
-POST /api/v1/quantum/execute
-  → L6 Encoder (65536 amplitudes)
-    → MoE Router (7 tensor experts)
-      → L3 VQE Circuit (unified substrate)
-        → Finance Domain Handler
-          → Sub-module dispatch (6 modules)
-```
+The Finance package provides quantum-accelerated financial computation through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **6 specialized sub-modules** covering market data integration, Monte Carlo simulation, portfolio optimization, quantum financial algorithms, risk analytics, and trading systems.
 
 **API Endpoint:** `POST http://localhost:8080/api/v1/quantum/execute`
 
@@ -23,20 +12,20 @@ POST /api/v1/quantum/execute
 
 ## The 6 Quantum Finance Sub-Modules
 
-| # | Sub-Module | Source | Size | Key Domain |
-|---|-----------|--------|------|------------|
-| 1 | Market Data | `market_data.rs` | 24.1 KB | Data Feed Integration |
-| 2 | Monte Carlo | `monte_carlo.rs` | 32.8 KB | Stochastic Simulation |
-| 3 | Portfolio | `portfolio.rs` | 36.5 KB | Portfolio Optimization |
-| 4 | Quantum Algorithms | `quantum_algorithms.rs` | 28.9 KB | Quantum Finance Primitives |
-| 5 | Risk Metrics | `risk_metrics.rs` | 21.7 KB | Risk Analytics |
-| 6 | Trading System | `trading_system.rs` | 30.4 KB | Trade Execution |
+| # | Sub-Module | Source | Key Domain |
+|---|-----------|--------|------------|
+| 1 | Market Data | `market_data.rs` | Data Feed Integration |
+| 2 | Monte Carlo | `monte_carlo.rs` | Stochastic Simulation |
+| 3 | Portfolio | `portfolio.rs` | Portfolio Optimization |
+| 4 | Quantum Algorithms | `quantum_algorithms.rs` | Quantum Finance Primitives |
+| 5 | Risk Metrics | `risk_metrics.rs` | Risk Analytics |
+| 6 | Trading System | `trading_system.rs` | Trade Execution |
 
 ---
 
 ## 1. Market Data
 
-**Source:** `market_data.rs` (24.1 KB)
+**Source:** `market_data.rs`
 
 Manages market data feed integration supporting multiple providers with configuration, real-time data ingestion, and market point representation for quantum financial computations.
 
@@ -71,7 +60,7 @@ Manages market data feed integration supporting multiple providers with configur
 
 ## 2. Monte Carlo
 
-**Source:** `monte_carlo.rs` (32.8 KB)
+**Source:** `monte_carlo.rs`
 
 Implements quantum Monte Carlo with variance reduction techniques and stochastic process models for derivative pricing with quadratic quantum speedup.
 
@@ -111,7 +100,7 @@ Implements quantum Monte Carlo with variance reduction techniques and stochastic
 
 ## 3. Portfolio
 
-**Source:** `portfolio.rs` (36.5 KB)
+**Source:** `portfolio.rs`
 
 Provides portfolio optimization using multiple methods with constraint management for institutional-scale asset allocation across 65536 simultaneous instruments.
 
@@ -151,7 +140,7 @@ Provides portfolio optimization using multiple methods with constraint managemen
 
 ## 4. Quantum Algorithms
 
-**Source:** `quantum_algorithms.rs` (28.9 KB)
+**Source:** `quantum_algorithms.rs`
 
 Implements quantum financial algorithms including amplitude estimation, support vector machines, and generative models purpose-built for financial applications.
 
@@ -186,7 +175,7 @@ Implements quantum financial algorithms including amplitude estimation, support 
 
 ## 5. Risk Metrics
 
-**Source:** `risk_metrics.rs` (21.7 KB)
+**Source:** `risk_metrics.rs`
 
 Computes comprehensive risk metrics for portfolio evaluation with full quantum acceleration for tail risk estimation.
 
@@ -220,7 +209,7 @@ Computes comprehensive risk metrics for portfolio evaluation with full quantum a
 
 ## 6. Trading System
 
-**Source:** `trading_system.rs` (30.4 KB)
+**Source:** `trading_system.rs`
 
 Integrates trading system with comprehensive order types, risk management configuration, and trade execution for quantum-enhanced algorithmic trading.
 
@@ -292,9 +281,6 @@ POST http://localhost:8080/api/v1/quantum/finance/demo
 - **Qubits:** 65536
 - **Maximum assets:** 65536 simultaneous instruments
 - **Monte Carlo paths:** Quadratic speedup over 10^9 classical paths
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
-- **Total finance source:** ~174 KB across 6 modules
 
 ---
 

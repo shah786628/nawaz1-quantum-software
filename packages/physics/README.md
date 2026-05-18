@@ -2,18 +2,7 @@
 
 ## Overview
 
-The Physics package provides quantum simulation of fundamental physical systems through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **13 specialized sub-modules** covering the full spectrum of quantum physics — from quantum field theory and quantum gravity to quantum cosmology and metrology — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
-
-## Architecture
-
-```
-POST /api/v1/quantum/execute
-  → L6 Encoder (65536 amplitudes)
-    → MoE Router (7 tensor experts)
-      → L3 VQE Circuit (unified substrate)
-        → Physics Domain Handler
-          → Sub-module dispatch (13 modules)
-```
+The Physics package provides quantum simulation of fundamental physical systems through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **13 specialized sub-modules** covering the full spectrum of quantum physics — from quantum field theory and quantum gravity to quantum cosmology and metrology.
 
 **API Endpoint:** `POST http://localhost:8080/api/v1/quantum/execute`
 
@@ -530,8 +519,6 @@ POST http://localhost:8080/api/v1/quantum/physics/demo
 
 - **Qubits:** 65536
 - **Maximum lattice:** 256×256 sites (65536 spins)
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 - **Total physics source:** 13 modules covering all fundamental physics domains
 
 ---

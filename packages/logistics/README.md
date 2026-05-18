@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Logistics package provides quantum-accelerated combinatorial optimization for vehicle routing, supply chain management, scheduling, and resource allocation through the unified L3 VQE circuit at 65536-qubit scale. It solves NP-hard optimization problems with up to 65536 decision variables — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Logistics package provides quantum-accelerated combinatorial optimization for vehicle routing, supply chain management, scheduling, and resource allocation through the unified L3 VQE circuit at 65536-qubit scale. It solves NP-hard optimization problems with up to 65536 decision variables.
 
 ## Key Features
 
@@ -32,8 +32,6 @@ The Logistics package provides quantum-accelerated combinatorial optimization fo
 - **Qubits:** 65536
 - **Maximum nodes/cities:** 65536 locations
 - **Decision variables:** 65536 binary/integer variables
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 

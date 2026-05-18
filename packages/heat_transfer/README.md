@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Heat Transfer package provides quantum-accelerated solutions for thermal conduction, convection, radiation, and conjugate heat transfer through the unified L3 VQE circuit at 65536-qubit scale. It solves the Fourier heat equation and coupled thermal-fluid systems on 256×256 grids — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Heat Transfer package provides quantum-accelerated solutions for thermal conduction, convection, radiation, and conjugate heat transfer through the unified L3 VQE circuit at 65536-qubit scale. It solves the Fourier heat equation and coupled thermal-fluid systems on 256×256 grids.
 
 ## Key Features
 
@@ -32,8 +32,6 @@ The Heat Transfer package provides quantum-accelerated solutions for thermal con
 - **Maximum grid:** 256×256 thermal nodes
 - **3D thermal:** 64×64×16 volumetric grids
 - **Temperature range:** 0 K to 10^6 K (plasma conditions)
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 

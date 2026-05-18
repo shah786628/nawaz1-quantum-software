@@ -2,18 +2,7 @@
 
 ## Overview
 
-The Biology package provides quantum simulation of biological systems through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **14 specialized sub-modules** covering the full spectrum of computational biology — from nucleotide thermodynamics to systems-level metabolic modeling — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
-
-## Architecture
-
-```
-POST /api/v1/quantum/execute
-  → L6 Encoder (65536 amplitudes)
-    → MoE Router (7 tensor experts)
-      → L3 VQE Circuit (unified substrate)
-        → Biology Domain Handler
-          → Sub-module dispatch (14 modules)
-```
+The Biology package provides quantum simulation of biological systems through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **14 specialized sub-modules** covering the full spectrum of computational biology — from nucleotide thermodynamics to systems-level metabolic modeling.
 
 **API Endpoint:** `POST http://localhost:8080/api/v1/quantum/execute`
 
@@ -23,28 +12,28 @@ POST /api/v1/quantum/execute
 
 ## The 14 Quantum Biology Sub-Modules
 
-| # | Sub-Module | Source | Size | Key Domain |
-|---|-----------|--------|------|------------|
-| 1 | DNA/RNA | `dna_rna.rs` | 40.8 KB | Genomics |
-| 2 | Drug Discovery | `drug_discovery.rs` | 44.9 KB | Pharmacology |
-| 3 | Enzyme Catalysis | `enzyme_catalysis.rs` | 28.2 KB | Biochemistry |
-| 4 | Glycobiology | `glycobiology.rs` | 19.4 KB | Carbohydrate Science |
-| 5 | Membrane Biophysics | `membrane_biophysics.rs` | 30.8 KB | Cell Biology |
-| 6 | Metabolic Networks | `metabolic_networks.rs` | 25.9 KB | Systems Biology |
-| 7 | Molecular Dynamics | `molecular_dynamics.rs` | 43.9 KB | Biophysics |
-| 8 | Neurochemistry | `neurochemistry.rs` | 30.5 KB | Neuroscience |
-| 9 | Photosynthesis | `photosynthesis.rs` | 26.2 KB | Plant Biology |
-| 10 | Protein Folding | `protein_folding.rs` | 40.9 KB | Structural Biology |
-| 11 | Protein-Protein Interactions | `protein_protein_interactions.rs` | 51.0 KB | Interactomics |
-| 12 | Quantum Virology | `quantum_virology.rs` | 29.8 KB | Virology |
-| 13 | Structural Biology | `structural_biology.rs` | 23.2 KB | Crystallography |
-| 14 | Systems Biology | `systems_biology.rs` | 24.9 KB | Network Biology |
+| # | Sub-Module | Source | Key Domain |
+|---|-----------|--------|------------|
+| 1 | DNA/RNA | `dna_rna.rs` | Genomics |
+| 2 | Drug Discovery | `drug_discovery.rs` | Pharmacology |
+| 3 | Enzyme Catalysis | `enzyme_catalysis.rs` | Biochemistry |
+| 4 | Glycobiology | `glycobiology.rs` | Carbohydrate Science |
+| 5 | Membrane Biophysics | `membrane_biophysics.rs` | Cell Biology |
+| 6 | Metabolic Networks | `metabolic_networks.rs` | Systems Biology |
+| 7 | Molecular Dynamics | `molecular_dynamics.rs` | Biophysics |
+| 8 | Neurochemistry | `neurochemistry.rs` | Neuroscience |
+| 9 | Photosynthesis | `photosynthesis.rs` | Plant Biology |
+| 10 | Protein Folding | `protein_folding.rs` | Structural Biology |
+| 11 | Protein-Protein Interactions | `protein_protein_interactions.rs` | Interactomics |
+| 12 | Quantum Virology | `quantum_virology.rs` | Virology |
+| 13 | Structural Biology | `structural_biology.rs` | Crystallography |
+| 14 | Systems Biology | `systems_biology.rs` | Network Biology |
 
 ---
 
 ## 1. DNA/RNA
 
-**Source:** `dna_rna.rs` (40.8 KB)
+**Source:** `dna_rna.rs`
 
 Quantum-accurate nucleic acid simulation covering base encoding, Watson-Crick pairing thermodynamics, and structural dynamics.
 
@@ -75,7 +64,7 @@ Quantum-accurate nucleic acid simulation covering base encoding, Watson-Crick pa
 
 ## 2. Drug Discovery
 
-**Source:** `drug_discovery.rs` (44.9 KB)
+**Source:** `drug_discovery.rs`
 
 Comprehensive drug-likeness evaluation and quantum-enhanced virtual screening combining classical ADMET filters with quantum binding affinity calculations.
 
@@ -107,7 +96,7 @@ Comprehensive drug-likeness evaluation and quantum-enhanced virtual screening co
 
 ## 3. Enzyme Catalysis
 
-**Source:** `enzyme_catalysis.rs` (28.2 KB)
+**Source:** `enzyme_catalysis.rs`
 
 Quantum simulation of enzyme kinetics, catalytic mechanisms, and transition state theory at atomic resolution.
 
@@ -139,7 +128,7 @@ Quantum simulation of enzyme kinetics, catalytic mechanisms, and transition stat
 
 ## 4. Glycobiology
 
-**Source:** `glycobiology.rs` (19.4 KB)
+**Source:** `glycobiology.rs`
 
 Quantum modeling of carbohydrate structures, glycosidic bond energetics, and sugar-protein interactions.
 
@@ -170,7 +159,7 @@ Quantum modeling of carbohydrate structures, glycosidic bond energetics, and sug
 
 ## 5. Membrane Biophysics
 
-**Source:** `membrane_biophysics.rs` (30.8 KB)
+**Source:** `membrane_biophysics.rs`
 
 Quantum treatment of biological membrane systems including ion transport, electrochemistry, and channel gating.
 
@@ -205,7 +194,7 @@ Quantum treatment of biological membrane systems including ion transport, electr
 
 ## 6. Metabolic Networks
 
-**Source:** `metabolic_networks.rs` (25.9 KB)
+**Source:** `metabolic_networks.rs`
 
 Quantum-enhanced metabolic pathway analysis combining flux balance with quantum optimization of reaction networks.
 
@@ -237,7 +226,7 @@ Quantum-enhanced metabolic pathway analysis combining flux balance with quantum 
 
 ## 7. Molecular Dynamics
 
-**Source:** `molecular_dynamics.rs` (43.9 KB)
+**Source:** `molecular_dynamics.rs`
 
 Full quantum molecular dynamics with classical force field integration for large-scale biomolecular trajectory simulation.
 
@@ -271,7 +260,7 @@ Full quantum molecular dynamics with classical force field integration for large
 
 ## 8. Neurochemistry
 
-**Source:** `neurochemistry.rs` (30.5 KB)
+**Source:** `neurochemistry.rs`
 
 Quantum modeling of neurotransmitter systems, receptor pharmacology, and synaptic signal transduction.
 
@@ -304,7 +293,7 @@ Quantum modeling of neurotransmitter systems, receptor pharmacology, and synapti
 
 ## 9. Photosynthesis
 
-**Source:** `photosynthesis.rs` (26.2 KB)
+**Source:** `photosynthesis.rs`
 
 Quantum coherence modeling in biological light-harvesting complexes and photosynthetic energy transfer.
 
@@ -336,7 +325,7 @@ Quantum coherence modeling in biological light-harvesting complexes and photosyn
 
 ## 10. Protein Folding
 
-**Source:** `protein_folding.rs` (40.9 KB)
+**Source:** `protein_folding.rs`
 
 Quantum energy landscape exploration for protein tertiary structure prediction with full amino acid representation.
 
@@ -368,7 +357,7 @@ Quantum energy landscape exploration for protein tertiary structure prediction w
 
 ## 11. Protein-Protein Interactions
 
-**Source:** `protein_protein_interactions.rs` (51.0 KB)
+**Source:** `protein_protein_interactions.rs`
 
 Quantum-accurate modeling of macromolecular interfaces, binding energetics, and complex assembly.
 
@@ -401,7 +390,7 @@ Quantum-accurate modeling of macromolecular interfaces, binding energetics, and 
 
 ## 12. Quantum Virology
 
-**Source:** `quantum_virology.rs` (29.8 KB)
+**Source:** `quantum_virology.rs`
 
 Quantum geometric modeling of viral capsid structures, symmetry operations, and assembly pathways.
 
@@ -434,7 +423,7 @@ Quantum geometric modeling of viral capsid structures, symmetry operations, and 
 
 ## 13. Structural Biology
 
-**Source:** `structural_biology.rs` (23.2 KB)
+**Source:** `structural_biology.rs`
 
 Quantum-enhanced structure determination methods including X-ray crystallography and scattering calculations.
 
@@ -467,7 +456,7 @@ Quantum-enhanced structure determination methods including X-ray crystallography
 
 ## 14. Systems Biology
 
-**Source:** `systems_biology.rs` (24.9 KB)
+**Source:** `systems_biology.rs`
 
 Quantum network biology combining gene regulation modeling with systems-level pathway dynamics.
 
@@ -531,9 +520,6 @@ POST http://localhost:8080/api/v1/quantum/biomolecules/demo
 
 - **Qubits:** 65536
 - **Maximum biomolecule:** 8738 atoms (hemoglobin-scale)
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
-- **Total biology source:** ~460 KB across 14 modules
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Error Mitigation package provides comprehensive quantum error correction and noise mitigation techniques through the unified L3 VQE circuit at 65536-qubit scale. It implements all 5 error mitigation algorithms — ZNE, PEC, Virtual Distillation, CDR, and Readout Correction — ensuring high-fidelity results from noisy quantum computations, all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Error Mitigation package provides comprehensive quantum error correction and noise mitigation techniques through the unified L3 VQE circuit at 65536-qubit scale. It implements all 5 error mitigation algorithms — ZNE, PEC, Virtual Distillation, CDR, and Readout Correction — ensuring high-fidelity results from noisy quantum computations.
 
 ## Key Features
 
@@ -30,8 +30,6 @@ The Error Mitigation package provides comprehensive quantum error correction and
 - **Qubits:** 65536
 - **Error rates corrected:** Up to 5% per-gate error rate
 - **Readout fidelity:** Corrects up to 10% readout error
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 

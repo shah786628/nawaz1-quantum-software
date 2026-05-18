@@ -27,7 +27,6 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 | Biomolecules | Hemoglobin tetramer (4532 atoms, 65536 conformations) — **14 sub-modules** |
 | Machine Learning | 65536-feature quantum kernel SVM |
 | Logistics | 65536-node global supply chain |
-| Nuclear | Uranium-238 (238 nucleons, 65536 basis states) |
 | Mathematics | 65536×65536 sparse linear system — **11 sub-modules** |
 | Error Mitigation | 65536-amplitude noisy state correction |
 | Graphics | 256×256 = 65536-pixel quantum ray tracing |
@@ -41,7 +40,7 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 
 ## Biomolecules Domain — 14 Quantum Biology Sub-Modules
 
-The **biomolecules** domain contains 14 specialized sub-modules (~460 KB total) providing comprehensive quantum biology coverage:
+The **biomolecules** domain contains 14 specialized sub-modules providing comprehensive quantum biology coverage:
 
 | # | Sub-Module | Key Capabilities |
 |---|-----------|------------------|
@@ -145,7 +144,7 @@ The **mathematics** domain contains 11 specialized sub-modules providing compreh
 
 ## Chemistry Domain — 5 Quantum Chemistry Sub-Modules
 
-The **chemistry** domain contains 5 specialized sub-modules (~147 KB total) providing comprehensive quantum chemistry coverage from electronic structure to variational eigensolvers:
+The **chemistry** domain contains 5 specialized sub-modules providing comprehensive quantum chemistry coverage from electronic structure to variational eigensolvers:
 
 | # | Sub-Module | Key Capabilities |
 |---|-----------|------------------|
@@ -200,7 +199,7 @@ The **finance** domain contains 6 specialized sub-modules providing comprehensiv
 
 ## Fluid Mechanics Domain — 6 Quantum CFD Sub-Modules
 
-The **fluid_mechanics** domain contains 6 specialized sub-modules (~210 KB total) providing comprehensive quantum-accelerated computational fluid dynamics from incompressible Navier-Stokes to quantum-native linear solvers:
+The **fluid_mechanics** domain contains 6 specialized sub-modules providing comprehensive quantum-accelerated computational fluid dynamics from incompressible Navier-Stokes to quantum-native linear solvers:
 
 | # | Sub-Module | Key Capabilities |
 |---|-----------|------------------|

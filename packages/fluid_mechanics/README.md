@@ -2,18 +2,7 @@
 
 ## Overview
 
-The Fluid Mechanics package provides quantum-accelerated computational fluid dynamics through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **6 specialized sub-modules** covering the full spectrum of CFD — from incompressible Navier-Stokes to quantum-native linear solvers for fluid systems — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
-
-## Architecture
-
-```
-POST /api/v1/quantum/execute
-  → L6 Encoder (65536 amplitudes)
-    → MoE Router (7 tensor experts)
-      → L3 VQE Circuit (unified substrate)
-        → Fluid Mechanics Domain Handler
-          → Sub-module dispatch (6 modules)
-```
+The Fluid Mechanics package provides quantum-accelerated computational fluid dynamics through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **6 specialized sub-modules** covering the full spectrum of CFD — from incompressible Navier-Stokes to quantum-native linear solvers for fluid systems.
 
 **API Endpoint:** `POST http://localhost:8080/api/v1/quantum/execute`
 
@@ -23,20 +12,20 @@ POST /api/v1/quantum/execute
 
 ## The 6 Quantum CFD Sub-Modules
 
-| # | Sub-Module | Source | Size | Key Domain |
-|---|-----------|--------|------|------------|
-| 1 | Navier-Stokes | `navier_stokes.rs` | 38.4 KB | Core Flow Solver |
-| 2 | Turbulence | `turbulence.rs` | 42.1 KB | Turbulence Modeling |
-| 3 | Compressible | `compressible.rs` | 35.7 KB | Compressible Flow |
-| 4 | Multiphase | `multiphase.rs` | 31.2 KB | Interface Tracking |
-| 5 | Heat Transfer | `heat_transfer.rs` | 28.9 KB | Thermal Simulation |
-| 6 | Quantum CFD | `quantum_cfd.rs` | 33.5 KB | Quantum Linear Solvers |
+| # | Sub-Module | Source | Key Domain |
+|---|-----------|--------|------------|
+| 1 | Navier-Stokes | `navier_stokes.rs` | Core Flow Solver |
+| 2 | Turbulence | `turbulence.rs` | Turbulence Modeling |
+| 3 | Compressible | `compressible.rs` | Compressible Flow |
+| 4 | Multiphase | `multiphase.rs` | Interface Tracking |
+| 5 | Heat Transfer | `heat_transfer.rs` | Thermal Simulation |
+| 6 | Quantum CFD | `quantum_cfd.rs` | Quantum Linear Solvers |
 
 ---
 
 ## 1. Navier-Stokes
 
-**Source:** `navier_stokes.rs` (38.4 KB)
+**Source:** `navier_stokes.rs`
 
 Core incompressible and compressible Navier-Stokes solver supporting multiple flow regimes with spatial discretization schemes and finite volume method integration at 65536-qubit scale via the L3 VQE engine.
 
@@ -72,7 +61,7 @@ Core incompressible and compressible Navier-Stokes solver supporting multiple fl
 
 ## 2. Turbulence
 
-**Source:** `turbulence.rs` (42.1 KB)
+**Source:** `turbulence.rs`
 
 Comprehensive turbulence modeling framework providing DNS, RANS, LES, and hybrid methods for resolving or modeling turbulent flow structures at all relevant scales via the L3 VQE engine at 65536-qubit scale.
 
@@ -108,7 +97,7 @@ Comprehensive turbulence modeling framework providing DNS, RANS, LES, and hybrid
 
 ## 3. Compressible
 
-**Source:** `compressible.rs` (35.7 KB)
+**Source:** `compressible.rs`
 
 Compressible flow solvers for Euler equations and compressible Navier-Stokes with advanced flux schemes for shock-capturing and high-speed flow simulation at 65536-qubit scale via the L3 VQE engine.
 
@@ -144,7 +133,7 @@ Compressible flow solvers for Euler equations and compressible Navier-Stokes wit
 
 ## 4. Multiphase
 
-**Source:** `multiphase.rs` (31.2 KB)
+**Source:** `multiphase.rs`
 
 Multiphase flow simulation with interface tracking and surface tension modeling for immiscible fluid systems at 65536-qubit scale via the L3 VQE engine.
 
@@ -181,7 +170,7 @@ Multiphase flow simulation with interface tracking and surface tension modeling 
 
 ## 5. Heat Transfer
 
-**Source:** `heat_transfer.rs` (28.9 KB)
+**Source:** `heat_transfer.rs`
 
 Heat transfer simulation with multiple modes including conduction, convection, conjugate heat transfer, and radiation at 65536-qubit scale via the L3 VQE engine.
 
@@ -218,7 +207,7 @@ Heat transfer simulation with multiple modes including conduction, convection, c
 
 ## 6. Quantum CFD
 
-**Source:** `quantum_cfd.rs` (33.5 KB)
+**Source:** `quantum_cfd.rs`
 
 Quantum CFD integration providing quantum linear solvers for fluid mechanics systems, quantum error mitigation, and quantum circuit configuration for CFD workloads at 65536-qubit scale via the L3 VQE engine.
 
@@ -288,9 +277,6 @@ POST http://localhost:8080/api/v1/quantum/fluid_mechanics/demo
 - **Maximum grid:** 256×256 (65536 cells per 2D slice)
 - **3D extension:** 64×64×16 volumetric grids
 - **Reynolds number:** Up to Re = 10⁶ with quantum turbulence models
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
-- **Total fluid mechanics source:** ~210 KB across 6 modules
 
 ---
 

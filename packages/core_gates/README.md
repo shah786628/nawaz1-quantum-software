@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Core Gates package provides low-level quantum gate synthesis, circuit optimization, and gate-level control through the unified L3 VQE circuit at 65536-qubit scale. It enables custom circuit construction, gate decomposition, quantum error correction codes, and teleportation protocols — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Core Gates package provides low-level quantum gate synthesis, circuit optimization, and gate-level control through the unified L3 VQE circuit at 65536-qubit scale. It enables custom circuit construction, gate decomposition, quantum error correction codes, and teleportation protocols.
 
 ## Key Features
 
@@ -31,8 +31,6 @@ The Core Gates package provides low-level quantum gate synthesis, circuit optimi
 - **Qubits:** 65536
 - **Maximum circuit depth:** 10^9 gates (1 billion gate throughput)
 - **Gate types:** All standard gates (H, X, Y, Z, CNOT, Toffoli, Rz, Ry, etc.)
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 

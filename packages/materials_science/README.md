@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Materials Science package provides quantum simulation of crystalline materials, superconductors, topological phases, and novel materials through the unified L3 VQE circuit at 65536-qubit scale. It enables band structure calculations, phonon spectra, superconducting gap equations, and defect modeling — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Materials Science package provides quantum simulation of crystalline materials, superconductors, topological phases, and novel materials through the unified L3 VQE circuit at 65536-qubit scale. It enables band structure calculations, phonon spectra, superconducting gap equations, and defect modeling.
 
 ## Key Features
 
@@ -31,8 +31,6 @@ The Materials Science package provides quantum simulation of crystalline materia
 - **Qubits:** 65536
 - **Maximum unit cell:** 8192 atoms with periodic boundaries
 - **k-point mesh:** Up to 256×256×1 Brillouin zone sampling
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 

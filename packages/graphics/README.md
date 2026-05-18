@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Graphics package provides quantum-accelerated rendering, ray tracing, image processing, and computational geometry through the unified L3 VQE circuit at 65536-qubit scale. It leverages quantum parallelism for scene traversal, photon simulation, and image transformation — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Graphics package provides quantum-accelerated rendering, ray tracing, image processing, and computational geometry through the unified L3 VQE circuit at 65536-qubit scale. It leverages quantum parallelism for scene traversal, photon simulation, and image transformation.
 
 ## Key Features
 
@@ -31,8 +31,6 @@ The Graphics package provides quantum-accelerated rendering, ray tracing, image 
 - **Qubits:** 65536
 - **Maximum resolution:** 256×256 pixels per quantum batch
 - **Scene complexity:** 65536 geometric primitives
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 

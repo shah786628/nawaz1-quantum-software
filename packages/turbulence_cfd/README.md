@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Turbulence CFD package provides quantum-accelerated computational fluid dynamics for Reynolds-averaged (RANS), Large Eddy Simulation (LES), and Direct Numerical Simulation (DNS) of turbulent flows through the unified L3 VQE circuit at 65536-qubit scale. It resolves turbulent structures at extreme resolution — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Turbulence CFD package provides quantum-accelerated computational fluid dynamics for Reynolds-averaged (RANS), Large Eddy Simulation (LES), and Direct Numerical Simulation (DNS) of turbulent flows through the unified L3 VQE circuit at 65536-qubit scale. It resolves turbulent structures at extreme resolution.
 
 ## Key Features
 
@@ -32,8 +32,6 @@ The Turbulence CFD package provides quantum-accelerated computational fluid dyna
 - **Maximum DNS grid:** 256×256 (65536 degrees of freedom per field)
 - **Taylor Reynolds number:** Up to Re_λ = 1000
 - **Kolmogorov scale resolution:** Full cascade from integral to dissipation
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 

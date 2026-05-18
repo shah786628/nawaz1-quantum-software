@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Machine Learning package provides quantum-native neural networks, kernel methods, and classification algorithms through the unified L3 VQE circuit at 65536-qubit scale. It enables quantum neural networks (QNN), physics-informed neural networks (QPINN), quantum kernel evaluation, and feature map encoding — all executed via the Algorithm Bridge on 7 tensor network experts in unconditional superposition.
+The Machine Learning package provides quantum-native neural networks, kernel methods, and classification algorithms through the unified L3 VQE circuit at 65536-qubit scale. It enables quantum neural networks (QNN), physics-informed neural networks (QPINN), quantum kernel evaluation, and feature map encoding.
 
 ## Key Features
 
@@ -31,8 +31,6 @@ The Machine Learning package provides quantum-native neural networks, kernel met
 - **Qubits:** 65536
 - **Feature dimension:** Up to 65536 input features
 - **Training data:** Amplitude-encoded datasets of arbitrary size
-- **Bond dimension:** Adaptive χ = ln(Q) per geometry
-- **Tensor experts:** MPS/PEPS/PEPS3D/MERA/TTN/LoopTTN/PepsND in superposition
 
 ## Input Data Format
 
