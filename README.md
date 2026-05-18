@@ -70,7 +70,6 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 | Heat Transfer | 256×256 thermal conduction grid (65536 nodes) |
 | Core Gates | 65536-qubit quantum Fourier transform |
 | SDK | Python, C++, Rust, Julia client libraries |
-| Multidimensional | N-dim array tables, custom schemas, range queries — 6 sub-modules |
 | Cross-Domain | Multi-physics pipeline for complex problems |
 
 ---
@@ -101,39 +100,6 @@ Paid tier users can define custom data type mappings:
 - Domain-specific encoding schemes
 - Batch processing of heterogeneous data types
 - Schema registry for reusable type definitions
-
----
-
-## Schema Creation & Multidimensional Tables
-
-The engine supports custom schemas for multidimensional data tables. See [`packages/multidimensional/README.md`](packages/multidimensional/README.md) for full documentation.
-
-### Quick Schema Example
-
-```json
-{
-  "table_name": "experiment_data",
-  "dimensions": [
-    {"name": "sample_id", "type": "INT"},
-    {"name": "timestamp", "type": "TIMESTAMP"},
-    {"name": "energy_level", "type": "FLOAT"}
-  ],
-  "measures": [
-    {"name": "intensity", "type": "FLOAT"},
-    {"name": "amplitude", "type": "AMPLITUDE", "qubits": 65536}
-  ],
-  "indexing": "mixed_radix"
-}
-```
-
-### Schema Workflow
-
-1. **Define dimensions** — N-dim coordinate axes (lat/lon/time/etc.)
-2. **Define measures** — Values to store at each coordinate
-3. **Choose indexing** — `mixed_radix` (fastest), `btree`, or `hash`
-4. **Set chunking** — Optimize storage for your access pattern
-5. **Create table** — POST to `/api/v1/multidimensional/create`
-6. **Insert & query** — Use range queries for efficient subsetting
 
 ---
 
