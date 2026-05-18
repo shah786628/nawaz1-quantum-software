@@ -133,7 +133,6 @@ print(response.json())
       "temperature_gradient_max": 1247.8
     },
     "grid_resolution": [256, 256],
-    "tensor_expert_used": "PEPS",
     "qubit_count": 65536,
     "wall_time_ms": 3456
   }

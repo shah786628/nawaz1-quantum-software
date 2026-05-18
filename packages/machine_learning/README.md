@@ -126,7 +126,6 @@ print(response.json())
       "entangling_capability": 0.87,
       "effective_dimension": 4521
     },
-    "tensor_expert_used": "TTN",
     "qubit_count": 65536,
     "wall_time_ms": 1893
   }

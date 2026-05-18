@@ -120,7 +120,6 @@ print(response.json())
       "fidelity_improvement": 0.043,
       "variance_increase": 1.8
     },
-    "tensor_expert_used": "MPS",
     "qubit_count": 65536,
     "wall_time_ms": 987
   }

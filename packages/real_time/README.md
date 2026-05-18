@@ -127,7 +127,6 @@ print(response.json())
       "max_entanglement": 3.21,
       "light_cone_velocity": 2.34
     },
-    "tensor_expert_used": "MPS",
     "qubit_count": 65536,
     "wall_time_ms": 8934
   }

@@ -122,7 +122,6 @@ print(response.json())
       "render_quality": 0.98
     },
     "output_format": "float32_rgb",
-    "tensor_expert_used": "PEPS",
     "qubit_count": 65536,
     "wall_time_ms": 1456
   }

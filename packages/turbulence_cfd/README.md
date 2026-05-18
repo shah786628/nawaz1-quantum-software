@@ -129,7 +129,6 @@ print(response.json())
       "kolmogorov_constant": 1.5
     },
     "grid_resolution": [256, 256],
-    "tensor_expert_used": "PEPS",
     "qubit_count": 65536,
     "wall_time_ms": 12456
   }

@@ -126,7 +126,6 @@ print(response.json())
       "max_route_time": 480,
       "constraint_violations": 0
     },
-    "tensor_expert_used": "LoopTTN",
     "qubit_count": 65536,
     "wall_time_ms": 2876
   }

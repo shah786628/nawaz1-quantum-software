@@ -535,7 +535,7 @@ def demo_time_evolution():
         "simulation_type": "tebd", "num_sites": 65536,
         "time_steps": 100, "dt": 0.01, "bond_dimension": 256,
         "hamiltonian": "heisenberg_xxz", "input_data": data
-    }, "L2. TEBD — Time-Evolving Block Decimation (MPS-based)")
+    }, "L2. TEBD — Time-Evolving Block Decimation")
 
     # L3. QITE — Quantum Imaginary Time Evolution
     execute_quantum({

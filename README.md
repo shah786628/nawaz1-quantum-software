@@ -621,7 +621,7 @@ Quantum dynamics simulation algorithms.
 | # | Algorithm | Description | When to Use |
 |---|-----------|-------------|-------------|
 | L1 | VQS | Variational Quantum Simulation (McLachlan) | Real-time dynamics |
-| L2 | TEBD | Time-Evolving Block Decimation (MPS) | 1D systems, long times |
+| L2 | TEBD | Time-Evolving Block Decimation | 1D systems, long times |
 | L3 | QITE | Quantum Imaginary Time Evolution | Ground state preparation, thermal states |
 
 ```json

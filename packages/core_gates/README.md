@@ -125,7 +125,6 @@ print(response.json())
       "circuit_volume": 569520000,
       "entangling_depth": 4200
     },
-    "tensor_expert_used": "TTN",
     "qubit_count": 65536,
     "wall_time_ms": 567
   }
