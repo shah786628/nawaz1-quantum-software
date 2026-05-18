@@ -145,7 +145,7 @@ print(response.json())
 1. **Electronics Cooling** — Thermal management of data centers, GPUs, and high-power electronics
 2. **Additive Manufacturing** — Thermal simulation of laser powder bed fusion (3D printing)
 3. **Building Energy** — HVAC system design and building envelope thermal performance
-4. **Nuclear Reactor Thermal** — Fuel rod temperature distribution and coolant thermal-hydraulics
+4. **Power-Plant Coolant Thermal** — Fuel-element temperature distribution and coolant thermal-hydraulics
 5. **Spacecraft Thermal Control** — Orbital thermal cycling and radiator design for satellites
 6. **Industrial Furnaces** — Temperature uniformity optimization in heat treatment processes
 7. **Geothermal Energy** — Subsurface heat transport modeling for geothermal reservoir engineering

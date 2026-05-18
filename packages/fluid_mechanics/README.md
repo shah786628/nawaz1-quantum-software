@@ -335,7 +335,7 @@ print(response.json())
 | **Electronics Cooling** | Heat Transfer, Navier-Stokes, Quantum CFD |
 | **Marine Engineering** | Multiphase, Navier-Stokes, Turbulence |
 | **Hypersonic Vehicles** | Compressible, Heat Transfer, Turbulence |
-| **Nuclear Reactor Thermal-Hydraulics** | Multiphase, Heat Transfer, Navier-Stokes |
+| **Power-Plant Coolant Thermal-Hydraulics** | Multiphase, Heat Transfer, Navier-Stokes |
 | **Microfluidics** | Multiphase, Navier-Stokes, Quantum CFD |
 | **Wind Energy** | Turbulence, Navier-Stokes, Quantum CFD |
 | **Climate & Ocean Modeling** | Navier-Stokes, Turbulence, Heat Transfer |

@@ -8,9 +8,13 @@
 
 ---
 
-> **⚠️ IMPORTANT — Hardware Security Requirements for Launch**
+> **⚠️ IMPORTANT — Hardware Security & Build Requirements for Launch**
 >
-> This software **MUST** be launched on a **Linux VM** with a CPU that supports at least one of the following hardware security extensions:
+> The `nawaz1-server` binary in this repository was compiled on **Ubuntu 22.04 LTS (`x86_64-unknown-linux-gnu`)** with the **Rust 1.70 stable toolchain**.
+>
+> You **MUST** run it on a **compatible Ubuntu Linux VM** (Ubuntu 22.04 LTS or a binary-compatible derivative on `x86_64`). Running on Windows, macOS, Alpine (musl), or other non-glibc / non-x86_64 systems is **not supported**.
+>
+> The host VM CPU **MUST** support at least one of the following hardware security extensions:
 >
 > | Technology | Vendor | Minimum Requirement |
 > |-----------|--------|-------------------|
@@ -24,9 +28,17 @@
 > - Side-channel attack resistance
 > - Tamper-proof execution of quantum algorithms
 >
-> **Verification:** Run `dmesg | grep -i "tdx\|sev\|sgx"` to check hardware support.
+> **Verification:**
+> ```bash
+> # Confirm OS
+> lsb_release -a    # Expect: Ubuntu 22.04 LTS (or compatible)
+> uname -m          # Expect: x86_64
 >
-> Launching on unsupported hardware will result in degraded security posture.
+> # Confirm hardware security support
+> dmesg | grep -i "tdx\|sev\|sgx"
+> ```
+>
+> Launching on unsupported hardware or a non-Ubuntu / non-x86_64 system will result in immediate failure or degraded security posture.
 
 ---
 
@@ -45,7 +57,7 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 | Chemistry | Hemoglobin protein (8738 atoms, 65536 orbital amplitudes) |
 | Physics | 256×256 Heisenberg lattice (65536 sites) — **13 sub-modules** |
 | Finance | 65536 financial instruments (global portfolio) |
-| Materials | 65536-atom YBCO superconductor crystal |
+| Materials | 65536-atom YBCO superconductor crystal — **12 sub-modules** |
 | Biomolecules | Hemoglobin tetramer (4532 atoms, 65536 conformations) — **14 sub-modules** |
 | Machine Learning | 65536-feature quantum kernel SVM |
 | Logistics | 65536-node global supply chain |
@@ -59,6 +71,69 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 | Core Gates | 65536-qubit quantum Fourier transform |
 | SDK | Python, C++, Rust, Julia client libraries |
 | Cross-Domain | Multi-physics pipeline for complex problems |
+
+---
+
+## Input Data Types & How to Define Them
+
+The quantum engine accepts input data as a **flat array of 64-bit floating point numbers** (f64). Each value represents one amplitude in the quantum Hilbert space.
+
+### Supported Input Formats
+
+| Format | Type | Example |
+|--------|------|---------|
+| Normalized amplitudes | `f64[]` | `[0.001, -0.023, 0.045, ...]` |
+| Raw measurements | `f64[]` | Auto-normalized by engine |
+| Complex amplitudes (Re/Im interleaved) | `f64[]` | `[re₁, im₁, re₂, im₂, ...]` |
+
+### How to Prepare Your Data
+
+1. **Collect your domain data** (molecular orbitals, financial time series, fluid grid points, etc.)
+2. **Convert to float array** — each data point becomes one f64 value
+3. **Ensure length is power of 2** — pad with zeros if needed (engine auto-pads)
+4. **For 65536 qubits**, provide exactly 65536 float values
+
+### User-Defined Data Types (Paid Tier)
+
+Paid tier users can define custom data type mappings:
+- Custom struct serialization to amplitude arrays
+- Domain-specific encoding schemes
+- Batch processing of heterogeneous data types
+- Schema registry for reusable type definitions
+
+---
+
+## ⏱️ Free Tier Limits
+
+| Parameter | Free Tier | Paid Tier |
+|-----------|-----------|-----------|
+| **Active Runtime** | 50 minutes | Unlimited |
+| **Cooldown** | 10 hours | None |
+| **Daily Active** | ~50 min/day | 24/7 |
+| **Domains** | 15 standard | All + custom |
+| **Max Qubits** | 65536 | Unlimited scale |
+
+> **Free Tier Cycle:** 50 minutes active → 10 hours cooldown → repeats  
+> That means approximately **50 minutes of quantum computation per day**.
+
+### Paid Tier — Full Access Includes:
+- ⏰ **Unlimited runtime** — no cooldown, no time limits
+- 📦 **More packages** — additional specialized domains
+- 🔌 **Extensions & Plugins** — custom algorithm extensions
+- 🎯 **UDF (User-Defined Functions)** — custom quantum routines
+- 📊 **User-Defined Data Types** — custom input schemas
+- 💾 **Persistence** — quantum state storage & retrieval
+- 🔐 **Advanced Security** — enhanced encryption, audit logs
+- 📈 **Monitoring** — real-time performance dashboards
+- 🏗️ **Infrastructure** — dedicated compute resources
+- 📊 **Dashboard** — web-based management console
+- 🌐 **Unified Multi-Domain Engine** — seamless cross-domain orchestration
+- 🏢 **Multi-Datacenter** — geo-distributed quantum compute
+- 🔄 **Streaming Pipeline** — real-time quantum data streams
+- ⚡ **Maximum Qubits** — beyond 65536, scale to millions
+- 🎁 **Custom Packages** — bespoke domain packages on request
+
+**Contact:** For paid tier access, contact Shahnawaz Alam
 
 ---
 
@@ -149,7 +224,7 @@ The **mathematics** domain contains 11 specialized sub-modules providing compreh
 | 8 | **Quantum Category Theory** | Monoidal/dagger categories, quantum logic lattice, Frobenius algebras |
 | 9 | **Quantum Optimization Theory** | SDP relaxations, quantum game theory, Nash equilibrium, QAOA mapping |
 | 10 | **Quantum Number Theory** | Shor's factoring, discrete logarithm, Stabilizer/CSS/Toric/Surface codes |
-| 11 | **Advanced Quantum Probability** | Free probability, Wigner semicircle, Marchenko-Pastur, Tracy-Widom |
+| 11 | **Advanced Quantum Probability** | Free probability (Voiculescu), Wigner semicircle, Marchenko-Pastur, Tracy-Widom, quantum CLT, quantum martingales, concentration inequalities, quantum optimal transport (Wasserstein), quantum copula, Schatten class |
 
 **Usage:** Set `"config": {"sub_module": "<name>"}` in the execute request body. See [`packages/mathematics/README.md`](packages/mathematics/README.md) for full API documentation per sub-module.
 
@@ -531,7 +606,7 @@ Lattice quantum many-body models at scale.
 | K1 | Heisenberg | XXZ antiferromagnet on square lattice | Magnetic materials |
 | K2 | Hubbard | Strongly correlated electron model | High-Tc superconductors |
 | K3 | Ising | Transverse-field quantum spin chain | Phase transitions |
-| K4 | Lattice Gauge Theory | SU(3) gauge field on lattice | QCD, nuclear physics |
+| K4 | Lattice Gauge Theory | SU(3) gauge field on lattice | QCD, high-energy hadronic physics |
 
 ```json
 {"problem_type": "condensed_matter", "model": "hubbard", "hopping_t": 1.0, "interaction_u": 4.0}

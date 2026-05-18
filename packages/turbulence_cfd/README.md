@@ -142,6 +142,6 @@ print(response.json())
 2. **Hypersonic Aerodynamics** — Turbulent heating and transition prediction for reentry vehicles
 3. **Wind Farm Optimization** — Wake turbulence modeling for wind farm power maximization
 4. **Urban Air Quality** — Pollutant dispersion in complex urban street canyon geometries
-5. **Nuclear Reactor Safety** — Turbulent mixing in reactor coolant systems
+5. **Power-Plant Coolant Safety** — Turbulent mixing in industrial power-plant coolant systems
 6. **Noise Prediction** — Aeroacoustic noise generation from turbulent shear layers
 7. **Plasma Turbulence** — Magnetohydrodynamic turbulence in fusion devices (tokamaks)

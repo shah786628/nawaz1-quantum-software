@@ -24,7 +24,7 @@ The Mathematics package provides quantum-accelerated mathematical computations t
 | 8 | Quantum Category Theory | `quantum_category_theory.rs` | Monoidal Categories |
 | 9 | Quantum Optimization Theory | `quantum_optimization_theory.rs` | SDP & Game Theory |
 | 10 | Quantum Number Theory | `quantum_number_theory.rs` | Factoring & Error Codes |
-| 11 | Advanced Quantum Probability | `advanced_quantum_probability.rs` | Free Probability & RMT |
+| 11 | Advanced Quantum Probability | `advanced_quantum_probability.rs` | Free Probability, RMT, Quantum CLT, Wasserstein, Schatten |
 
 ---
 
@@ -380,19 +380,24 @@ Quantum factoring, discrete logarithm, error-correcting codes (Stabilizer, CSS, 
 
 **Source:** `advanced_quantum_probability.rs`
 
-Free probability spaces, Wigner semicircle, Marchenko-Pastur distribution, Tracy-Widom. Random matrix theory for quantum systems.
+A comprehensive non-commutative / random-matrix probability suite for quantum systems. Combines Voiculescu's free probability, the universal eigenvalue laws (Wigner, Marchenko-Pastur, Tracy-Widom), quantum-CLT convergence, quantum martingales, concentration inequalities, optimal-transport metrics on density operators, copula structures, and the full Schatten-class operator-norm theory.
 
 **Key Capabilities:**
-- Free probability (free independence, free convolution)
-- Wigner semicircle law (eigenvalue distribution of random Hermitian matrices)
-- Marchenko-Pastur distribution (sample covariance eigenvalues)
-- Tracy-Widom distribution (largest eigenvalue fluctuations)
-- Free cumulants and R-transform
-- Voiculescu's free entropy
-- Random matrix universality classes
-- Free central limit theorem
 
-**When to Use:** Quantum chaos analysis, random circuit behavior, entanglement spectra, quantum complexity theory.
+- **Free Probability (Voiculescu)** — non-commutative probability for random matrices: free independence, free convolution, free cumulants, R-transform, S-transform, Voiculescu's free entropy and free Fisher information; foundation for the asymptotic spectra of large random matrices.
+- **Wigner Semicircle Law** — limiting eigenvalue distribution ρ(x) = (1/2π)√(4−x²) for large Hermitian random matrices (GOE/GUE/GSE); spectral density of Wigner ensembles, bulk universality.
+- **Marchenko-Pastur Distribution** — eigenvalue density of sample covariance matrices XX†/N as p, N → ∞ at fixed ratio c = p/N; supports phase boundaries and atom at zero for c > 1.
+- **Tracy-Widom Distribution** — universal fluctuations of the largest eigenvalue (TW₁ / TW₂ / TW₄) around the spectral edge; Painlevé-II representation, Fβ(s) numerical evaluation, edge scaling exponents.
+- **Quantum Central Limit Theorem** — quantum-CLT convergence of sums of non-commutative random variables to free / Gaussian / Boolean limits; rate of convergence in Wasserstein and Kolmogorov distances; bosonic and fermionic CLT variants.
+- **Quantum Martingales** — quantum stochastic processes adapted to filtrations of von Neumann algebras; quantum Doob decomposition, optional sampling, Burkholder-Davis-Gundy inequalities; non-commutative L^p martingale convergence.
+- **Quantum Concentration Inequalities** — tail bounds for matrix-valued random variables: matrix Chernoff, matrix Bernstein, Ahlswede-Winter, Tropp's user-friendly tail bounds; applications to quantum learning and tomography sample complexity.
+- **Quantum Optimal Transport** — Wasserstein-type distances W_p(ρ, σ) between density operators; Bures-Wasserstein metric, quantum entropic transport (Sinkhorn), couplings of quantum states; geodesics on the manifold of density matrices.
+- **Quantum Copula** — dependency structures in quantum systems: quantum analogues of Sklar's theorem, copula decompositions of bipartite states, tail-dependence measures for entangled subsystems, quantum Archimedean copulas.
+- **Schatten Class** — operator-norm theory: Schatten p-norms ∥A∥_p = (Tr|A|^p)^(1/p), trace class (S₁), Hilbert-Schmidt (S₂), interpolation theorems, duality (S_p)* = S_q with 1/p + 1/q = 1, non-commutative L^p spaces.
+- **Random Matrix Universality** — β = 1, 2, 4 ensembles (GOE/GUE/GSE), bulk and edge universality classes, level-spacing statistics (Wigner surmise), spectral form factor, Dyson Brownian motion.
+- **Free Central Limit Theorem** — free analogue of the CLT: sum of free identically-distributed self-adjoint variables converges to a semicircular distribution; rate-of-convergence estimates.
+
+**When to Use:** Quantum chaos and random-circuit analysis, entanglement spectrum statistics, quantum complexity theory, sample-complexity bounds for quantum learning / tomography, large-N limits of quantum many-body systems, quantum-finance and quantum-statistics applications requiring rigorous concentration and dependency control.
 
 ```json
 {
@@ -407,6 +412,30 @@ Free probability spaces, Wigner semicircle, Marchenko-Pastur distribution, Tracy
     "num_samples": 1000
   }
 }
+```
+
+**Additional task examples:**
+
+```json
+// Tracy-Widom largest-eigenvalue fluctuations
+{ "sub_module": "advanced_quantum_probability", "task": "tracy_widom",
+  "beta": 2, "matrix_dimension": 8192, "num_realizations": 5000 }
+
+// Marchenko-Pastur sample-covariance spectrum
+{ "sub_module": "advanced_quantum_probability", "task": "marchenko_pastur",
+  "p_dimension": 2048, "n_samples": 4096 }
+
+// Quantum optimal transport (Bures-Wasserstein)
+{ "sub_module": "advanced_quantum_probability", "task": "quantum_wasserstein",
+  "metric": "bures_wasserstein", "state_dim": 256 }
+
+// Schatten p-norm of an operator
+{ "sub_module": "advanced_quantum_probability", "task": "schatten_norm",
+  "p": 1, "operator_dim": 1024 }
+
+// Matrix Bernstein concentration bound
+{ "sub_module": "advanced_quantum_probability", "task": "matrix_bernstein",
+  "num_summands": 1000, "variance_bound": 0.01 }
 ```
 
 ---

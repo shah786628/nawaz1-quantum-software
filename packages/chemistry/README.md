@@ -105,10 +105,10 @@ Provides molecular Hamiltonian construction with Jordan-Wigner fermion-to-qubit 
 **Key Capabilities:**
 - Molecular Hamiltonian construction from atomic coordinates
 - Jordan-Wigner transformation (fermion-to-qubit mapping)
-- One-electron integrals (kinetic energy + nuclear attraction)
+- One-electron integrals (kinetic energy + electron–core attraction)
 - Two-electron integrals (electron-electron repulsion)
 - Statevector-based expectation value computation
-- Nuclear repulsion energy calculation
+- Core–core electrostatic repulsion energy calculation
 - Spin-orbital indexing and mapping
 
 **When to Use:** Building and evaluating molecular Hamiltonians for VQE ground state calculations, computing electronic structure properties, and evaluating molecular energies.

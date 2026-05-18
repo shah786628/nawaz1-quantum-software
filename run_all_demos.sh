@@ -44,7 +44,7 @@ NC='\033[0m' # No Color
 echo -e "${CYAN}"
 echo "╔══════════════════════════════════════════════════════════════════════════╗"
 echo "║  NAWAZ1 QUANTUM VQE ENGINE - Demo Runner (65536-Qubit Scale)           ║"
-echo "║  All 16 Domains + Data Import + Pipeline                               ║"
+echo "║  All 15 Domains + Data Import + Pipeline                               ║"
 echo "║  Data SIZE determines qubit count (amplitude encoding)                 ║"
 echo "╚══════════════════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
@@ -173,7 +173,7 @@ curl -s -X POST "${BASE_URL}/multidimensional/query" \
     python3 -m json.tool 2>/dev/null || echo "(raw output above)"
 
 # =============================================================================
-# Step 3: Run Python quantum examples (FULL 65536-qubit scale, all 16 domains)
+# Step 3: Run Python quantum examples (FULL 65536-qubit scale, all 15 domains)
 # =============================================================================
 echo -e "\n${YELLOW}[3/6] Running FULL 65536-qubit quantum examples (Python)...${NC}"
 echo -e "       Each domain sends 65536 amplitude values → engine allocates 65536 qubits"

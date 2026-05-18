@@ -165,7 +165,7 @@ Klein-Gordon and Dirac equation implementations. Relativistic particle dynamics 
     "task": "dirac_hydrogen",
     "principal_quantum_number": 2,
     "angular_momentum": 1,
-    "nuclear_charge": 92
+    "atomic_number": 92
   }
 }
 ```
