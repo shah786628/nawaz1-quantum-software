@@ -1,6 +1,6 @@
 # Nawaz1 Quantum VQE Engine - Usage Guide
 
-> **Multidimensional Quantum Pipeline** — A production-grade quantum VQE engine supporting 15 domains, **62 algorithms across 13 categories**, data persistence, and real-time streaming.
+> **Multidimensional Quantum Pipeline** — A production-grade quantum VQE engine supporting 15 domains, **63 algorithms across 13 categories**, data persistence, and real-time streaming.
 
 **Author:** Shahnawaz Alam  
 **License:** Proprietary  
@@ -71,7 +71,6 @@ chmod +x bin/arm64/nawaz1-server
 - **Build Date:** 2026-05-19
 - **Expiration:** 18 months (November 2027)
 - **Runtime:** 24/7 — No time restrictions
-- **Validation:** NTP internet time verification (cannot bypass)
 - **Built with:** Rust 1.95.0, Ubuntu 24.04
 
 ---
@@ -577,7 +576,7 @@ The quantum engine provides a **pre-built VQE execution substrate**. The **Algor
 
 ---
 
-### Complete Algorithm Reference (62 Algorithms)
+### Complete Algorithm Reference (63 Algorithms)
 
 #### Category 1: Variational Algorithms
 | Algorithm | Key | Best For |
@@ -951,7 +950,7 @@ The **fluid_mechanics** domain contains 6 specialized sub-modules providing comp
 - [Quick Start](#quick-start)
 - [Environment Variables](#environment-variables)
 - [API Endpoints](#api-endpoints)
-- [Complete Algorithm Reference (62 Algorithms)](#complete-algorithm-reference-62-algorithms)
+- [Complete Algorithm Reference (63 Algorithms)](#complete-algorithm-reference-63-algorithms)
 - [Algorithm Summary Table](#algorithm-summary-table)
 - [Data Import Guide](#data-import-guide)
 - [Authentication & Security](#authentication--security)
@@ -1005,7 +1004,7 @@ print(resp.json())
 
 ```bash
 pip install numpy requests
-python quantum_usage_examples.py              # Run all 62 algorithms
+python quantum_usage_examples.py              # Run all 63 algorithms
 python quantum_usage_examples.py --list       # List all categories
 python quantum_usage_examples.py vqe_family   # Run single category
 ```
@@ -1040,7 +1039,7 @@ python quantum_usage_examples.py vqe_family   # Run single category
 
 ---
 
-## Complete Algorithm Reference (62 Algorithms)
+## Complete Algorithm Reference (63 Algorithms)
 
 **ARCHITECTURAL KEY POINT:** All algorithms route through the **Algorithm Bridge** onto the pre-built VQE circuit substrate. The `algorithm` field is metadata for orchestration — execution always goes through the same unified parametric circuit. Only the parameter vector changes.
 
@@ -1135,11 +1134,12 @@ Quantum linear algebra algorithms with exponential speedup for sparse systems.
 
 ---
 
-### Category F: Grover Search (1)
+### Category F: Grover & Quantum Search (2)
 
 | # | Algorithm | Description | When to Use |
 |---|-----------|-------------|-------------|
 | F1 | Grover Search | O(√N) unstructured quantum search | Unstructured search, database queries |
+| F2 | Quantum Binary Search (QBS) | O(log N) structured quantum search | Structural search, sorted data, ordered indices |
 
 ```json
 {"algorithm": "grover", "search_space_size": 65536, "target_states": [42, 1337]}
@@ -1282,7 +1282,7 @@ Cutting-edge quantum algorithms for specialized applications.
 | C. VQE Ansätze | 5 | UCCSD, QubitAdapt, Symmetry-Preserving, k-UpCCGSD, LDCA |
 | D. QAOA Variants | 5 | Standard, Adaptive, Continuous, Multi-Angle, Warm-Start |
 | E. HHL Family | 4 | Standard HHL, Preconditioned HHL, QSVT, Quantum Regression |
-| F. Grover | 1 | Grover Search |
+| F. Grover & Quantum Search | 2 | Grover Search, Quantum Binary Search (QBS) |
 | G. Error Mitigation | 5 | ZNE, PEC, Virtual Distillation, CDR, Readout Mitigation |
 | H. Measurement Reduction | 3 | Term Grouper, Classical Shadow, Adaptive Shot Allocator |
 | I. Numerical/Scientific | 7 | FDM, FEM, FVM, IMEX, Multigrid, PDE General, SINDy |
@@ -1290,7 +1290,7 @@ Cutting-edge quantum algorithms for specialized applications.
 | K. Condensed Matter | 4 | Heisenberg, Hubbard, Ising, Lattice Gauge Theory |
 | L. Time Evolution | 3 | VQS, TEBD, QITE |
 | M. Advanced Quantum | 6 | Shor, Lindblad Solver, Thermodynamics, Metrology, QNN, QPINN |
-| **TOTAL** | **62** | |
+| **TOTAL** | **63** | |
 
 ---
 
@@ -1361,7 +1361,7 @@ For data operations (query, import), use JWT tokens obtained from `/api/v1/auth/
 
 | File | Description |
 |------|-------------|
-| `quantum_usage_examples.py` | All **62 algorithms** at 65536-qubit scale (Python + numpy) |
+| `quantum_usage_examples.py` | All **63 algorithms** at 65536-qubit scale (Python + numpy) |
 | `data_import_examples.py` | Auth, tables, import, query (Python) |
 | `run_all_demos.sh` | Full demo runner (Bash) |
 | `run_all_demos.ps1` | Full demo runner (PowerShell) |

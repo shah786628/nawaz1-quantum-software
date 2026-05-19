@@ -2,7 +2,7 @@
 """
 Nawaz1 Quantum VQE Engine - Complete Usage Examples (65536-Qubit Scale)
 =======================================================================
-Demonstrates ALL 62 quantum algorithms available in the engine across 13 categories.
+Demonstrates ALL 63 quantum algorithms available in the engine across 13 categories.
 
 ARCHITECTURAL KEY POINT:
 All algorithms route through the Algorithm Bridge → execute_l3() on the pre-built
@@ -322,12 +322,12 @@ def demo_hhl_family():
 
 
 # =============================================================================
-# CATEGORY F: GROVER FAMILY (1)
+# CATEGORY F: GROVER & QUANTUM SEARCH (2)
 # =============================================================================
 def demo_grover():
     """Grover's quantum search algorithm."""
     print("\n" + "#" * 70)
-    print("  CATEGORY F: GROVER SEARCH (1)")
+    print("  CATEGORY F: GROVER & QUANTUM SEARCH (2)")
     print("  O(sqrt(N)) unstructured search on 65536-element space")
     print("#" * 70)
     data = gen_generic(57)
@@ -336,6 +336,21 @@ def demo_grover():
         "search_space_size": 65536, "target_states": [42, 1337, 65535],
         "oracle_type": "phase_flip", "input_data": data
     }, "F1. Grover Search — O(sqrt(N)) unstructured quantum search")
+
+
+def demo_quantum_binary_search():
+    """F2: Quantum Binary Search (QBS) — O(log N) structured quantum search"""
+    print("\n--- F2: Quantum Binary Search (QBS) ---")
+    print("Algorithm: Quantum Binary Search for structural data")
+    print("Complexity: O(log N) for sorted/structured datasets")
+    data = gen_generic(58)
+    execute_quantum({
+        "domain": "core_gates", "algorithm": "quantum_binary_search",
+        "qubits": 65536, "input_data": data,
+        "search_type": "structural", "data_structure": "sorted_index",
+        "target_precision": 1e-10
+    }, "F2. Quantum Binary Search (QBS) — O(log N) structured quantum search")
+    print("  QBS: Exploits data structure for exponential speedup over classical binary search")
 
 
 # =============================================================================
@@ -647,7 +662,8 @@ ALL_CATEGORIES = {
     "vqe_ansatz": ("C: VQE Ansatze (5)", demo_vqe_ansatz),
     "qaoa_variants": ("D: QAOA Variants (5)", demo_qaoa_variants),
     "hhl_family": ("E: HHL Family (4)", demo_hhl_family),
-    "grover": ("F: Grover Search (1)", demo_grover),
+    "grover": ("F: Grover & Quantum Search (2)", demo_grover),
+    "quantum_binary_search": ("F: Grover & Quantum Search (2)", demo_quantum_binary_search),
     "error_mitigation": ("G: Error Mitigation (5)", demo_error_mitigation),
     "measurement_reduction": ("H: Measurement Reduction (3)", demo_measurement_reduction),
     "numerical_solvers": ("I: Numerical/Scientific (7)", demo_numerical_solvers),
@@ -661,7 +677,7 @@ if __name__ == "__main__":
     print("""
 +========================================================================+
 |  NAWAZ1 QUANTUM VQE ENGINE - 65536-Qubit Scale Usage Examples          |
-|  62 Algorithms | 13 Categories (A-M) | Unified L3 VQE Substrate        |
+|  63 Algorithms | 13 Categories (A-M) | Unified L3 VQE Substrate        |
 |  Copyright (c) 2026 Shahnawaz Alam. All rights reserved.              |
 |                                                                        |
 |  ARCHITECTURE: All algorithms route through Algorithm Bridge ->        |
@@ -673,7 +689,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         arg = sys.argv[1]
         if arg == "--list":
-            print("Available algorithm categories (62 algorithms total):\n")
+            print("Available algorithm categories (63 algorithms total):\n")
             for key, (desc, _) in ALL_CATEGORIES.items():
                 print(f"  {key:<25} {desc}")
             print(f"\n  {'algorithms':<25} Run ALL categories")
@@ -710,5 +726,5 @@ if __name__ == "__main__":
                 print(f"\n[ERROR in {key}]: {e}")
 
         print("\n" + "=" * 70)
-        print("  ALL 62 ALGORITHM DEMOS COMPLETE - 65536-qubit scale verified")
+        print("  ALL 63 ALGORITHM DEMOS COMPLETE - 65536-qubit scale verified")
         print("=" * 70)

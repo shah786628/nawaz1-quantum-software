@@ -2,7 +2,7 @@
 # Nawaz1 Quantum VQE Engine - Run All Demos (PowerShell)
 # =============================================================================
 # Runs all quantum domain examples at REAL 65536-qubit scale.
-# Covers ALL 62 algorithms across 13 categories (A-M) via the Python script,
+# Covers ALL 63 algorithms across 13 categories (A-M) via the Python script,
 # with inline 1024-qubit PowerShell demos for quick API validation.
 #
 # The VQE engine uses amplitude encoding: num_qubits is determined by the
@@ -73,7 +73,7 @@ function Invoke-Quantum($payload, $label) {
 Write-Host ""
 Write-Host "========================================================================" -ForegroundColor Yellow
 Write-Host "  NAWAZ1 QUANTUM VQE ENGINE - Demo Runner (65536-Qubit Scale)"
-Write-Host "  62 Algorithms | 13 Categories (A-M) | Unified L3 VQE Substrate"
+Write-Host "  63 Algorithms | 13 Categories (A-M) | Unified L3 VQE Substrate"
 Write-Host "  Data SIZE determines qubit count (amplitude encoding)"
 Write-Host "========================================================================" -ForegroundColor Yellow
 Write-Host ""
@@ -177,14 +177,14 @@ Invoke-Quantum @{ domain="core_gates"; algorithm="grover"; problem_type="quantum
 
 # =============================================================================
 # Step 3: Algorithm Bridge Demos — Selected from 13 Categories (1024-qubit inline)
-# Full 62-algorithm coverage runs via Python in Step 7.
+# Full 63-algorithm coverage runs via Python in Step 7.
 # Categories: A(VQE×8), B(Optimizers×6), C(Ansatze×5), D(QAOA×5),
 #             E(HHL×4), F(Grover×1), G(ErrMit×5), H(MeasRed×3),
 #             I(Numerical×7), J(Specialized×5), K(CondMatter×4),
 #             L(TimeEvol×3), M(Advanced×6)
 # =============================================================================
 Write-Host "`n[3/7] Algorithm Bridge - Sample from 13 categories (1024-qubit demo)..." -ForegroundColor Yellow
-Write-Host "       (Full 62 algorithms at 65536-qubit scale run in Step 7 via Python)" -ForegroundColor Gray
+Write-Host "       (Full 63 algorithms at 65536-qubit scale run in Step 7 via Python)" -ForegroundColor Gray
 
 # A: VQE Family
 Invoke-Quantum @{ domain="chemistry"; algorithm="vqe"; molecule="hemoglobin"; atoms=8738; input_data=$chemData } "Cat A: VQE — Hemoglobin ground state (1024 amplitudes)"
@@ -315,13 +315,13 @@ if ($pythonCmd) {
     Write-Host "  Running quantum_usage_examples.py --list (category overview)..." -ForegroundColor Cyan
     & $pythonCmd quantum_usage_examples.py --list 2>&1
     Write-Host ""
-    Write-Host "  Running quantum_usage_examples.py (ALL 62 algorithms, 65536-qubit scale)..." -ForegroundColor Cyan
+    Write-Host "  Running quantum_usage_examples.py (ALL 63 algorithms, 65536-qubit scale)..." -ForegroundColor Cyan
     & $pythonCmd quantum_usage_examples.py 2>&1 | Select-Object -First 200
     Write-Host "`n  Running data_import_examples.py..." -ForegroundColor Cyan
     & $pythonCmd data_import_examples.py 2>&1 | Select-Object -First 50
 } else {
     Write-Host "  Python not found. Install Python 3.8+ with numpy to run 65536-qubit examples." -ForegroundColor Red
-    Write-Host "  The Python script demonstrates all 62 algorithms across 13 categories (A-M):" -ForegroundColor Red
+    Write-Host "  The Python script demonstrates all 63 algorithms across 13 categories (A-M):" -ForegroundColor Red
     Write-Host "    A: VQE Family (8)        B: VQE Optimizers (6)   C: VQE Ansatze (5)" -ForegroundColor Gray
     Write-Host "    D: QAOA Variants (5)     E: HHL Family (4)       F: Grover (1)" -ForegroundColor Gray
     Write-Host "    G: Error Mitigation (5)  H: Meas. Reduction (3)  I: Numerical (7)" -ForegroundColor Gray
@@ -340,7 +340,7 @@ Write-Host "  QUBIT SCALING (amplitude encoding):"
 Write-Host "    PowerShell inline: 1024 data points -> 1024 qubits (quick demo)"
 Write-Host "    Python full scale: 65536 data points -> 65536 qubits"
 Write-Host ""
-Write-Host "  ALGORITHMS: 62 total across 13 categories (A-M):"
+Write-Host "  ALGORITHMS: 63 total across 13 categories (A-M):"
 Write-Host "    A: VQE Family (8)        B: VQE Optimizers (6)   C: VQE Ansatze (5)"
 Write-Host "    D: QAOA Variants (5)     E: HHL Family (4)       F: Grover (1)"
 Write-Host "    G: Error Mitigation (5)  H: Meas. Reduction (3)  I: Numerical (7)"
@@ -359,5 +359,5 @@ Write-Host ""
 Write-Host "  Run individual categories:"
 Write-Host "    python quantum_usage_examples.py --list        # List all categories"
 Write-Host "    python quantum_usage_examples.py vqe_family    # Run single category"
-Write-Host "    python quantum_usage_examples.py algorithms    # Run all 62 algorithms"
+Write-Host "    python quantum_usage_examples.py algorithms    # Run all 63 algorithms"
 Write-Host "========================================================================" -ForegroundColor Green
