@@ -2,9 +2,9 @@
 
 ## Overview
 
-The **Extension & Plugin System** lets you ship your own quantum algorithms into the running engine without forking the codebase. Plugins are first-class Rust types that implement a single trait, get vetted by a **multi-layer security validation pipeline**, and then run on the same universal **L3 VQE execution substrate** that powers every built-in domain.
+The **Extension & Plugin System** lets you ship your own quantum algorithms into the running engine without forking the codebase. Plugins are first-class Rust types that implement a single trait, get vetted by a **multi-layer security validation pipeline**, and then run on the same universal **VQE execution substrate** that powers every built-in domain.
 
-**Core principle:** plugins do *not* select a different quantum backend. The Algorithm Bridge **compiles** your custom algorithm onto the pre-built VQE circuit. Only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate at up to 65 536 qubits.
+**Core principle:** plugins do *not* select a different quantum backend. The Algorithm Bridge **compiles** your custom algorithm onto the VQE execution substrate. Only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate. The number of qubits used per call scales with the problem's structural complexity (roughly `log₂(unique patterns)`), up to a hard ceiling of 65 536 qubits — most real workloads use far fewer.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -19,14 +19,49 @@ The **Extension & Plugin System** lets you ship your own quantum algorithms into
                                      │ parameter vector
                                      ▼
                 ┌─────────────────────────────────┐
-                │   L3 VQE Universal Substrate    │
-                │   (65 536-qubit circuit)        │
+                │   VQE Execution Substrate       │
+                │   (qubit width per call scales  │
+                │    with problem; ≤ 65 536 max)  │
                 └─────────────────────────────────┘
 ```
 
 **Source of truth:** [`nawaz1_dev/src/api/algorithm_bridge.rs`](../../../nawaz1_dev/src/api/algorithm_bridge.rs). All trait shapes, request/result types, and security primitives in this guide are taken directly from that file.
 
 **Base URL:** `http://localhost:8080`
+
+---
+
+## Qubit Allocation
+
+Plugins **do not** consume one qubit per data point. The `num_qubits` field in `PluginAlgorithmRequest` is a *structural* width — the engine encodes amplitudes into a register sized by the **information content** of the workload, not by raw row count.
+
+The rule of thumb is:
+
+```
+num_qubits ≈ ceil(log₂(unique_structural_patterns))
+```
+
+where `unique_structural_patterns` is the count of distinct values, buckets, table relations, partitions, or other structural slots your algorithm distinguishes — *not* the size of `input_data`.
+
+### Examples
+
+| Workload | Data points | Distinct patterns | Required qubits |
+|----------|-------------|-------------------|-----------------|
+| Average of 100 salaries | 100 | ~16 buckets | **4** |
+| Median over 10 K records | 10 000 | ~256 buckets | **8** |
+| Join order over 8 tables | 8 | 8! = 40 320 plans | **16** |
+| Partition pruning over 10 K partitions | 10 000 | 10 000 keep/skip | **14** |
+| Anomaly z-scan over 1 M samples | 1 000 000 | ~4 096 spectral bins | **12** |
+| Vector search over 1 B embeddings | 1 000 000 000 | ~65 K centroids | **16** |
+| Maximum capacity (hard ceiling) | — | up to 2⁶⁵⁵³⁶ patterns | **65 536** |
+
+The vast majority of real plugin requests fit in **8–20 qubits**. The 65 536-qubit ceiling exists for theoretical worst-case workloads such as universe-scale combinatorial search; you will almost never request anywhere close to it.
+
+### Practical guidance
+
+- Pick `num_qubits = ceil(log₂(distinct_patterns))`, then add 1–2 qubits of headroom for ancillas if your algorithm needs them.
+- Set `security_manifest().max_qubits_requested` to your **actual** ceiling, not 65 536. Over-declaring is treated as a security smell.
+- Never set `num_qubits` proportional to `input_data.len()` — that is the classical mental model and will exhaust the circuit-bounds checker on anything non-trivial.
 
 ---
 
@@ -200,7 +235,7 @@ pub struct PluginAlgorithmRequest {
 | `domain` | One of the 16 supported quantum domains. Must intersect `supported_domains()`. |
 | `parameters` | Free-form JSON parameter map. Validated for depth, entropy, and injection patterns. |
 | `num_qubits` | Logical qubit width requested for this run. Bounded by the manifest's `max_qubits_requested`. |
-| `input_data` | Raw amplitude vector. Treated as quantum amplitudes by the L3 substrate. |
+| `input_data` | Raw amplitude vector. Treated as quantum amplitudes by the VQE substrate. |
 
 ### `PluginAlgorithmResult`
 
@@ -476,7 +511,7 @@ impl AlgorithmPlugin for CustomVqePlugin {
             version: self.version().to_string(),
             author: "Quantum Plugin Authors".to_string(),
             description:
-                "Custom VQE variant compiling onto the L3 universal substrate.".to_string(),
+                "Custom VQE variant compiling onto the universal VQE substrate.".to_string(),
             supported_domains: self.supported_domains(),
             max_qubits: 16,
         }
@@ -582,7 +617,7 @@ impl AlgorithmPlugin for CustomQaoaOptimizer {
         let n = cost.len();
 
         // Greedy + QAOA-style refinement skeleton (real plugin compiles
-        // the cost Hamiltonian onto the L3 substrate via input_data).
+        // the cost Hamiltonian onto the VQE substrate via input_data).
         let mut assignment: Vec<usize> = (0..n).collect();
         let mut best_cost = f64::INFINITY;
         for _ in 0..self.layers {
@@ -655,7 +690,7 @@ let plugin = Arc::new(CustomQaoaOptimizer { layers: 8 });
 
 The plugin system supports integration with **any database, data lake, data warehouse, or time-series database**. Below are complete, working examples for each major category.
 
-> **How the integration works.** Plugins do **not** open network sockets to your database. Your application (or a sidecar extractor) pulls **statistics, schemas, workload patterns, or sampled signals** out of the database, encodes them as the `input_data: Vec<f64>` amplitude vector and `parameters: HashMap<String, Value>` in `PluginAlgorithmRequest`, and the plugin compiles that workload onto the L3 VQE substrate. The plugin returns optimised query plans, partition selections, materialised-view recommendations, anomaly scores, etc. — never raw rows.
+> **How the integration works.** Plugins do **not** open network sockets to your database. Your application (or a sidecar extractor) pulls **statistics, schemas, workload patterns, or sampled signals** out of the database, encodes them as the `input_data: Vec<f64>` amplitude vector and `parameters: HashMap<String, Value>` in `PluginAlgorithmRequest`, and the plugin compiles that workload onto the VQE substrate. The plugin returns optimised query plans, partition selections, materialised-view recommendations, anomaly scores, etc. — never raw rows.
 >
 > Treat each example as a template: swap the toy scoring functions for whatever cost model your storage system actually exposes.
 
@@ -724,7 +759,7 @@ impl AlgorithmPlugin for SqlQueryOptimizerPlugin {
         let tables = req.parameters["tables"].as_array().unwrap();
         let n = tables.len();
 
-        // Encode statistics as a quantum amplitude vector and let the L3 substrate
+        // Encode statistics as a quantum amplitude vector and let the VQE substrate
         // score every plan permutation in superposition. Here we model the
         // post-VQE classical readout: pick the lowest-cost join order.
         let stats = &req.input_data;
@@ -776,7 +811,7 @@ impl AlgorithmPlugin for SqlQueryOptimizerPlugin {
             author: "Storage Integrations".to_string(),
             description:
                 "Quantum query planner for PostgreSQL/MySQL/SQLite — join ordering, \
-                 index selection, cardinality on the L3 VQE substrate.".to_string(),
+                 index selection, cardinality on the VQE substrate.".to_string(),
             supported_domains: self.supported_domains(),
             max_qubits: 1024,
         }
@@ -902,9 +937,9 @@ impl AlgorithmPlugin for DataLakeOptimizerPlugin {
                          .and_then(|v| v.as_f64()).unwrap_or(1.0);
 
         // Quantum-style scan: keep partitions whose amplitude squared exceeds a
-        // threshold derived from the global L2 norm — i.e. probability mass.
-        let l2: f64 = profile.iter().map(|x| x * x).sum::<f64>().sqrt().max(1e-12);
-        let normalised: Vec<f64> = profile.iter().map(|x| x / l2).collect();
+        // threshold derived from the global Euclidean norm — i.e. probability mass.
+        let norm: f64 = profile.iter().map(|x| x * x).sum::<f64>().sqrt().max(1e-12);
+        let normalised: Vec<f64> = profile.iter().map(|x| x / norm).collect();
         let cutoff = 1.0 / (profile.len() as f64).sqrt() * 0.5;
         let kept: Vec<usize> = normalised.iter()
             .enumerate()
@@ -1436,7 +1471,7 @@ impl AlgorithmPlugin for GraphDatabasePlugin {
         let adj = &req.input_data;
 
         // Walk amplitudes for `depth` steps — surrogate for a Grover-style scan
-        // that the L3 substrate would actually perform.
+        // that the VQE substrate would actually perform.
         let mut visit = vec![0.0f64; n];
         visit[0] = 1.0;
         for _ in 0..depth {
@@ -1740,7 +1775,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/universal_db_connector/execute
 ### Operational notes for storage plugins
 
 - **Plugins receive pre-extracted data.** Your application is responsible for pulling stats/metadata out of the database; the plugin never opens a socket. This is why every example above declares `requires_network: false` and `requires_filesystem: false`.
-- **Encode statistics as amplitudes.** Normalise your numeric profile to a unit-norm `Vec<f64>` before passing it as `input_data` — the L3 substrate treats the vector as quantum amplitudes.
+- **Encode statistics as amplitudes.** Normalise your numeric profile to a unit-norm `Vec<f64>` before passing it as `input_data` — the VQE substrate treats the vector as quantum amplitudes.
 - **Keep parameter maps shallow.** Deep JSON triggers the input-validation stage's depth limiter; flatten nested config into top-level keys when possible.
 - **Use `Linear` for read-only optimisations**, `Quadratic` when you compare every workload pair (warehouse advisors), and `Polynomial` for graph or BYO dispatch.
 - **One storage backend, one plugin name** is the cleanest pattern. Use the universal connector only when you genuinely need a single registration point.
@@ -1807,7 +1842,7 @@ Status codes: `201` registered · `400` invalid manifest · `401` unauthenticate
       "name": "custom_vqe",
       "version": "1.0.0",
       "author": "Quantum Plugin Authors",
-      "description": "Custom VQE variant compiling onto the L3 universal substrate.",
+      "description": "Custom VQE variant compiling onto the universal VQE substrate.",
       "supported_domains": ["chemistry", "materials_science"],
       "max_qubits": 16,
       "trust_level": "Verified"
@@ -1889,7 +1924,7 @@ Status codes: `200` ok · `400` validation failed · `403` plugin quarantined ·
   "name": "custom_vqe",
   "version": "1.0.0",
   "author": "Quantum Plugin Authors",
-  "description": "Custom VQE variant compiling onto the L3 universal substrate.",
+  "description": "Custom VQE variant compiling onto the universal VQE substrate.",
   "supported_domains": ["chemistry", "materials_science"],
   "max_qubits": 16,
   "trust_level": "Verified",
@@ -2096,7 +2131,7 @@ The system automatically escalates the global `ThreatLevel` when violations accu
 ## FAQ
 
 **Q: Can I access the VQE engine directly from my plugin?**
-No — and you don't need to. The bridge already forwards `input_data` and `num_qubits` to the L3 universal substrate. Your job is to compile algorithm parameters; execution stays on the substrate.
+No — and you don't need to. The bridge already forwards `input_data` and `num_qubits` to the VQE universal substrate. Your job is to compile algorithm parameters; execution stays on the substrate.
 
 **Q: What happens during hot-reload?**
 The bridge holds plugins by `Arc<dyn AlgorithmPlugin>`. Replacing a plugin requires `unregister_plugin` followed by `register_plugin` — there is no in-place swap. In-flight executions complete against the previous `Arc`.
