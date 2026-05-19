@@ -110,30 +110,297 @@ For **65536 qubits**, you must provide **65536 amplitude values** in the `input_
 
 ## Input Data Types & How to Define Them
 
-The quantum engine accepts input data as a **flat array of 64-bit floating point numbers** (f64). Each value represents one amplitude in the quantum Hilbert space.
+The quantum engine accepts a wide variety of input data types. Data is automatically normalized to quantum amplitudes internally.
 
-### Supported Input Formats
+### Primary Data Types
 
-| Format | Type | Example |
-|--------|------|---------|
-| Normalized amplitudes | `f64[]` | `[0.001, -0.023, 0.045, ...]` |
-| Raw measurements | `f64[]` | Auto-normalized by engine |
-| Complex amplitudes (Re/Im interleaved) | `f64[]` | `[re₁, im₁, re₂, im₂, ...]` |
+| Type | Description | Size | Example |
+|------|-------------|------|---------|
+| `int` | Signed 64-bit integer | 8 bytes | `42`, `-1`, `1000000` |
+| `float` / `f64` | 64-bit floating point | 8 bytes | `3.14159`, `-273.15`, `1.23e-10` |
+| `bool` | Boolean | 1 byte | `true`, `false` |
+| `string` | UTF-8 text | Variable | `"hemoglobin"`, `"H2O"` |
+| `complex` | Complex number (re, im) | 16 bytes | `(0.707, 0.707)`, `(1.0, 0.0)` |
+| `timestamp` | Unix timestamp or ISO-8601 | 8 bytes | `"2026-05-19T12:00:00Z"` |
+| `blob` | Raw binary data | Variable | `b"\x00\xFF..."` |
+| `null` | Null/missing value | 0 bytes | `null`, `None` |
 
-### How to Prepare Your Data
+### Secondary / Composite Data Types
 
-1. **Collect your domain data** (molecular orbitals, financial time series, fluid grid points, etc.)
-2. **Convert to float array** — each data point becomes one f64 value
-3. **Ensure length is power of 2** — pad with zeros if needed (engine auto-pads)
-4. **For 65536 qubits**, provide exactly 65536 float values
+| Type | Description | Example |
+|------|-------------|---------|
+| `list` | Ordered sequence of same-type elements | `[1.0, 2.0, 3.0, 4.0]` |
+| `nested_list` | List of lists (multi-level) | `[[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]` |
+| `array` | Fixed-size numerical array (f64) | `[0.001, -0.023, 0.045, 0.012]` |
+| `nested_array` | Multi-dimensional array (2D, 3D, ND) | `[[[1,2],[3,4]], [[5,6],[7,8]]]` |
+| `dict` / `dictionary` | Key-value pairs (string keys) | `{"energy": 0.5, "spin": 1}` |
+| `nested_dict` | Dictionary with nested dictionaries | `{"molecule": {"name": "H2O", "bonds": 2}}` |
+| `tuple` | Fixed-size ordered collection | `(3.14, "pi", true)` |
+| `set` | Unordered unique elements | `{1, 2, 3, 4, 5}` |
+| `matrix` | 2D numerical matrix (rows × cols) | `[[1,0,0],[0,1,0],[0,0,1]]` |
+| `tensor` | N-dimensional numerical tensor | `shape: [4, 4, 4], data: [...]` |
+| `vector` | 1D numerical vector | `[0.1, 0.2, 0.3, ..., 0.9]` |
+| `sparse_matrix` | Sparse representation (row, col, val) | `[(0,0,1.0), (1,1,2.0), (2,2,3.0)]` |
+| `time_series` | Timestamped values | `[{"t": 0, "v": 1.2}, {"t": 1, "v": 1.5}]` |
+| `graph` | Nodes and edges | `{"nodes": [0,1,2], "edges": [[0,1],[1,2]]}` |
+| `dataframe` | Tabular data (columns × rows) | `{"col1": [1,2,3], "col2": [4,5,6]}` |
 
-### User-Defined Data Types (Paid Tier)
+### SDK Data Type Support (All Languages)
 
-Paid tier users can define custom data type mappings:
-- Custom struct serialization to amplitude arrays
-- Domain-specific encoding schemes
-- Batch processing of heterogeneous data types
-- Schema registry for reusable type definitions
+#### Python
+```python
+import numpy as np
+
+# Primary types
+input_int = 42
+input_float = 3.14159
+input_complex = complex(0.707, 0.707)
+input_string = "hemoglobin"
+
+# List
+input_list = [1.0, 2.0, 3.0, 4.0, 5.0]
+
+# Nested list
+input_nested_list = [
+    [0.1, 0.2, 0.3],
+    [0.4, 0.5, 0.6],
+    [0.7, 0.8, 0.9]
+]
+
+# NumPy array (recommended for large data)
+input_array = np.random.randn(65536).tolist()
+
+# Nested array (multi-dimensional)
+input_nested_array = np.random.randn(256, 256).tolist()
+
+# Dictionary
+input_dict = {
+    "molecule": "C6H12O6",
+    "energy": -1.234,
+    "bonds": 24
+}
+
+# Nested dictionary
+input_nested_dict = {
+    "system": {
+        "molecule": {"name": "hemoglobin", "atoms": 9672},
+        "parameters": {"temperature": 310.15, "pressure": 101.325},
+        "quantum": {"qubits": 65536, "depth": 100}
+    }
+}
+
+# Tuple
+input_tuple = (3.14, 2.718, 1.618)
+
+# DataFrame (via pandas)
+import pandas as pd
+df = pd.DataFrame({
+    "position": [0.1, 0.2, 0.3],
+    "momentum": [1.0, 2.0, 3.0],
+    "spin": [0.5, -0.5, 0.5]
+})
+input_dataframe = df.to_dict(orient="list")
+
+# Time series
+input_timeseries = [
+    {"timestamp": "2026-05-19T00:00:00Z", "value": 100.5},
+    {"timestamp": "2026-05-19T01:00:00Z", "value": 101.2},
+    {"timestamp": "2026-05-19T02:00:00Z", "value": 99.8}
+]
+
+# API call with any data type
+import requests
+payload = {
+    "domain": "chemistry",
+    "qubits": 65536,
+    "input_data": input_array,  # or any type above
+    "metadata": input_nested_dict
+}
+resp = requests.post("http://localhost:8080/api/v1/quantum/execute", json=payload)
+```
+
+#### Rust
+```rust
+use serde_json::json;
+
+// Primary types
+let input_int: i64 = 42;
+let input_float: f64 = 3.14159;
+let input_bool: bool = true;
+
+// Array / Vector
+let input_array: Vec<f64> = vec![0.001, -0.023, 0.045, 0.012];
+
+// Nested array (2D)
+let input_nested: Vec<Vec<f64>> = vec![
+    vec![1.0, 2.0, 3.0],
+    vec![4.0, 5.0, 6.0],
+    vec![7.0, 8.0, 9.0],
+];
+
+// Dictionary (HashMap)
+use std::collections::HashMap;
+let mut input_dict: HashMap<&str, f64> = HashMap::new();
+input_dict.insert("energy", -1.234);
+input_dict.insert("spin", 0.5);
+
+// Nested dictionary (JSON object)
+let input_nested_dict = json!({
+    "molecule": {
+        "name": "glucose",
+        "formula": "C6H12O6",
+        "atoms": 24
+    },
+    "parameters": {
+        "temperature": 298.15,
+        "solvent": "water"
+    }
+});
+
+// Tuple
+let input_tuple: (f64, f64, f64) = (3.14, 2.718, 1.618);
+
+// Full API payload
+let payload = json!({
+    "domain": "biology",
+    "qubits": 65536,
+    "input_data": input_array,
+    "metadata": input_nested_dict
+});
+```
+
+#### C++
+```cpp
+#include <vector>
+#include <map>
+#include <string>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
+// Primary types
+int64_t input_int = 42;
+double input_float = 3.14159;
+bool input_bool = true;
+
+// Array / Vector
+std::vector<double> input_array = {0.001, -0.023, 0.045, 0.012};
+
+// Nested array (2D vector)
+std::vector<std::vector<double>> input_nested = {
+    {1.0, 2.0, 3.0},
+    {4.0, 5.0, 6.0},
+    {7.0, 8.0, 9.0}
+};
+
+// Dictionary (map)
+std::map<std::string, double> input_dict = {
+    {"energy", -1.234},
+    {"spin", 0.5},
+    {"mass", 12.011}
+};
+
+// Nested dictionary (JSON)
+json input_nested_dict = {
+    {"molecule", {
+        {"name", "ethanol"},
+        {"formula", "C2H5OH"},
+        {"atoms", 9}
+    }},
+    {"quantum", {
+        {"qubits", 65536},
+        {"depth", 50}
+    }}
+};
+
+// Full payload
+json payload = {
+    {"domain", "chemistry"},
+    {"qubits", 65536},
+    {"input_data", input_array},
+    {"metadata", input_nested_dict}
+};
+```
+
+#### Julia
+```julia
+# Primary types
+input_int = 42
+input_float = 3.14159
+input_complex = 0.707 + 0.707im
+
+# Array
+input_array = randn(Float64, 65536)
+
+# Nested array (matrix)
+input_nested = [
+    1.0 2.0 3.0;
+    4.0 5.0 6.0;
+    7.0 8.0 9.0
+]
+
+# Dictionary
+input_dict = Dict(
+    "energy" => -1.234,
+    "spin" => 0.5,
+    "bonds" => 6
+)
+
+# Nested dictionary
+input_nested_dict = Dict(
+    "molecule" => Dict(
+        "name" => "caffeine",
+        "formula" => "C8H10N4O2",
+        "atoms" => 24
+    ),
+    "parameters" => Dict(
+        "temperature" => 300.0,
+        "pressure" => 101.325
+    )
+)
+
+# Tuple
+input_tuple = (3.14, 2.718, 1.618)
+
+# Set
+input_set = Set([1, 2, 3, 4, 5])
+
+# Named tuple (struct-like)
+input_named = (molecule="water", bonds=2, angle=104.5)
+
+# API call
+using HTTP, JSON3
+payload = Dict(
+    "domain" => "physics",
+    "qubits" => 65536,
+    "input_data" => collect(input_array),
+    "metadata" => input_nested_dict
+)
+resp = HTTP.post("http://localhost:8080/api/v1/quantum/execute",
+    ["Content-Type" => "application/json"],
+    JSON3.write(payload))
+```
+
+### Data Type Conversion Rules
+
+| Input Type | Engine Conversion | Notes |
+|-----------|-------------------|-------|
+| `int` / `float` | Direct f64 amplitude | Single value → 1 amplitude |
+| `list` / `array` | Each element → 1 amplitude | Length becomes qubit dimension |
+| `nested_list` | Flattened to 1D array | `[[1,2],[3,4]]` → `[1,2,3,4]` |
+| `dict` | Values extracted as amplitudes | Keys preserved in metadata |
+| `nested_dict` | Recursively flattened | Deep values become amplitude array |
+| `complex` | Re/Im interleaved | `(a+bi)` → `[a, b]` |
+| `matrix` | Row-major flattened | 256×256 → 65536 amplitudes |
+| `tensor` | Row-major flattened to 1D | All dimensions collapsed |
+| `string` | UTF-8 bytes → normalized floats | Each byte → amplitude |
+| `dataframe` | Column-major flattened | Each column concatenated |
+| `time_series` | Values extracted in time order | Timestamps stored in metadata |
+| `graph` | Adjacency matrix → flattened | N nodes → N×N amplitudes |
+| `sparse_matrix` | Expanded to dense, then flattened | Zero-filled |
+
+### Auto-Padding
+If your input length is not a power of 2, the engine automatically pads with zeros to the next power of 2. For maximum performance, provide exactly **65536** values.
 
 ---
 
