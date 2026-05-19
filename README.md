@@ -45,6 +45,37 @@
 
 ---
 
+## Binary Downloads
+
+Pre-compiled server binaries are included in the `bin/` directory:
+
+| Architecture | Path | Target | Supported CPUs |
+|-------------|------|--------|----------------|
+| **x86_64** | `bin/x86_64/nawaz1-server` | Intel/AMD 64-bit Linux | Intel TDX/SGX/Ultra 3,5,7,9 — AMD SEV/SEV-SNP/Ryzen 7,9 |
+| **ARM64** | `bin/arm64/nawaz1-server` | Apple Silicon Linux VM | Apple M1, M2, M3, M4, M5 series |
+
+### Quick Start
+
+```bash
+# For x86_64 (Intel/AMD):
+chmod +x bin/x86_64/nawaz1-server
+./bin/x86_64/nawaz1-server
+
+# For ARM64 (Apple M1–M5 Linux VM):
+chmod +x bin/arm64/nawaz1-server
+./bin/arm64/nawaz1-server
+```
+
+### Binary Details
+
+- **Build Date:** 2026-05-19
+- **Expiration:** 18 months (November 2027)
+- **Runtime:** 24/7 — No time restrictions
+- **Validation:** NTP internet time verification (cannot bypass)
+- **Built with:** Rust 1.95.0, Ubuntu 24.04
+
+---
+
 ## How Qubit Count Works (Amplitude Encoding)
 
 The VQE engine uses **amplitude encoding**: the number of qubits is determined by the **input data length**, not a forced parameter.
