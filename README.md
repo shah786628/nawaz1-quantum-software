@@ -402,6 +402,175 @@ resp = HTTP.post("http://localhost:8080/api/v1/quantum/execute",
 ### Auto-Padding
 If your input length is not a power of 2, the engine automatically pads with zeros to the next power of 2. For maximum performance, provide exactly **65536** values.
 
+### How Qubit Count is Calculated
+
+The engine automatically determines the number of qubits from your input data:
+
+```rust
+num_qubits = input_data.len().next_power_of_two()
+```
+
+| Input Length | Qubits Allocated | Explanation |
+|-------------|-----------------|-------------|
+| 1–2 | 2 | Minimum 1 qubit (2¹) |
+| 3–4 | 4 | 2 qubits (2²) |
+| 5–8 | 8 | 3 qubits (2³) |
+| 9–16 | 16 | 4 qubits (2⁴) |
+| 100 | 128 | 7 qubits (2⁷) |
+| 1000 | 1024 | 10 qubits (2¹⁰) |
+| 50000 | 65536 | 16 qubits (2¹⁶) — maximum free tier |
+| 65536 | 65536 | Exact fit — optimal performance |
+
+**Formula breakdown:**
+- `input_data.len()` — count of elements in your flattened amplitude array
+- `.next_power_of_two()` — rounds UP to nearest power of 2
+- Result determines the Hilbert space dimension: 2^n qubits
+
+**Examples:**
+```python
+# 100 stock prices → 128 amplitudes (7 qubits)
+data = [price for price in stock_prices[:100]]  # len=100 → 2⁷=128 qubits
+
+# 65536 molecular orbital values → exact 65536 (16 qubits)
+data = molecular_amplitudes[:65536]  # len=65536 → 2¹⁶=65536 qubits
+
+# 10000 sensor readings → 16384 amplitudes (14 qubits)
+data = sensor_readings[:10000]  # len=10000 → 2¹⁴=16384 qubits
+```
+
+**Best Practice:** Provide exactly 65536 values for maximum qubit utilization and optimal quantum accuracy.
+
+### Physical & Scientific Data Types
+
+The engine natively understands physical quantities with units:
+
+| Physical Type | Unit | Example | Use Case |
+|--------------|------|---------|----------|
+| `energy` | eV, Hartree, J, kcal/mol | `{"value": -1.234, "unit": "hartree"}` | Molecular energies, band gaps |
+| `temperature` | K, °C, °F | `{"value": 310.15, "unit": "K"}` | Thermodynamics, biological systems |
+| `pressure` | Pa, atm, bar | `{"value": 101325, "unit": "Pa"}` | Fluid dynamics, chemical reactions |
+| `length` | m, Å, nm, bohr | `{"value": 1.54, "unit": "angstrom"}` | Bond lengths, lattice constants |
+| `mass` | kg, amu, Da | `{"value": 55845, "unit": "amu"}` | Atomic/molecular mass |
+| `time` | s, fs, ps, ns | `{"value": 100, "unit": "fs"}` | Molecular dynamics, reaction rates |
+| `frequency` | Hz, THz, cm⁻¹ | `{"value": 3000, "unit": "cm-1"}` | Spectroscopy, phonons |
+| `charge` | e, C | `{"value": -2, "unit": "e"}` | Ions, electrochemistry |
+| `magnetic_field` | T, G, A/m | `{"value": 1.5, "unit": "tesla"}` | NMR, magnetism |
+| `angle` | rad, deg | `{"value": 109.5, "unit": "deg"}` | Bond angles, crystal geometry |
+| `velocity` | m/s, km/s | `{"value": 1500, "unit": "m/s"}` | Fluid flow, wave propagation |
+| `density` | kg/m³, g/cm³ | `{"value": 1000, "unit": "kg/m3"}` | Materials, fluids |
+| `voltage` | V, mV | `{"value": -0.07, "unit": "V"}` | Electrochemistry, neural signals |
+| `concentration` | mol/L, mM, μM | `{"value": 0.15, "unit": "mol/L"}` | Solutions, drug concentrations |
+| `wavefunction` | amplitude | `[0.707, 0.0, 0.707, 0.0]` | Quantum states directly |
+
+#### Physical Data Example (Python):
+```python
+# Molecular system with physical units
+payload = {
+    "domain": "chemistry",
+    "qubits": 65536,
+    "input_data": orbital_amplitudes,  # f64 array
+    "physical_context": {
+        "system": "caffeine_C8H10N4O2",
+        "temperature": {"value": 298.15, "unit": "K"},
+        "pressure": {"value": 1.0, "unit": "atm"},
+        "bond_lengths": [
+            {"atoms": ["C1", "C2"], "value": 1.40, "unit": "angstrom"},
+            {"atoms": ["C2", "N1"], "value": 1.38, "unit": "angstrom"}
+        ],
+        "total_energy": {"value": -680.45, "unit": "hartree"},
+        "basis_set": "cc-pVTZ"
+    }
+}
+```
+
+### User-Defined Data Types (UDT)
+
+Define your own custom data types with specific encoding rules for domain-specific applications:
+
+#### Defining a Custom Type
+```python
+# Register a custom data type
+custom_type = {
+    "type_name": "protein_structure",
+    "version": "1.0",
+    "fields": [
+        {"name": "residue_id", "type": "int", "encoding": "ordinal"},
+        {"name": "x_coord", "type": "float", "encoding": "direct"},
+        {"name": "y_coord", "type": "float", "encoding": "direct"},
+        {"name": "z_coord", "type": "float", "encoding": "direct"},
+        {"name": "residue_type", "type": "string", "encoding": "one_hot", "categories": 20},
+        {"name": "secondary_structure", "type": "string", "encoding": "categorical", 
+         "values": ["helix", "sheet", "coil"]},
+        {"name": "b_factor", "type": "float", "encoding": "normalized"},
+        {"name": "occupancy", "type": "float", "encoding": "direct"}
+    ],
+    "flatten_order": "row_major",
+    "padding": "auto_power_of_two"
+}
+
+# Register the type
+resp = requests.post("http://localhost:8080/api/v1/types/register", json=custom_type)
+type_id = resp.json()["type_id"]
+```
+
+#### Using a Custom Type
+```python
+# Use your registered type in a quantum execution
+protein_data = [
+    {"residue_id": 1, "x_coord": 12.5, "y_coord": 8.3, "z_coord": 15.2,
+     "residue_type": "ALA", "secondary_structure": "helix", 
+     "b_factor": 15.3, "occupancy": 1.0},
+    {"residue_id": 2, "x_coord": 13.1, "y_coord": 9.0, "z_coord": 14.8,
+     "residue_type": "GLY", "secondary_structure": "helix",
+     "b_factor": 12.1, "occupancy": 1.0},
+    # ... more residues
+]
+
+payload = {
+    "domain": "biology",
+    "qubits": 65536,
+    "input_type": type_id,  # Use your custom type
+    "input_data": protein_data,
+    "metadata": {"protein": "hemoglobin", "chain": "A"}
+}
+resp = requests.post("http://localhost:8080/api/v1/quantum/execute", json=payload)
+```
+
+#### UDT Encoding Strategies
+
+| Encoding | Description | Best For |
+|----------|-------------|----------|
+| `direct` | Value used as-is (f64) | Coordinates, energies, amplitudes |
+| `normalized` | Min-max scaled to [0, 1] | B-factors, scores, percentages |
+| `one_hot` | Category → binary vector | Residue types, element types |
+| `categorical` | Category → integer index | Enum-like fields |
+| `ordinal` | Sequential integer encoding | IDs, positions, ranks |
+| `log_scale` | log₂(value) encoding | Frequencies, concentrations |
+| `phase` | Map to [0, 2π] phase angle | Angles, cyclic quantities |
+| `binary` | Bit-level encoding | Flags, binary properties |
+
+#### UDT Composition (Nested Types)
+```python
+# Compose types from other types
+molecular_system_type = {
+    "type_name": "molecular_system",
+    "fields": [
+        {"name": "atoms", "type": "protein_structure", "is_array": True},
+        {"name": "bonds", "type": "custom:bond_type", "is_array": True},
+        {"name": "global_energy", "type": "float"},
+        {"name": "charge_distribution", "type": "array", "element_type": "float"},
+        {"name": "metadata", "type": "dict"}
+    ]
+}
+```
+
+#### UDT API Endpoints
+- `POST /api/v1/types/register` — Register new custom type
+- `GET /api/v1/types/list` — List all registered types
+- `GET /api/v1/types/<type_id>` — Get type definition
+- `DELETE /api/v1/types/<type_id>` — Remove a type
+- `POST /api/v1/types/validate` — Validate data against a type
+
 ---
 
 ## Runtime
