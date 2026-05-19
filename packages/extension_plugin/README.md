@@ -4,7 +4,7 @@
 
 The **Extension & Plugin System** lets you ship your own quantum algorithms into the running engine without forking the codebase. Plugins are first-class Rust types that implement a single trait, get vetted by a **multi-layer security validation pipeline**, and then run on the same universal **VQE execution substrate** that powers every built-in domain.
 
-**Core principle:** plugins do *not* select a different quantum backend. The Algorithm Bridge **compiles** your custom algorithm onto the VQE execution substrate. Only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate. The number of qubits used per call is determined by the **complexity of the problem being solved**: simple aggregates need only a handful of qubits, while complex quantum simulations, molecular dynamics, and large-scale optimisation legitimately require thousands — up to the engine's full ceiling of 65 536 qubits. The engine supports that ceiling precisely because real-world problems demand it.
+**Core principle:** plugins do *not* select a different quantum backend, **and they do not choose qubit counts either**. The Algorithm Bridge **compiles** your custom algorithm onto the VQE execution substrate; only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate. The number of qubits used per call is **auto-selected by the engine's internal `QubitManager`** from your `input_data` — via Born normalization, Shannon-entropy complexity analysis, element count, and bond-dimension requirements — up to the engine's ceiling of 65 536 qubits. Plugins just hand over meaningful amplitude data; the engine handles qubit allocation, normalization, and quantum state preparation automatically.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -20,8 +20,8 @@ The **Extension & Plugin System** lets you ship your own quantum algorithms into
                                      ▼
                 ┌─────────────────────────────────┐
                 │   VQE Execution Substrate       │
-                │   (qubit width per call scales  │
-                │    with problem; ≤ 65 536 max)  │
+                │   (engine auto-selects qubit    │
+                │    width per call; ≤ 65 536)    │
                 └─────────────────────────────────┘
 ```
 
@@ -33,25 +33,20 @@ The **Extension & Plugin System** lets you ship your own quantum algorithms into
 
 ## Qubit Allocation
 
-Qubit count is determined by **problem complexity**, not raw data size.
+**You do not select qubits.** The quantum engine automatically determines the optimal qubit count for your problem.
 
-**Key principle:** one data point does NOT equal one qubit. The engine allocates qubits based on the structural complexity of the computation being performed.
+When your plugin provides `input_data`, the engine:
 
-| Problem Type | Typical Qubits | Reason |
-|---|---|---|
-| Simple statistics (average, sum, count) on salary data | 4–16 | Operation structure is simple regardless of data volume |
-| Database query optimization | 8–32 | Scales with query plan complexity |
-| Financial portfolio optimization | 16–64 | Scales with asset correlations and constraints |
-| Molecular simulation (small molecule) | 4–32 | Scales with electron orbital count |
-| Materials science / protein folding | 64–512 | Scales with atomic interaction complexity |
-| Full molecular dynamics (drug discovery) | 256–4096 | Scales with molecular system size |
-| Universe-scale combinatorial optimization | 4096–65 536 | Maximum complexity problems |
+1. **Normalizes** the data to a valid quantum state (Born normalization, ‖ψ‖₂ = 1).
+2. **Analyzes complexity** via Shannon entropy measurement on the normalized amplitudes.
+3. **Evaluates** element count, bond-dimension requirements, and entanglement structure.
+4. **Auto-selects** the optimal qubit width from these factors (the internal `QubitManager` takes the maximum of the three lower bounds, capped at the engine's ceiling of 65 536 qubits).
 
-**The engine supports up to 65 536 qubits because real-world problems demand it.** Complex quantum simulations, molecular dynamics, and large-scale optimization problems require thousands of qubits — and the engine is designed to handle them.
+The `num_qubits` field in `PluginAlgorithmRequest` is **advisory only** — the engine's internal `QubitManager` makes the final decision and will override it whenever its analysis demands a different width. Setting it to `0` (or any reasonable default) is fine; the engine will pick the right number regardless.
 
-In your plugin, set `num_qubits` in the request based on the **complexity of the problem your algorithm solves** — not based on how many data points you have. A 10-million-row aggregate and a 10-row aggregate use the same qubit count; a 30-atom molecular dynamics run and a 3-atom one do not.
+The `max_qubits_requested` field in `PluginSecurityManifest` is a **security cap**, not an allocation. It declares the upper bound your plugin is allowed to consume so the bridge can refuse runs that would exceed your declared budget — set it honestly to the largest width your most complex use case could legitimately need.
 
-In your `PluginSecurityManifest`, set `max_qubits_requested` to the maximum your algorithm could need for its most complex use case. Declare it honestly — under-declaring causes runtime kills when a hard problem arrives.
+**Your job as a plugin author:** provide meaningful amplitude data in `input_data`. The engine handles qubit allocation, normalization, and quantum state preparation automatically.
 
 ---
 
@@ -152,7 +147,8 @@ fn main() -> Result<(), String> {
         algorithm_name: "hello".to_string(),
         domain: "mathematics".to_string(),
         parameters: HashMap::new(),
-        num_qubits: 8,
+        // Engine auto-selects optimal qubits from input_data; this field is advisory only.
+        num_qubits: 0,
         input_data: vec![1.0, 2.0, 3.0, 4.0],
     };
     let result = bridge.execute_plugin("hello_plugin", &req)?;
@@ -224,7 +220,7 @@ pub struct PluginAlgorithmRequest {
 | `algorithm_name` | Logical name selected by the caller (the plugin can ignore or branch on it). |
 | `domain` | One of the 16 supported quantum domains. Must intersect `supported_domains()`. |
 | `parameters` | Free-form JSON parameter map. Validated for depth, entropy, and injection patterns. |
-| `num_qubits` | Logical qubit width requested for this run. Bounded by the manifest's `max_qubits_requested`. |
+| `num_qubits` | **Advisory hint only — the engine's internal `QubitManager` auto-selects the optimal qubit width** from `input_data` (Born normalization → Shannon entropy → element count → bond-dimension requirements) and will override this value whenever its analysis demands a different width. Setting it to `0` is fine. The actual width is still bounded by the manifest's `max_qubits_requested` security cap. |
 | `input_data` | Raw amplitude vector. Treated as quantum amplitudes by the VQE substrate. |
 
 ### `PluginAlgorithmResult`
@@ -281,7 +277,7 @@ pub struct PluginSecurityManifest {
 | `requires_network` / `requires_filesystem` / `requires_gpu` | Capabilities you are requesting. Untrusted plugins that declare `true` are auto-quarantined on first execution. |
 | `max_memory_mib` | Soft cap. Runtime monitoring detects `MemoryBombDetected`. |
 | `max_execution_time_ms` | Hard cap. The sandbox raises `ExecutionTimeout` once exceeded. |
-| `max_qubits_requested` | Bounded by the bridge-wide `max_qubits_limit` (default 8192 strict, 65 536 permissive). |
+| `max_qubits_requested` | **Security cap, not an allocation.** Upper bound the plugin is permitted to consume; the bridge refuses runs that would exceed it. The engine still auto-selects the actual width internally — this field only sets the ceiling. Bounded by the bridge-wide `max_qubits_limit` (default 8192 strict, 65 536 permissive). |
 | `declared_complexity_class` | Used by the circuit-bounds checker to pick gate-count limits. |
 | `data_access_scope` | The plugin's contract about what data it reads. Cross-checked at the request layer. |
 
@@ -443,9 +439,9 @@ impl AlgorithmPlugin for CustomVqePlugin {
         if req.input_data.iter().any(|a| !a.is_finite()) {
             return Err("input_data contains NaN or Inf".into());
         }
-        if req.num_qubits == 0 || req.num_qubits > 16 {
-            return Err(format!("num_qubits {} outside [1,16]", req.num_qubits));
-        }
+        // Note: do NOT validate `req.num_qubits` here — it is an advisory hint;
+        // the engine's internal QubitManager auto-selects the actual qubit width
+        // from input_data (Born normalization → Shannon entropy → bond dimension).
         Ok(())
     }
 
@@ -540,7 +536,8 @@ fn main() -> Result<(), String> {
         algorithm_name: "custom_vqe".to_string(),
         domain: "chemistry".to_string(),
         parameters: HashMap::new(),
-        num_qubits: 4,
+        // Engine auto-selects optimal qubits from input_data; this field is advisory only.
+        num_qubits: 0,
         input_data: amps,
     };
     let res = bridge.execute_plugin("custom_vqe", &req)?;
@@ -847,7 +844,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/sql_query_optimizer/execute `
       "tables": ["users", "orders"],
       "join_predicates": [["users.id", "orders.user_id"]]
     },
-    "num_qubits": 16,
+    "num_qubits": 0,
     "input_data": [125000.0, 9800000.0]
   }'
 ```
@@ -1014,7 +1011,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/data_lake_optimizer/execute `
       "file_format": "parquet",
       "sampling_rate": 0.05
     },
-    "num_qubits": 20,
+    "num_qubits": 0,
     "input_data": [0.12, 0.05, 0.91, 0.83, 0.04, 0.02, 0.77, 0.10]
   }'
 ```
@@ -1182,7 +1179,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/data_warehouse_optimizer/execu
       ],
       "schemas": ["positions", "trades", "instruments", "market_data"]
     },
-    "num_qubits": 24,
+    "num_qubits": 0,
     "input_data": [4200.0, 1800.0, 9600.0, 120.0]
   }'
 ```
@@ -1372,7 +1369,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/timeseries_analytics/execute `
       "resolution": "10s",
       "aggregation": "mean"
     },
-    "num_qubits": 16,
+    "num_qubits": 0,
     "input_data": [42.1, 41.9, 43.0, 42.5, 44.1, 43.8, 44.2, 99.7, 43.3, 42.9, 43.1, 42.6]
   }'
 ```
@@ -1558,7 +1555,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/graph_database_optimizer/execu
       "traversal_depth": 4,
       "node_filters": [{ "label": "Warehouse" }, { "label": "Customer" }]
     },
-    "num_qubits": 32,
+    "num_qubits": 0,
     "input_data": [
       0.0, 0.6, 0.4, 0.0,
       0.0, 0.0, 0.5, 0.5,
@@ -1737,7 +1734,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/universal_db_connector/execute
       "operation": "search",
       "config": { "endpoint": "https://vec.internal", "collection": "embeddings_v3" }
     },
-    "num_qubits": 16,
+    "num_qubits": 0,
     "input_data": [0.10, 0.42, 0.71, 0.18, 0.09, 0.05]
   }'
 ```
@@ -1869,7 +1866,7 @@ curl -X DELETE http://localhost:8080/api/v1/plugins/custom_vqe `
   "algorithm_name": "custom_vqe",
   "domain": "chemistry",
   "parameters": { "theta": [0.1, 0.2, 0.3] },
-  "num_qubits": 4,
+  "num_qubits": 0,
   "input_data": [1.0, 0.0, 0.0, 0.0]
 }
 ```
@@ -1901,7 +1898,7 @@ curl -X DELETE http://localhost:8080/api/v1/plugins/custom_vqe `
 ```powershell
 curl -X POST http://localhost:8080/api/v1/plugins/custom_vqe/execute `
   -H "Content-Type: application/json" `
-  -d '{ "algorithm_name":"custom_vqe","domain":"chemistry","parameters":{},"num_qubits":4,"input_data":[1.0,0.0,0.0,0.0] }'
+  -d '{ "algorithm_name":"custom_vqe","domain":"chemistry","parameters":{},"num_qubits":0,"input_data":[1.0,0.0,0.0,0.0] }'
 ```
 
 Status codes: `200` ok · `400` validation failed · `403` plugin quarantined · `408` timeout · `429` rate limited · `503` global threat-level lockdown.
