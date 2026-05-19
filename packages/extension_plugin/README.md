@@ -4,7 +4,7 @@
 
 The **Extension & Plugin System** lets you ship your own quantum algorithms into the running engine without forking the codebase. Plugins are first-class Rust types that implement a single trait, get vetted by a **multi-layer security validation pipeline**, and then run on the same universal **VQE execution substrate** that powers every built-in domain.
 
-**Core principle:** plugins do *not* select a different quantum backend. The Algorithm Bridge **compiles** your custom algorithm onto the VQE execution substrate. Only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate. The number of qubits used per call scales with the problem's structural complexity (roughly `log₂(unique patterns)`), up to a hard ceiling of 65 536 qubits — most real workloads use far fewer.
+**Core principle:** plugins do *not* select a different quantum backend. The Algorithm Bridge **compiles** your custom algorithm onto the VQE execution substrate. Only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate. The number of qubits used per call is determined by the **complexity of the problem being solved**: simple aggregates need only a handful of qubits, while complex quantum simulations, molecular dynamics, and large-scale optimisation legitimately require thousands — up to the engine's full ceiling of 65 536 qubits. The engine supports that ceiling precisely because real-world problems demand it.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -33,35 +33,25 @@ The **Extension & Plugin System** lets you ship your own quantum algorithms into
 
 ## Qubit Allocation
 
-Plugins **do not** consume one qubit per data point. The `num_qubits` field in `PluginAlgorithmRequest` is a *structural* width — the engine encodes amplitudes into a register sized by the **information content** of the workload, not by raw row count.
+Qubit count is determined by **problem complexity**, not raw data size.
 
-The rule of thumb is:
+**Key principle:** one data point does NOT equal one qubit. The engine allocates qubits based on the structural complexity of the computation being performed.
 
-```
-num_qubits ≈ ceil(log₂(unique_structural_patterns))
-```
+| Problem Type | Typical Qubits | Reason |
+|---|---|---|
+| Simple statistics (average, sum, count) on salary data | 4–16 | Operation structure is simple regardless of data volume |
+| Database query optimization | 8–32 | Scales with query plan complexity |
+| Financial portfolio optimization | 16–64 | Scales with asset correlations and constraints |
+| Molecular simulation (small molecule) | 4–32 | Scales with electron orbital count |
+| Materials science / protein folding | 64–512 | Scales with atomic interaction complexity |
+| Full molecular dynamics (drug discovery) | 256–4096 | Scales with molecular system size |
+| Universe-scale combinatorial optimization | 4096–65 536 | Maximum complexity problems |
 
-where `unique_structural_patterns` is the count of distinct values, buckets, table relations, partitions, or other structural slots your algorithm distinguishes — *not* the size of `input_data`.
+**The engine supports up to 65 536 qubits because real-world problems demand it.** Complex quantum simulations, molecular dynamics, and large-scale optimization problems require thousands of qubits — and the engine is designed to handle them.
 
-### Examples
+In your plugin, set `num_qubits` in the request based on the **complexity of the problem your algorithm solves** — not based on how many data points you have. A 10-million-row aggregate and a 10-row aggregate use the same qubit count; a 30-atom molecular dynamics run and a 3-atom one do not.
 
-| Workload | Data points | Distinct patterns | Required qubits |
-|----------|-------------|-------------------|-----------------|
-| Average of 100 salaries | 100 | ~16 buckets | **4** |
-| Median over 10 K records | 10 000 | ~256 buckets | **8** |
-| Join order over 8 tables | 8 | 8! = 40 320 plans | **16** |
-| Partition pruning over 10 K partitions | 10 000 | 10 000 keep/skip | **14** |
-| Anomaly z-scan over 1 M samples | 1 000 000 | ~4 096 spectral bins | **12** |
-| Vector search over 1 B embeddings | 1 000 000 000 | ~65 K centroids | **16** |
-| Maximum capacity (hard ceiling) | — | up to 2⁶⁵⁵³⁶ patterns | **65 536** |
-
-The vast majority of real plugin requests fit in **8–20 qubits**. The 65 536-qubit ceiling exists for theoretical worst-case workloads such as universe-scale combinatorial search; you will almost never request anywhere close to it.
-
-### Practical guidance
-
-- Pick `num_qubits = ceil(log₂(distinct_patterns))`, then add 1–2 qubits of headroom for ancillas if your algorithm needs them.
-- Set `security_manifest().max_qubits_requested` to your **actual** ceiling, not 65 536. Over-declaring is treated as a security smell.
-- Never set `num_qubits` proportional to `input_data.len()` — that is the classical mental model and will exhaust the circuit-bounds checker on anything non-trivial.
+In your `PluginSecurityManifest`, set `max_qubits_requested` to the maximum your algorithm could need for its most complex use case. Declare it honestly — under-declaring causes runtime kills when a hard problem arrives.
 
 ---
 
@@ -857,7 +847,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/sql_query_optimizer/execute `
       "tables": ["users", "orders"],
       "join_predicates": [["users.id", "orders.user_id"]]
     },
-    "num_qubits": 8,
+    "num_qubits": 16,
     "input_data": [125000.0, 9800000.0]
   }'
 ```
@@ -1024,7 +1014,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/data_lake_optimizer/execute `
       "file_format": "parquet",
       "sampling_rate": 0.05
     },
-    "num_qubits": 12,
+    "num_qubits": 20,
     "input_data": [0.12, 0.05, 0.91, 0.83, 0.04, 0.02, 0.77, 0.10]
   }'
 ```
@@ -1192,7 +1182,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/data_warehouse_optimizer/execu
       ],
       "schemas": ["positions", "trades", "instruments", "market_data"]
     },
-    "num_qubits": 10,
+    "num_qubits": 24,
     "input_data": [4200.0, 1800.0, 9600.0, 120.0]
   }'
 ```
@@ -1382,7 +1372,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/timeseries_analytics/execute `
       "resolution": "10s",
       "aggregation": "mean"
     },
-    "num_qubits": 10,
+    "num_qubits": 16,
     "input_data": [42.1, 41.9, 43.0, 42.5, 44.1, 43.8, 44.2, 99.7, 43.3, 42.9, 43.1, 42.6]
   }'
 ```
@@ -1568,7 +1558,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/graph_database_optimizer/execu
       "traversal_depth": 4,
       "node_filters": [{ "label": "Warehouse" }, { "label": "Customer" }]
     },
-    "num_qubits": 16,
+    "num_qubits": 32,
     "input_data": [
       0.0, 0.6, 0.4, 0.0,
       0.0, 0.0, 0.5, 0.5,
@@ -1747,7 +1737,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/universal_db_connector/execute
       "operation": "search",
       "config": { "endpoint": "https://vec.internal", "collection": "embeddings_v3" }
     },
-    "num_qubits": 12,
+    "num_qubits": 16,
     "input_data": [0.10, 0.42, 0.71, 0.18, 0.09, 0.05]
   }'
 ```
