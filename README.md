@@ -585,34 +585,169 @@ molecular_system_type = {
 
 ### Algorithm Selection & Algorithm Bridge
 
-> **Users specify which quantum algorithm to use.** The Algorithm Bridge then compiles that algorithm onto the pre-built VQE execution substrate.
->
-> The VQE circuit is a **universal execution substrate** — the Algorithm Bridge can compile ANY quantum algorithm to run on it. The VQE circuit itself is **not** the algorithm for every domain; it is the hardware-optimized runtime that every algorithm executes on.
->
-> | Domain | Algorithm (User Specifies) | Bridge Compiles To |
-> |--------|---------------------------|-------------------|
-> | Chemistry | `"algorithm": "vqe"` | Native VQE execution |
-> | Finance (portfolio / trading) | `"algorithm": "qaoa"` | QAOA → VQE substrate |
-> | Finance (risk / Monte Carlo) | `"algorithm": "monte_carlo"` | MC → VQE substrate |
-> | Linear Algebra | `"algorithm": "hhl"` | HHL → VQE substrate |
-> | Search | `"algorithm": "grover"` | Grover → VQE substrate |
-> | Fourier Analysis / Fluid Mechanics / Graphics / Heat Transfer | `"algorithm": "qft"` | QFT → VQE substrate |
-> | Physics (ground state) | `"algorithm": "qpe"` | QPE → VQE substrate |
-> | Physics (dynamics) | `"algorithm": "dmrg"` | DMRG → VQE substrate |
-> | Real-Time / Time Evolution | `"algorithm": "trotter"` | Trotter → VQE substrate |
-> | Optimization / Logistics | `"algorithm": "qaoa"` | QAOA → VQE substrate |
-> | Machine Learning | `"algorithm": "qnn"` | QNN → VQE substrate |
-> | Biology / Materials Science | `"algorithm": "vqe"` | Native VQE execution |
-> | Error Mitigation | `"algorithm": "zne"` | ZNE → VQE substrate |
->
-> **How the Algorithm Bridge works:**
-> 1. The user specifies `domain` + `algorithm` in the request.
-> 2. The Algorithm Bridge receives the selected algorithm.
-> 3. The Bridge compiles the algorithm into parameter vectors for the VQE circuit.
-> 4. The pre-built VQE substrate executes with those parameters.
-> 5. Results are returned.
->
-> This makes the engine **universal** — any quantum algorithm runs on the same hardware-optimized VQE circuit. The MoE router only routes the request to the correct domain handler; it does **not** select the algorithm. Algorithm choice is the user's responsibility, not the engine's.
+> ⚠️ **CRITICAL: You MUST select the correct algorithm for your problem.**  
+> **Selecting the wrong algorithm will produce incorrect results.**  
+> Read the algorithm list carefully and choose the one that matches your problem type.
+
+The quantum engine provides a **pre-built VQE execution substrate**. The **Algorithm Bridge** compiles your selected algorithm onto this substrate — making the engine universal.
+
+**You specify the algorithm. The Algorithm Bridge handles compilation to VQE.**
+
+---
+
+### Complete Algorithm Reference (62 Algorithms)
+
+#### Category 1: Variational Algorithms
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Variational Quantum Eigensolver | `vqe` | Ground state energy, molecular Hamiltonians, chemistry |
+| Quantum Approximate Optimization | `qaoa` | Combinatorial optimization, portfolio, scheduling, routing |
+| Variational Quantum Simulation | `vqs` | Real/imaginary time evolution of quantum systems |
+| Quantum Natural Gradient | `qng` | Variational parameter optimization with Fisher metric |
+| Rotosolve | `rotosolve` | Analytical minimization of variational circuits |
+
+#### Category 2: Quantum Phase & Eigenvalue
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Quantum Phase Estimation | `qpe` | Energy eigenvalues, ground state computation, physics |
+| Iterative Phase Estimation | `iqpe` | Resource-efficient phase estimation |
+| Quantum Power Method | `qpm` | Dominant eigenvalue extraction |
+| Quantum Singular Value Decomposition | `qsvd` | Matrix decomposition, PCA, dimensionality reduction |
+| Quantum Principal Component Analysis | `qpca` | Data compression, feature extraction |
+
+#### Category 3: Quantum Fourier & Transform
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Quantum Fourier Transform | `qft` | Frequency analysis, spectral methods, fluid dynamics, signals |
+| Inverse Quantum Fourier Transform | `iqft` | Inverse frequency domain problems |
+| Quantum Wavelet Transform | `qwt` | Multi-resolution analysis, image processing |
+| Quantum Hadamard Transform | `qht` | Boolean analysis, error correction preprocessing |
+
+#### Category 4: Quantum Search & Sampling
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Grover Search | `grover` | Unstructured search, database lookup, SAT problems |
+| Quantum Amplitude Estimation | `qae` | Monte Carlo speedup, integration, option pricing |
+| Quantum Monte Carlo | `monte_carlo` | Statistical sampling, risk analysis, integration |
+| Quantum Amplitude Amplification | `qaa` | Boosting success probability of quantum subroutines |
+| Quantum Walk | `quantum_walk` | Graph problems, spatial search, network analysis |
+
+#### Category 5: Linear Algebra & Systems
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Harrow-Hassidim-Lloyd (HHL) | `hhl` | Linear systems Ax=b, differential equations |
+| Quantum Linear Solver | `qls` | Sparse linear systems with quantum speedup |
+| Quantum Matrix Inversion | `qmi` | Matrix inversion, regression |
+| Quantum LU Decomposition | `qlu` | Direct linear system solving |
+| Block Encoding | `block_encoding` | Quantum signal processing, matrix arithmetic |
+
+#### Category 6: Quantum Simulation & Dynamics
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Trotter-Suzuki Evolution | `trotter` | Real-time quantum dynamics, Hamiltonian simulation |
+| DMRG (Density Matrix RG) | `dmrg` | 1D strongly correlated systems, ground states |
+| Time-Evolving Block Decimation | `tebd` | 1D quantum lattice time evolution |
+| Quantum Lanczos | `lanczos` | Low-lying eigenvalues, spectroscopy |
+| Krylov Subspace Methods | `krylov` | Sparse Hamiltonian evolution |
+
+#### Category 7: Quantum Machine Learning
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Quantum Neural Network | `qnn` | Classification, regression, pattern recognition |
+| Quantum Support Vector Machine | `qsvm` | Classification with kernel methods |
+| Quantum k-Means | `qkmeans` | Clustering, unsupervised learning |
+| Quantum Boltzmann Machine | `qbm` | Generative models, distribution learning |
+| Quantum Kernel Estimation | `qke` | Feature map learning, similarity metrics |
+| Quantum Transfer Learning | `qtl` | Domain adaptation, few-shot learning |
+
+#### Category 8: Error Mitigation & Correction
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Zero-Noise Extrapolation | `zne` | Noise mitigation by extrapolating to zero noise |
+| Probabilistic Error Cancellation | `pec` | Quasi-probability error cancellation |
+| Clifford Data Regression | `cdr` | Training-based error mitigation |
+| Symmetry Verification | `symmetry_verify` | Detecting errors via symmetry checks |
+| Quantum Error Correction (Steane) | `steane` | Full error correction (7-qubit) |
+
+#### Category 9: Quantum Cryptography & Security
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Quantum Key Distribution | `qkd` | Secure key exchange |
+| Quantum Random Number Generation | `qrng` | True randomness, cryptographic seeds |
+| Shor's Algorithm | `shor` | Integer factorization |
+| Quantum Digital Signature | `qds` | Message authentication |
+
+#### Category 10: Tensor Network Methods
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Matrix Product State | `mps` | 1D quantum systems, area-law entanglement |
+| Multi-scale Entanglement RG | `mera` | Critical systems, scale-invariant problems |
+| Projected Entangled Pair States | `peps` | 2D quantum systems, lattice models |
+| Tree Tensor Network | `ttn` | Hierarchical systems, molecular simulations |
+| Tensor Train Decomposition | `tensor_train` | High-dimensional function approximation |
+
+#### Category 11: Classical-Quantum Hybrid
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Coupled Cluster (CCSD) | `ccsd` | High-accuracy molecular chemistry |
+| Quantum-Classical Neural ODE | `qnode` | Differential equation learning |
+| Quantum Belief Propagation | `qbp` | Graphical models, Bayesian inference |
+| Quantum Semidefinite Programming | `qsdp` | Convex optimization, relaxations |
+| Quantum Interior Point | `qip` | Convex optimization, linear programming |
+
+#### Category 12: Specialized Quantum Algorithms
+| Algorithm | Key | Best For |
+|-----------|-----|----------|
+| Quantum Counting | `quantum_count` | Counting solutions to search problems |
+| Quantum Mean Estimation | `qme` | Statistical mean with quantum speedup |
+| Quantum Gradient Descent | `qgd` | Parameter optimization in quantum circuits |
+| Bernstein-Vazirani | `bv` | Finding hidden linear functions |
+| Simon's Algorithm | `simon` | Finding hidden periods |
+| Quantum Topological Data Analysis | `qtda` | Persistent homology, topological features |
+| Quantum Metropolis Sampling | `metropolis` | Thermal state preparation, MCMC |
+| Quantum Gibbs Sampling | `gibbs` | Thermal equilibrium states, partition functions |
+
+---
+
+### Algorithm Selection Guide
+
+> **Wrong algorithm = wrong results.** Match your problem to the correct algorithm:
+
+| My Problem | Use This Algorithm |
+|-----------|-------------------|
+| Finding lowest energy of a molecule | `vqe` |
+| Optimizing a portfolio / routing problem | `qaoa` |
+| Solving linear system Ax = b | `hhl` |
+| Frequency/spectral analysis | `qft` |
+| Searching unsorted data | `grover` |
+| Statistical sampling / Monte Carlo | `monte_carlo` |
+| Physics time evolution | `trotter` |
+| 1D strongly correlated electrons | `dmrg` |
+| Neural network / classification | `qnn` |
+| Reducing noise in results | `zne` |
+| High-accuracy molecular chemistry | `ccsd` |
+| 2D lattice quantum system | `peps` |
+| Quantum key distribution | `qkd` |
+| Integer factorization | `shor` |
+
+---
+
+### Request Format
+
+```json
+{
+  "domain": "finance",
+  "algorithm": "qaoa",
+  "qubits": 65536,
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "portfolio",
+    "task": "optimization"
+  }
+}
+```
+
+The Algorithm Bridge compiles your selected algorithm onto the VQE execution substrate automatically.
 
 ---
 
