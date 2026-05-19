@@ -1,6 +1,6 @@
 # Nawaz1 Quantum VQE Engine - Usage Guide
 
-> **Multidimensional L6→L3 Quantum Pipeline** — A production-grade quantum VQE engine supporting 15 domains, **62 algorithms across 13 categories**, data persistence, and real-time streaming.
+> **Multidimensional Quantum Pipeline** — A production-grade quantum VQE engine supporting 15 domains, **62 algorithms across 13 categories**, data persistence, and real-time streaming.
 
 **Author:** Shahnawaz Alam  
 **License:** Proprietary  
@@ -78,13 +78,15 @@ chmod +x bin/arm64/nawaz1-server
 
 ## How Qubit Count Works (Amplitude Encoding)
 
-The VQE engine uses **amplitude encoding**: the number of qubits is determined by the **input data length**, not a forced parameter.
+The engine automatically determines the optimal qubit allocation for your data through internal analysis (normalization, entropy measurement, and complexity evaluation). You do not need to calculate or specify qubit counts — provide your amplitude data and the engine handles qubit selection.
 
-```
-num_qubits = input_data.len().next_power_of_two()
-```
+The engine internally:
+1. Normalizes your data (Born normalization)
+2. Analyzes Shannon entropy
+3. Evaluates element count, bond dimension, and entanglement structure
+4. Auto-selects the optimal qubit width
 
-For **65536 qubits**, you must provide **65536 amplitude values** in the `input_data` array. Each value represents one amplitude in a 65536-dimensional Hilbert space.
+For maximum-scale problems, providing **65536 amplitude values** in the `input_data` array enables the engine to allocate up to 65536 qubits, where each value represents one amplitude in a 65536-dimensional Hilbert space.
 
 | Domain | Problem Scale for 65536 Qubits |
 |--------|-------------------------------|
@@ -401,40 +403,20 @@ resp = HTTP.post("http://localhost:8080/api/v1/quantum/execute",
 ### Auto-Padding
 If your input length is not a power of 2, the engine automatically pads with zeros to the next power of 2. For maximum performance, provide exactly **65536** values.
 
-### How Qubit Count is Calculated
+### How Qubit Count is Allocated
 
-The engine automatically determines the number of qubits from your input data:
-
-```rust
-num_qubits = input_data.len().next_power_of_two()
-```
-
-| Input Length | Qubits Allocated | Explanation |
-|-------------|-----------------|-------------|
-| 1–2 | 2 | Minimum 1 qubit (2¹) |
-| 3–4 | 4 | 2 qubits (2²) |
-| 5–8 | 8 | 3 qubits (2³) |
-| 9–16 | 16 | 4 qubits (2⁴) |
-| 100 | 128 | 7 qubits (2⁷) |
-| 1000 | 1024 | 10 qubits (2¹⁰) |
-| 50000 | 65536 | 16 qubits (2¹⁶) — maximum free tier |
-| 65536 | 65536 | Exact fit — optimal performance |
-
-**Formula breakdown:**
-- `input_data.len()` — count of elements in your flattened amplitude array
-- `.next_power_of_two()` — rounds UP to nearest power of 2
-- Result determines the Hilbert space dimension: 2^n qubits
+The engine automatically determines the optimal qubit allocation for your data through internal analysis (normalization, entropy measurement, and complexity evaluation). You do not need to calculate or specify qubit counts — provide your amplitude data and the engine handles qubit selection.
 
 **Examples:**
 ```python
-# 100 stock prices → 128 amplitudes (7 qubits)
-data = [price for price in stock_prices[:100]]  # len=100 → 2⁷=128 qubits
+# 100 stock prices → engine auto-selects optimal qubits
+data = [price for price in stock_prices[:100]]
 
-# 65536 molecular orbital values → exact 65536 (16 qubits)
-data = molecular_amplitudes[:65536]  # len=65536 → 2¹⁶=65536 qubits
+# 65536 molecular orbital values → engine allocates up to 65536 qubits
+data = molecular_amplitudes[:65536]
 
-# 10000 sensor readings → 16384 amplitudes (14 qubits)
-data = sensor_readings[:10000]  # len=10000 → 2¹⁴=16384 qubits
+# 10000 sensor readings → engine auto-selects optimal qubits
+data = sensor_readings[:10000]
 ```
 
 **Best Practice:** Provide exactly 65536 values for maximum qubit utilization and optimal quantum accuracy.
@@ -579,7 +561,7 @@ molecular_system_type = {
 > - Input data complexity (Shannon entropy)
 > - Problem domain characteristics
 > - Available qubit count
-> - Entanglement structure detected by L6 encoder
+> - Entanglement structure detected by the engine's encoder
 >
 > Users do NOT need to specify depth. The engine guarantees optimal correlation coverage at the selected depth.
 
@@ -1053,14 +1035,14 @@ python quantum_usage_examples.py vqe_family   # Run single category
 | `POST` | `/api/v1/quantum/execute` | **Execute quantum computation** |
 | `POST` | `/api/v1/quantum/optimizer/run` | Run VQE with specific optimizer |
 | `POST` | `/api/v1/quantum/vqs/evolve` | VQS time evolution |
-| `POST` | `/api/v1/quantum/pipeline/execute` | Full L1→L2→L3 pipeline |
+| `POST` | `/api/v1/quantum/pipeline/execute` | Full quantum pipeline |
 | `POST` | `/api/v1/multidimensional/query` | Multidimensional range query |
 
 ---
 
 ## Complete Algorithm Reference (62 Algorithms)
 
-**ARCHITECTURAL KEY POINT:** All algorithms route through the **Algorithm Bridge → execute_l3()** on the pre-built VQE circuit substrate. The `algorithm` field is metadata for orchestration — execution always goes through the same unified L3 parametric circuit. Only the parameter vector changes.
+**ARCHITECTURAL KEY POINT:** All algorithms route through the **Algorithm Bridge** onto the pre-built VQE circuit substrate. The `algorithm` field is metadata for orchestration — execution always goes through the same unified parametric circuit. Only the parameter vector changes.
 
 ---
 
@@ -1201,7 +1183,7 @@ Reduce measurement overhead for expectation value estimation.
 
 ### Category I: Numerical/Scientific Solvers (7)
 
-PDE solvers and scientific computing on the L3 quantum substrate.
+PDE solvers and scientific computing on the quantum substrate.
 
 | # | Method | Description | When to Use |
 |---|--------|-------------|-------------|
