@@ -43,7 +43,7 @@ Core incompressible and compressible Navier-Stokes solver supporting multiple fl
 ```json
 {
   "domain": "fluid_mechanics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "navier_stokes",
@@ -79,7 +79,7 @@ Comprehensive turbulence modeling framework providing DNS, RANS, LES, and hybrid
 ```json
 {
   "domain": "fluid_mechanics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "turbulence",
@@ -115,7 +115,7 @@ Compressible flow solvers for Euler equations and compressible Navier-Stokes wit
 ```json
 {
   "domain": "fluid_mechanics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "compressible",
@@ -151,7 +151,7 @@ Multiphase flow simulation with interface tracking and surface tension modeling 
 ```json
 {
   "domain": "fluid_mechanics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "multiphase",
@@ -188,7 +188,7 @@ Heat transfer simulation with multiple modes including conduction, convection, c
 ```json
 {
   "domain": "fluid_mechanics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "heat_transfer",
@@ -225,7 +225,7 @@ Quantum CFD integration providing quantum linear solvers for fluid mechanics sys
 ```json
 {
   "domain": "fluid_mechanics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_cfd",
@@ -255,7 +255,7 @@ POST http://localhost:8080/api/v1/quantum/execute
 ```json
 {
   "domain": "fluid_mechanics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": [/* 65536 float amplitude values */],
   "config": {
     "sub_module": "<feature_name>"
@@ -297,7 +297,7 @@ amplitudes = (amplitudes / np.linalg.norm(amplitudes)).tolist()
 # Example: Turbulent flow with k-omega SST
 response = requests.post(API, headers=HEADERS, json={
     "domain": "fluid_mechanics",
-    "algorithm": "vqe",
+    "algorithm": "qft",
     "input_data": amplitudes,
     "config": {
         "sub_module": "turbulence",
@@ -311,7 +311,7 @@ print(response.json())
 # Example: Multiphase VOF simulation
 response = requests.post(API, headers=HEADERS, json={
     "domain": "fluid_mechanics",
-    "algorithm": "vqe",
+    "algorithm": "qft",
     "input_data": amplitudes,
     "config": {
         "sub_module": "multiphase",

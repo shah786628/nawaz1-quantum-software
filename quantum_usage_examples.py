@@ -364,7 +364,7 @@ def demo_error_mitigation():
 
     for num, method, label, extra in methods:
         execute_quantum({
-            "domain": "error_mitigation", "algorithm": "vqe",
+            "domain": "error_mitigation", "algorithm": "zne",
             "mitigation_method": method, "input_data": data, **extra
         }, f"{num}. {label}")
 
@@ -433,9 +433,17 @@ def demo_numerical_solvers():
          {"time_series_length": 65536, "candidate_functions": ["poly", "trig", "exp"], "sparsity": 0.01}),
     ]
 
+    # Algorithm Bridge: pick the correct algorithm for each domain.
+    # User selects the algorithm — the bridge compiles it onto the VQE substrate.
+    domain_algo = {
+        "fluid_mechanics": "qft",   # Fourier / spectral PDE methods
+        "mathematics":     "hhl",   # Linear algebra (FEM stiffness, multigrid)
+        "physics":         "dmrg",  # Time-dependent dynamics (IMEX, SINDy)
+        "heat_transfer":   "qft",   # Spectral / Fourier
+    }
     for num, method, label, domain, input_data, extra in solvers:
         execute_quantum({
-            "domain": domain, "algorithm": "vqe",
+            "domain": domain, "algorithm": domain_algo[domain],
             "problem_type": "pde_solver", "pde_method": method,
             "input_data": input_data, **extra
         }, f"{num}. {label}")
@@ -495,7 +503,7 @@ def demo_condensed_matter():
 
     for num, model_id, label, extra in models:
         execute_quantum({
-            "domain": "physics", "algorithm": "vqe",
+            "domain": "physics", "algorithm": "dmrg",
             "problem_type": "condensed_matter", "input_data": data, **extra
         }, f"{num}. {label}")
 
@@ -531,7 +539,7 @@ def demo_time_evolution():
 
     # L2. TEBD — Time-Evolving Block Decimation
     execute_quantum({
-        "domain": "physics", "algorithm": "vqe",
+        "domain": "physics", "algorithm": "trotter",
         "simulation_type": "tebd", "num_sites": 65536,
         "time_steps": 100, "dt": 0.01, "bond_dimension": 256,
         "hamiltonian": "heisenberg_xxz", "input_data": data
@@ -539,7 +547,7 @@ def demo_time_evolution():
 
     # L3. QITE — Quantum Imaginary Time Evolution
     execute_quantum({
-        "domain": "physics", "algorithm": "vqe",
+        "domain": "physics", "algorithm": "qpe",
         "simulation_type": "qite", "num_sites": 65536,
         "imaginary_time_steps": 200, "d_beta": 0.05,
         "hamiltonian": "heisenberg_xxz",
@@ -567,7 +575,7 @@ def demo_advanced_quantum():
 
     # M2. Quantum Lindblad Solver
     execute_quantum({
-        "domain": "physics", "algorithm": "vqe",
+        "domain": "physics", "algorithm": "dmrg",
         "simulation_type": "lindblad", "num_sites": 65536,
         "dissipation_rate": 0.01, "lindblad_operators": ["sigma_minus", "dephasing"],
         "evolution_time": 5.0, "input_data": gen_realtime()
@@ -575,7 +583,7 @@ def demo_advanced_quantum():
 
     # M3. Quantum Thermodynamics
     execute_quantum({
-        "domain": "physics", "algorithm": "vqe",
+        "domain": "physics", "algorithm": "dmrg",
         "problem_type": "quantum_thermodynamics",
         "temperature": 300.0, "partition_function_dim": 65536,
         "observable": "free_energy", "input_data": data
@@ -583,7 +591,7 @@ def demo_advanced_quantum():
 
     # M4. Quantum Metrology
     execute_quantum({
-        "domain": "physics", "algorithm": "vqe",
+        "domain": "physics", "algorithm": "qpe",
         "problem_type": "quantum_metrology",
         "num_probes": 65536, "parameter_to_estimate": "magnetic_field",
         "heisenberg_limited": True, "input_data": data
@@ -591,7 +599,7 @@ def demo_advanced_quantum():
 
     # M5. QNN — Quantum Neural Network
     execute_quantum({
-        "domain": "machine_learning", "algorithm": "vqe",
+        "domain": "machine_learning", "algorithm": "qnn",
         "problem_type": "qnn", "num_features": 65536,
         "num_layers": 12, "activation": "quantum_relu",
         "loss_function": "cross_entropy", "input_data": gen_generic(47)
@@ -599,7 +607,7 @@ def demo_advanced_quantum():
 
     # M6. QPINN — Quantum Physics-Informed Neural Network
     execute_quantum({
-        "domain": "machine_learning", "algorithm": "vqe",
+        "domain": "machine_learning", "algorithm": "qnn",
         "problem_type": "qpinn", "physics_equation": "schrodinger",
         "num_collocation_points": 65536, "boundary_loss_weight": 10.0,
         "physics_loss_weight": 1.0, "input_data": gen_generic(48)

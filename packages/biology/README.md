@@ -489,6 +489,8 @@ Quantum network biology combining gene regulation modeling with systems-level pa
 
 ## General Request Format
 
+> **Algorithm:** The user specifies `"algorithm"` per request. For biological energy minimization (protein folding, ligand binding, conformational sampling) the correct choice is `"algorithm": "vqe"` — VQE is the proper algorithm for energy/eigenvalue problems and is what every example in this package uses. The Algorithm Bridge then compiles the requested algorithm onto the pre-built VQE execution substrate. Circuit depth is **automatically determined** by the engine based on input complexity; do not include `"depth"` in requests.
+
 All sub-modules are accessed through the unified quantum execution endpoint:
 
 ```

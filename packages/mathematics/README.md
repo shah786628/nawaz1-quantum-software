@@ -49,7 +49,7 @@ Lie algebra structures (SU, SO, Sp, exceptional E6-E8), Clifford algebras, opera
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_algebra",
@@ -84,7 +84,7 @@ Von Neumann and Rényi entropy, quantum channels, Fisher information. Quantum in
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_information_theory",
@@ -118,7 +118,7 @@ Knot invariants (Jones polynomial), braid groups, Chern-Simons theory. Topologic
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_topology",
@@ -152,7 +152,7 @@ Fiber bundles, gauge fields, Berry connection, Fubini-Study metric. Differential
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_differential_geometry",
@@ -187,7 +187,7 @@ Hilbert space structures, spectral decomposition, trace class operators, density
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_functional_analysis",
@@ -222,7 +222,7 @@ Quantum probability spaces, stochastic processes, Markov chains, random walks. N
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_probability",
@@ -258,7 +258,7 @@ Wigner function, Husimi Q-function, Glauber P-function, phase space distribution
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_harmonic_analysis",
@@ -293,7 +293,7 @@ Monoidal categories, dagger categories, quantum logic lattice. Categorical found
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_category_theory",
@@ -328,7 +328,7 @@ Semidefinite programming, quantum game theory, Nash equilibrium. Quantum constra
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "qaoa",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_optimization_theory",
@@ -363,7 +363,7 @@ Quantum factoring, discrete logarithm, error-correcting codes (Stabilizer, CSS, 
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_number_theory",
@@ -402,7 +402,7 @@ A comprehensive non-commutative / random-matrix probability suite for quantum sy
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "advanced_quantum_probability",
@@ -453,7 +453,7 @@ POST http://localhost:8080/api/v1/quantum/execute
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": [/* 65536 float amplitude values */],
   "config": {
     "sub_module": "<module_name>"
@@ -495,7 +495,7 @@ amplitudes = (amplitudes / np.linalg.norm(amplitudes)).tolist()
 # Example: Quantum topology - Jones polynomial
 response = requests.post(API, headers=HEADERS, json={
     "domain": "mathematics",
-    "algorithm": "vqe",
+    "algorithm": "hhl",
     "input_data": amplitudes,
     "config": {
         "sub_module": "quantum_topology",
@@ -508,7 +508,7 @@ print(response.json())
 # Example: Quantum number theory - factoring
 response = requests.post(API, headers=HEADERS, json={
     "domain": "mathematics",
-    "algorithm": "vqe",
+    "algorithm": "hhl",
     "input_data": amplitudes,
     "config": {
         "sub_module": "quantum_number_theory",

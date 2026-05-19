@@ -210,6 +210,8 @@ Core variational quantum eigensolver for chemistry with configuration management
 
 ## General Request Format
 
+> **Algorithm:** The user specifies `"algorithm"` per request. For molecular energy / eigenvalue problems (electronic structure, ground-state energy, excited states) the correct choice is `"algorithm": "vqe"` — VQE is the proper algorithm for chemistry and is what every example in this package uses. The Algorithm Bridge then compiles the requested algorithm onto the pre-built VQE execution substrate. Circuit depth is **automatically determined** by the engine based on input complexity; do not include `"depth"` in requests.
+
 All sub-modules are accessed through the unified quantum execution endpoint:
 
 ```

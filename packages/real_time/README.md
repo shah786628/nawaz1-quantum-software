@@ -39,7 +39,7 @@ The input data array encodes the initial quantum state as 65536 floating-point a
 ```json
 {
   "domain": "real_time",
-  "algorithm": "vqs",
+  "algorithm": "trotter",
   "input_data": [/* 65536 float values: initial state amplitudes */],
   "config": {
     "hamiltonian": "heisenberg",
@@ -64,7 +64,7 @@ curl -X POST http://localhost:8080/api/v1/quantum/execute \
   -H "Authorization: Bearer $NAWAZ1_API_KEY" \
   -d '{
     "domain": "real_time",
-    "algorithm": "vqs",
+    "algorithm": "trotter",
     "input_data": [1.0, 0.0, 0.0, ... /* 65536 initial state amplitudes */],
     "config": {
       "hamiltonian": "transverse_ising",
@@ -94,7 +94,7 @@ response = requests.post(
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     json={
         "domain": "real_time",
-        "algorithm": "tebd",
+        "algorithm": "trotter",
         "input_data": amplitudes,
         "config": {
             "hamiltonian": "heisenberg",

@@ -39,7 +39,7 @@ The input data array encodes the graphics problem as 65536 floating-point amplit
 ```json
 {
   "domain": "graphics",
-  "algorithm": "grover",
+  "algorithm": "qft",
   "input_data": [/* 65536 float values: scene/image data as amplitudes */],
   "config": {
     "task": "ray_tracing",
@@ -64,7 +64,7 @@ curl -X POST http://localhost:8080/api/v1/quantum/execute \
   -H "Authorization: Bearer $NAWAZ1_API_KEY" \
   -d '{
     "domain": "graphics",
-    "algorithm": "grover",
+    "algorithm": "qft",
     "input_data": [0.5, 0.3, 0.8, ... /* 65536 scene primitive values */],
     "config": {
       "task": "ray_tracing",
@@ -92,7 +92,7 @@ response = requests.post(
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     json={
         "domain": "graphics",
-        "algorithm": "grover",
+        "algorithm": "qft",
         "input_data": amplitudes,
         "config": {
             "task": "ray_tracing",

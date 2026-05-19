@@ -43,7 +43,7 @@ Manages market data feed integration supporting multiple providers with configur
 ```json
 {
   "domain": "finance",
-  "algorithm": "vqe",
+  "algorithm": "qaoa",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "market_data",
@@ -79,7 +79,7 @@ Implements quantum Monte Carlo with variance reduction techniques and stochastic
 ```json
 {
   "domain": "finance",
-  "algorithm": "vqe",
+  "algorithm": "monte_carlo",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "monte_carlo",
@@ -158,7 +158,7 @@ Implements quantum financial algorithms including amplitude estimation, support 
 ```json
 {
   "domain": "finance",
-  "algorithm": "vqe",
+  "algorithm": "monte_carlo",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_algorithms",
@@ -193,7 +193,7 @@ Computes comprehensive risk metrics for portfolio evaluation with full quantum a
 ```json
 {
   "domain": "finance",
-  "algorithm": "vqe",
+  "algorithm": "monte_carlo",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "risk_metrics",
@@ -227,7 +227,7 @@ Integrates trading system with comprehensive order types, risk management config
 ```json
 {
   "domain": "finance",
-  "algorithm": "vqe",
+  "algorithm": "qaoa",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "trading_system",
@@ -260,7 +260,7 @@ POST http://localhost:8080/api/v1/quantum/execute
 ```json
 {
   "domain": "finance",
-  "algorithm": "vqe",
+  "algorithm": "qaoa",
   "input_data": [/* 65536 float amplitude values */],
   "config": {
     "sub_module": "<feature_name>"
@@ -315,7 +315,7 @@ print(response.json())
 # Example: Monte Carlo option pricing
 response = requests.post(API, headers=HEADERS, json={
     "domain": "finance",
-    "algorithm": "vqe",
+    "algorithm": "monte_carlo",
     "input_data": amplitudes,
     "config": {
         "sub_module": "monte_carlo",

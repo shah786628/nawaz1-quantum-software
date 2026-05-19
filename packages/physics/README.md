@@ -53,7 +53,7 @@ Core quantum field theory with scalar field, gauge theory, and lattice QCD simul
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_field_theory",
@@ -89,7 +89,7 @@ QED calculations including lepton masses (electron, muon, tau), Bohr radius, and
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_electrodynamics",
@@ -123,7 +123,7 @@ Strong interaction physics with QCD coupling constants, quark condensate, gluon 
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_chromodynamics",
@@ -158,7 +158,7 @@ Klein-Gordon and Dirac equation implementations. Relativistic particle dynamics 
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "relativistic_quantum_mechanics",
@@ -194,7 +194,7 @@ Planck-scale physics including gravitational constant, Planck mass/length/time/e
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "dmrg",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_gravity",
@@ -228,7 +228,7 @@ Bell inequality tests (CHSH, Mermin, Svetlichny, TiltedBell). Measures and quant
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_entanglement_theory",
@@ -264,7 +264,7 @@ Fock state operations, photonic quantum states, coherent state manipulation. Qua
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "dmrg",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_optics",
@@ -300,7 +300,7 @@ Quantum Otto cycle and heat engine implementations. Quantum thermodynamic proces
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "dmrg",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_thermodynamics",
@@ -334,7 +334,7 @@ Random matrix theory ensembles (GOE, GUE, GSE, Poisson). Quantum chaotic dynamic
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "dmrg",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_chaos",
@@ -368,7 +368,7 @@ Density matrix representations and Bloch vector formalism. Decoherence, dissipat
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "dmrg",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "open_quantum_systems",
@@ -402,7 +402,7 @@ Transverse field Ising model and phase diagram analysis. Quantum critical phenom
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_phase_transitions",
@@ -438,7 +438,7 @@ Quantum Fisher information and parameter estimation. Precision measurement using
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_metrology",
@@ -472,7 +472,7 @@ Early universe quantum dynamics with CMB temperature, Hubble constant, cosmologi
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "dmrg",
   "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
   "config": {
     "sub_module": "quantum_cosmology",
@@ -499,7 +499,7 @@ POST http://localhost:8080/api/v1/quantum/execute
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": [/* 65536 float amplitude values */],
   "config": {
     "sub_module": "<module_name>"
@@ -540,7 +540,7 @@ amplitudes = (amplitudes / np.linalg.norm(amplitudes)).tolist()
 # Example: Quantum field theory scattering
 response = requests.post(API, headers=HEADERS, json={
     "domain": "physics",
-    "algorithm": "vqe",
+    "algorithm": "qpe",
     "input_data": amplitudes,
     "config": {
         "sub_module": "quantum_field_theory",
@@ -554,7 +554,7 @@ print(response.json())
 # Example: Black hole Hawking radiation
 response = requests.post(API, headers=HEADERS, json={
     "domain": "physics",
-    "algorithm": "vqe",
+    "algorithm": "dmrg",
     "input_data": amplitudes,
     "config": {
         "sub_module": "quantum_gravity",

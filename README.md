@@ -185,7 +185,7 @@ input_nested_dict = {
     "system": {
         "molecule": {"name": "hemoglobin", "atoms": 9672},
         "parameters": {"temperature": 310.15, "pressure": 101.325},
-        "quantum": {"qubits": 65536, "depth": 100}
+        "quantum": {"qubits": 65536}  # depth is auto-selected by the engine
     }
 }
 
@@ -308,8 +308,7 @@ json input_nested_dict = {
         {"atoms", 9}
     }},
     {"quantum", {
-        {"qubits", 65536},
-        {"depth", 50}
+        {"qubits", 65536}   // depth is auto-selected by the engine
     }}
 };
 
@@ -573,6 +572,50 @@ molecular_system_type = {
 
 ---
 
+### Automatic Depth Selection
+
+> **Important:** Circuit depth is **NOT** a user-configurable parameter.  
+> The VQE engine automatically determines the optimal depth based on:
+> - Input data complexity (Shannon entropy)
+> - Problem domain characteristics
+> - Available qubit count
+> - Entanglement structure detected by L6 encoder
+>
+> Users do NOT need to specify depth. The engine guarantees optimal correlation coverage at the selected depth.
+
+### Algorithm Selection & Algorithm Bridge
+
+> **Users specify which quantum algorithm to use.** The Algorithm Bridge then compiles that algorithm onto the pre-built VQE execution substrate.
+>
+> The VQE circuit is a **universal execution substrate** — the Algorithm Bridge can compile ANY quantum algorithm to run on it. The VQE circuit itself is **not** the algorithm for every domain; it is the hardware-optimized runtime that every algorithm executes on.
+>
+> | Domain | Algorithm (User Specifies) | Bridge Compiles To |
+> |--------|---------------------------|-------------------|
+> | Chemistry | `"algorithm": "vqe"` | Native VQE execution |
+> | Finance (portfolio / trading) | `"algorithm": "qaoa"` | QAOA → VQE substrate |
+> | Finance (risk / Monte Carlo) | `"algorithm": "monte_carlo"` | MC → VQE substrate |
+> | Linear Algebra | `"algorithm": "hhl"` | HHL → VQE substrate |
+> | Search | `"algorithm": "grover"` | Grover → VQE substrate |
+> | Fourier Analysis / Fluid Mechanics / Graphics / Heat Transfer | `"algorithm": "qft"` | QFT → VQE substrate |
+> | Physics (ground state) | `"algorithm": "qpe"` | QPE → VQE substrate |
+> | Physics (dynamics) | `"algorithm": "dmrg"` | DMRG → VQE substrate |
+> | Real-Time / Time Evolution | `"algorithm": "trotter"` | Trotter → VQE substrate |
+> | Optimization / Logistics | `"algorithm": "qaoa"` | QAOA → VQE substrate |
+> | Machine Learning | `"algorithm": "qnn"` | QNN → VQE substrate |
+> | Biology / Materials Science | `"algorithm": "vqe"` | Native VQE execution |
+> | Error Mitigation | `"algorithm": "zne"` | ZNE → VQE substrate |
+>
+> **How the Algorithm Bridge works:**
+> 1. The user specifies `domain` + `algorithm` in the request.
+> 2. The Algorithm Bridge receives the selected algorithm.
+> 3. The Bridge compiles the algorithm into parameter vectors for the VQE circuit.
+> 4. The pre-built VQE substrate executes with those parameters.
+> 5. Results are returned.
+>
+> This makes the engine **universal** — any quantum algorithm runs on the same hardware-optimized VQE circuit. The MoE router only routes the request to the correct domain handler; it does **not** select the algorithm. Algorithm choice is the user's responsibility, not the engine's.
+
+---
+
 ## Runtime
 
 > **Active 24/7 — No time restrictions on this build.**  
@@ -660,7 +703,7 @@ The **physics** domain contains 13 specialized sub-modules providing comprehensi
 ```json
 {
   "domain": "physics",
-  "algorithm": "vqe",
+  "algorithm": "qpe",
   "input_data": ["...65536 floats..."],
   "config": { "sub_module": "quantum_field_theory", "task": "scattering_amplitude" }
 }
@@ -693,7 +736,7 @@ The **mathematics** domain contains 11 specialized sub-modules providing compreh
 ```json
 {
   "domain": "mathematics",
-  "algorithm": "vqe",
+  "algorithm": "hhl",
   "input_data": ["...65536 floats..."],
   "config": { "sub_module": "quantum_topology", "task": "jones_polynomial" }
 }
@@ -748,7 +791,7 @@ The **finance** domain contains 6 specialized sub-modules providing comprehensiv
 ```json
 {
   "domain": "finance",
-  "algorithm": "vqe",
+  "algorithm": "qaoa",
   "input_data": ["...65536 floats..."],
   "config": { "sub_module": "portfolio", "task": "markowitz_optimization", "num_assets": 65536 }
 }
@@ -776,7 +819,7 @@ The **fluid_mechanics** domain contains 6 specialized sub-modules providing comp
 ```json
 {
   "domain": "fluid_mechanics",
-  "algorithm": "vqe",
+  "algorithm": "qft",
   "input_data": ["...65536 floats..."],
   "config": { "sub_module": "turbulence", "task": "les_simulation", "model": "k_omega_sst" }
 }

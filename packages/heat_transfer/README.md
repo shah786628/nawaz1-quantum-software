@@ -40,7 +40,7 @@ The input data array encodes the thermal field as 65536 floating-point amplitude
 ```json
 {
   "domain": "heat_transfer",
-  "algorithm": "hhl",
+  "algorithm": "qft",
   "input_data": [/* 65536 float values: amplitude-encoded temperature field */],
   "config": {
     "equation": "fourier",
@@ -69,7 +69,7 @@ curl -X POST http://localhost:8080/api/v1/quantum/execute \
   -H "Authorization: Bearer $NAWAZ1_API_KEY" \
   -d '{
     "domain": "heat_transfer",
-    "algorithm": "hhl",
+    "algorithm": "qft",
     "input_data": [293.15, 293.15, 293.15, ... /* 65536 temperature values */],
     "config": {
       "equation": "fourier_transient",
@@ -100,7 +100,7 @@ response = requests.post(
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     json={
         "domain": "heat_transfer",
-        "algorithm": "fem",
+        "algorithm": "qft",
         "input_data": amplitudes,
         "config": {
             "equation": "fourier_transient",

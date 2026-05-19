@@ -40,7 +40,7 @@ The input data array encodes the turbulent flow field as 65536 floating-point am
 ```json
 {
   "domain": "turbulence_cfd",
-  "algorithm": "pde_solver",
+  "algorithm": "qft",
   "input_data": [/* 65536 float values: turbulent field amplitudes */],
   "config": {
     "method": "dns",
@@ -67,7 +67,7 @@ curl -X POST http://localhost:8080/api/v1/quantum/execute \
   -H "Authorization: Bearer $NAWAZ1_API_KEY" \
   -d '{
     "domain": "turbulence_cfd",
-    "algorithm": "pde_solver",
+    "algorithm": "qft",
     "input_data": [0.023, -0.015, 0.042, ... /* 65536 turbulent field values */],
     "config": {
       "method": "les",
@@ -96,7 +96,7 @@ response = requests.post(
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     json={
         "domain": "turbulence_cfd",
-        "algorithm": "pde_solver",
+        "algorithm": "qft",
         "input_data": amplitudes,
         "config": {
             "method": "dns",

@@ -310,6 +310,25 @@ Every SDK serializes the same JSON body posted to `/api/v1/quantum/execute`:
 
 ---
 
+## Engine Behavior
+
+> **These behaviors apply to every SDK language and every domain:**
+
+- **Algorithm:** User-specified per request (required field). You must include `"algorithm"` in the payload — the engine does **not** auto-select. Pick the algorithm appropriate to your problem: `"vqe"` for chemistry / biology / materials energy minimization, `"qaoa"` for finance/logistics/optimization, `"qpe"` for physics ground states, `"dmrg"` for physics dynamics, `"hhl"` for linear systems, `"qft"` for fluid mechanics / graphics / heat transfer / Fourier methods, `"qnn"` for machine learning, `"monte_carlo"` for risk / sampling, `"trotter"` for real-time evolution, `"zne"` for error mitigation.
+- **Algorithm Bridge:** Compiles the selected algorithm onto the pre-built VQE execution substrate. The VQE circuit is a *universal execution substrate* — every algorithm above is compiled into parameter vectors that the substrate runs natively.
+- **Depth:** Automatically optimized — do **NOT** specify `"depth"` or `"circuit_depth"`. The engine selects the optimal depth from input entropy and domain characteristics; any value you supply will be ignored.
+- **Qubits:** Calculated from `input_data.len().next_power_of_two()`. Send 65536 normalized amplitudes for maximum scale (65536 qubits).
+- **Routing:** The MoE router only routes the request to the correct **domain handler**. It does **not** select the algorithm — that choice remains yours.
+
+| Setting | Behavior | Notes |
+|---------|----------|-------|
+| **Algorithm** | User-specified | Required field; bridge compiles your choice onto VQE substrate |
+| **Depth** | Auto-optimized | Engine picks; do NOT include `"depth"` |
+| **Qubits** | `input_data.len().next_power_of_two()` | Derived from input length |
+| **Routing** | MoE domain router | Routes to domain handler only — never overrides your algorithm |
+
+---
+
 ## Tips
 
 - **Qubit count is data-driven.** The number of qubits equals `next_power_of_two(len(input_data))`. For 65536 qubits, send exactly 65536 normalized amplitudes.
