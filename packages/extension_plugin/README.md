@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Extension & Plugin System** lets you ship your own quantum algorithms into the running engine without forking the codebase. Plugins are first-class Rust types that implement a single trait, get vetted by an **8-layer security stack**, and then run on the same universal **L3 VQE execution substrate** that powers every built-in domain.
+The **Extension & Plugin System** lets you ship your own quantum algorithms into the running engine without forking the codebase. Plugins are first-class Rust types that implement a single trait, get vetted by a **multi-layer security validation pipeline**, and then run on the same universal **L3 VQE execution substrate** that powers every built-in domain.
 
 **Core principle:** plugins do *not* select a different quantum backend. The Algorithm Bridge **compiles** your custom algorithm onto the pre-built VQE circuit. Only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate at up to 65 536 qubits.
 
@@ -13,15 +13,8 @@ The **Extension & Plugin System** lets you ship your own quantum algorithms into
                               │ implements AlgorithmPlugin
                               ▼
        ┌─────────────────────────────────────────────────┐
-       │   AlgorithmBridgeExtended  (8 security layers)  │
-       │   Layer 1  Cryptographic signing                │
-       │   Layer 2  Input sanitization                   │
-       │   Layer 3  Per-plugin rate limits               │
-       │   Layer 4  Canary trap detection                │
-       │   Layer 5  Behavioral anomaly detection         │
-       │   Layer 6  Circuit complexity bounds            │
-       │   Layer 7  Forensic audit log                   │
-       │   Layer 8  Sandboxed execution + timeout        │
+       │   AlgorithmBridgeExtended                       │
+       │   (Multi-layer security validation pipeline)    │
        └─────────────────────────────┬───────────────────┘
                                      │ parameter vector
                                      ▼
@@ -172,17 +165,17 @@ pub trait AlgorithmPlugin: Send + Sync {
 | `name()` | Unique identifier across the registry. Must be stable across versions. | Bridge, registry, audit log |
 | `version()` | Semver string (`"1.4.2"`). Changes require re-signing. | Registry, metadata API |
 | `supported_domains()` | Quantum domains this plugin can handle (e.g. `["chemistry", "materials_science"]`). | Domain router |
-| `execute()` | The single entry point. Receives a validated request, returns a result. | Bridge after all 8 security checks pass |
-| `validate_input()` | Pre-flight check **before** `execute()`. Reject malformed/dangerous inputs cheaply. | Bridge inside Layer 2 |
+| `execute()` | The single entry point. Receives a validated request, returns a result. | Bridge after all security checks pass |
+| `validate_input()` | Pre-flight check **before** `execute()`. Reject malformed/dangerous inputs cheaply. | Bridge during input validation |
 | `metadata()` | Public, advertised information about the plugin. Surfaced via `/plugins/list`. | Discovery API |
-| `security_manifest()` | Declarative resource & capability budget. Treated as a binding contract. | Layers 3, 6, 8 |
-| `integrity_hash()` | Deterministic, code-version-tied hash. Mismatch with the registry's stored value triggers `PluginIntegrityMismatch`. | Layer 1 |
+| `security_manifest()` | Declarative resource & capability budget. Treated as a binding contract. | Security validation pipeline |
+| `integrity_hash()` | Deterministic, code-version-tied hash. Mismatch with the registry's stored value triggers `PluginIntegrityMismatch`. | Signature verification |
 
 ### Method contracts
 
 - **`name()`** — must match `^[a-zA-Z][a-zA-Z0-9_]{2,63}$` (the bridge rejects anything else as `InvalidPluginName`).
 - **`execute()`** — must be deterministic for the same `(input_data, parameters)` pair, must not panic on hostile inputs (panics are caught and logged as `PluginPanicked`), must respect `security_manifest().max_execution_time_ms`.
-- **`validate_input()`** — should return `Err` for any input you would not want to run on the VQE substrate. The bridge calls this **before** the heavyweight Layer 6 circuit-complexity analyzer, so rejecting cheaply here is the primary cost-saver.
+- **`validate_input()`** — should return `Err` for any input you would not want to run on the VQE substrate. The bridge calls this **before** the heavyweight circuit-bounds checker, so rejecting cheaply here is the primary cost-saver.
 - **`integrity_hash()`** — must change whenever the implementation, parameters, or security manifest change. SHA-512 over `(name, version, source_hash, manifest_bytes)` is the recommended pattern; see "Computing the integrity hash" below.
 
 ---
@@ -205,7 +198,7 @@ pub struct PluginAlgorithmRequest {
 |-------|---------|
 | `algorithm_name` | Logical name selected by the caller (the plugin can ignore or branch on it). |
 | `domain` | One of the 16 supported quantum domains. Must intersect `supported_domains()`. |
-| `parameters` | Free-form JSON parameter map. Validated by Layer 2 (depth, entropy, injection). |
+| `parameters` | Free-form JSON parameter map. Validated for depth, entropy, and injection patterns. |
 | `num_qubits` | Logical qubit width requested for this run. Bounded by the manifest's `max_qubits_requested`. |
 | `input_data` | Raw amplitude vector. Treated as quantum amplitudes by the L3 substrate. |
 
@@ -224,7 +217,7 @@ pub struct PluginAlgorithmResult {
 | Field | Meaning |
 |-------|---------|
 | `success` | `true` only when the plugin completed normally. Error paths must return `Err(String)` from `execute()` rather than `Ok` with `success = false`. |
-| `output_data` | Free-form JSON map. Layer 8 caps total size to detect output-size explosion attacks. |
+| `output_data` | Free-form JSON map. Total size is capped to detect output-size explosion attacks. |
 | `execution_time_ms` | Wall-clock milliseconds inside `execute()`. The bridge cross-checks against `security_manifest().max_execution_time_ms` and against historical baselines. |
 | `plugin_name` / `plugin_version` | Should match `name()` / `version()`. Mismatch is logged. |
 
@@ -261,10 +254,10 @@ pub struct PluginSecurityManifest {
 | Field | Notes |
 |-------|-------|
 | `requires_network` / `requires_filesystem` / `requires_gpu` | Capabilities you are requesting. Untrusted plugins that declare `true` are auto-quarantined on first execution. |
-| `max_memory_mib` | Soft cap. Layer 5 watches for `MemoryBombDetected`. |
-| `max_execution_time_ms` | Hard cap. Layer 8 raises `ExecutionTimeout` once exceeded. |
+| `max_memory_mib` | Soft cap. Runtime monitoring detects `MemoryBombDetected`. |
+| `max_execution_time_ms` | Hard cap. The sandbox raises `ExecutionTimeout` once exceeded. |
 | `max_qubits_requested` | Bounded by the bridge-wide `max_qubits_limit` (default 8192 strict, 65 536 permissive). |
-| `declared_complexity_class` | Used by Layer 6 to pick the gate-count bound. |
+| `declared_complexity_class` | Used by the circuit-bounds checker to pick gate-count limits. |
 | `data_access_scope` | The plugin's contract about what data it reads. Cross-checked at the request layer. |
 
 ### `ComplexityClass`
@@ -275,7 +268,7 @@ pub enum ComplexityClass {
     Quadratic,     // O(n²)        — typical for pairwise algorithms
     Polynomial,    // O(n^k)       — heuristic optimizers, ansatz searches
     Exponential,   // O(2^n)       — only with explicit Trusted approval
-    Unknown,       // treated as Exponential by Layer 6
+    Unknown,       // treated as Exponential by the circuit-bounds checker
 }
 ```
 
@@ -343,7 +336,7 @@ fn integrity_hash(&self) -> String {
 }
 ```
 
-Layer 1 stores this hash at registration time and verifies it on **every** call. Any tampering — including changing the manifest after registration — produces `PluginIntegrityMismatch`.
+The system stores this hash at registration time and verifies it on **every** call. Any tampering — including changing the manifest after registration — produces `PluginIntegrityMismatch`.
 
 ### 4. Register with the bridge
 
@@ -353,7 +346,7 @@ let mut bridge = AlgorithmBridgeExtended::new();      // strict (default)
 let registered_name = bridge.register_plugin(Arc::new(MyPlugin))?;
 ```
 
-`register_plugin` runs Layer 2 (signature, integrity, name validation) before inserting into the registry. Newly registered plugins start at `TrustLevel::Untrusted`.
+`register_plugin` runs security validation (signature, integrity, name validation) before inserting into the registry. Newly registered plugins start at `TrustLevel::Untrusted`.
 
 ### 5. Execute
 
@@ -362,7 +355,7 @@ let req = PluginAlgorithmRequest { /* … */ };
 let res = bridge.execute_plugin(&registered_name, &req)?;
 ```
 
-This single call walks every active layer. The success path returns the plugin's `PluginAlgorithmResult`; the failure path returns a `String` whose body matches the corresponding `SecurityViolation::Display` output.
+This single call walks the full security validation pipeline. The success path returns the plugin's `PluginAlgorithmResult`; the failure path returns a `String` whose body matches the corresponding `SecurityViolation::Display` output.
 
 ---
 
@@ -862,8 +855,7 @@ curl http://localhost:8080/api/v1/plugins/security/audit `
   "total_violations": 14,
   "threat_level": "Elevated",
   "quarantined_count": 1,
-  "total_plugins": 7,
-  "canary_triggers": 0
+  "total_plugins": 7
 }
 ```
 
@@ -921,39 +913,35 @@ Allowed values: `Untrusted`, `Verified`, `Trusted`. Promotion to `BuiltIn` is re
 | Level | How obtained | Rate limit | Hard timeout | Max input amplitudes | Notes |
 |-------|--------------|------------|--------------|----------------------|-------|
 | `Untrusted` | Default after registration | 10 / min | 5 s | 100 000 | Full sandbox; capability requests cause auto-quarantine |
-| `Verified` | Valid signature accepted by `CryptoVerifier` | 50 / min | 15 s | 500 000 | Capability requests allowed but watched |
+| `Verified` | Valid signature accepted by signature verification | 50 / min | 15 s | 500 000 | Capability requests allowed but watched |
 | `Trusted` | Admin promotion via `/trust` endpoint | 200 / min | 30 s | 1 000 000 | May declare `ReadAll`, `Exponential` |
 | `BuiltIn` | Compiled-in plugins only | unbounded | 600 s | 65 536 amps | Bypasses runtime signature check, never quarantined |
 
-The exact rate-limit numerator is taken from `PluginSecurityGuard::check_rate_limit` in `algorithm_bridge.rs`; see the source for the binding values used by the running engine.
+The exact rate-limit numerator is enforced by the bridge's internal rate limiter; see the source for the binding values used by the running engine.
 
-### 8-Layer Protection
+### Security Pipeline
 
-| # | Layer | Class | Protects against |
-|---|-------|-------|------------------|
-| 1 | Cryptographic signing + HMAC integrity | `CryptoVerifier` | Forged plugins, swapped binaries, replay of revoked builds |
-| 2 | Input sanitization (14 distinct checks) | `PluginSecurityGuard` | Null-byte, path traversal, shell/SQL/code/script injection, serialization attacks, unicode homoglyphs, high-entropy payloads, parameter-depth bombs |
-| 3 | Per-plugin sliding-window rate limiting | `RateLimitState` | Brute-force, denial-of-wallet, oracle scraping |
-| 4 | Canary trap detection | `CanaryRegistry` | Plugin enumeration, registry probes |
-| 5 | Behavioral anomaly detection & quarantine | `ThreatDetector` | Drift from historical baselines, memory bombs, output-size explosion |
-| 6 | Quantum circuit complexity bounds | `CircuitComplexityAnalyzer` | Gate-count explosion, circuit-depth bombs, entanglement-density attacks |
-| 7 | Forensic audit trail | `ForensicAuditLogger` | Repudiation, missing evidence — every event is logged, violation entries are never evicted |
-| 8 | Sandboxed execution + hard timeout | `AlgorithmBridgeExtended::execute_plugin` | Panics, infinite loops, runaway compute |
+All plugin executions pass through a comprehensive multi-layer security validation pipeline before reaching the VQE substrate. This includes:
 
-Layers run in this order, and the first failure short-circuits the call with a `SecurityViolation` value.
+- Input validation and sanitization
+- Rate limiting per trust level
+- Execution sandboxing with hard timeouts
+- Continuous behavioral monitoring
+- Complete audit logging
 
-### Security Manifest Requirements
+Plugins that violate security policies are automatically quarantined. Repeated violations escalate the system-wide threat level, which progressively restricts what all plugins can do.
 
-Every field in `PluginSecurityManifest` is enforced:
+### Security Manifest
 
-- `requires_network` / `requires_filesystem` / `requires_gpu` — declaring `true` while at `Untrusted` triggers automatic quarantine on first execute.
-- `max_memory_mib` — Layer 5 monitors RSS delta; exceeding by ≥1.5× yields `MemoryBombDetected`.
-- `max_execution_time_ms` — both your declared cap **and** the trust-level hard cap apply; the smaller wins.
-- `max_qubits_requested` — bounded by the bridge-wide `max_qubits_limit` and by `request.num_qubits`.
-- `declared_complexity_class` — Layer 6 picks gate-count bounds: `Linear` ≤ 10⁵, `Quadratic` ≤ 10⁷, `Polynomial` ≤ 10⁹, `Exponential` requires `Trusted`.
-- `data_access_scope` — declaring `ReadAll` or `ReadDomainData` while `Untrusted` is rejected.
+Your `PluginSecurityManifest` declares what resources your plugin needs. The system enforces these limits at runtime:
 
-If the running plugin exceeds any declared limit, Layer 5 raises a behavioral anomaly and Layer 7 records it; repeated breaches escalate the global `ThreatLevel`.
+- Network, filesystem, and GPU access permissions
+- Memory and execution time budgets
+- Maximum qubit count
+- Computational complexity tier
+- Data access scope
+
+Exceeding declared limits results in quarantine. Declare only what you actually need — minimal manifests receive fewer restrictions.
 
 ---
 
@@ -967,16 +955,15 @@ Common variants you will encounter:
 |---------|---------|-----------|
 | `RateLimitExceeded { plugin, count }` | Sliding-window cap hit | Back off (`Retry-After` header) and reduce burst |
 | `ExecutionTimeout { plugin, elapsed_ms }` | Plugin slower than declared | Lower `max_execution_time_ms` honestly, optimise inner loop |
-| `PluginPanicked { plugin, message }` | `execute()` panicked | Fix the panic — guards turn this into a hard ban after 3 occurrences |
+| `PluginPanicked { plugin, message }` | `execute()` panicked | Fix the panic — repeated panics result in quarantine |
 | `PluginIntegrityMismatch { expected, actual }` | Manifest/source changed without re-registering | Re-compute `integrity_hash()` and re-register |
 | `InvalidPluginSignature(s)` | Signature missing or unknown trusted key | Sign with an admin-issued key |
 | `RevokedPluginSignature(s)` | Signature on the revocation list | Build & sign a new release |
-| `PayloadTooLarge { size, max }` | `input_data` exceeds Layer 2 cap | Stream in chunks or downsample |
+| `PayloadTooLarge { size, max }` | `input_data` exceeds the input-size cap | Stream in chunks or downsample |
 | `PluginQuarantined` | Anomaly detector tripped | Inspect audit log, fix root cause, ask admin to release |
 | `DomainNotAllowed(d)` | `request.domain` ∉ `supported_domains()` | Update plugin or correct the request |
 | `QubitLimitExceeded { requested, max }` | Manifest or request larger than bridge limit | Lower `num_qubits` |
-| `GateCountExplosion { count, max }` | Inner expansion exceeds Layer 6 bound | Reduce circuit depth or upgrade complexity class |
-| `CanaryTriggered { trap_type, trap_name }` | Plugin probed a honeypot identifier | Stop scanning the registry |
+| `GateCountExplosion { count, max }` | Inner expansion exceeds the circuit-bounds checker's limit | Reduce circuit depth or upgrade complexity class |
 
 ### Debugging "Plugin Blocked" errors
 
@@ -991,7 +978,7 @@ Treat `429 RateLimitExceeded` as advisory. The recommended client behaviour is e
 
 ### Threat-level escalation
 
-`ThreatDetector` escalates the global `ThreatLevel` automatically when violations accumulate. At `Lockdown`, **all non-`BuiltIn` execute calls** return `503`. Operators can de-escalate explicitly via `POST /api/v1/plugins/security/threat-level` with `{"level":"Normal"}` after triage.
+The system automatically escalates the global `ThreatLevel` when violations accumulate. At `Lockdown`, **all non-`BuiltIn` execute calls** return `503`. Operators can de-escalate explicitly via `POST /api/v1/plugins/security/threat-level` with `{"level":"Normal"}` after triage.
 
 ---
 
@@ -999,14 +986,14 @@ Treat `429 RateLimitExceeded` as advisory. The recommended client behaviour is e
 
 - **One domain, one plugin.** Splitting concerns keeps the manifest small and the integrity hash stable.
 - **Declare the smallest manifest that works.** The bridge prefers a tight, honest manifest over a permissive one.
-- **Always validate in `validate_input()`.** Layer 2 already rejects gross attacks — your job is semantic validation (matrix shape, normalisation, parameter ranges).
+- **Always validate in `validate_input()`.** The bridge's input-validation stage already rejects gross attacks — your job is semantic validation (matrix shape, normalisation, parameter ranges).
 - **Make `integrity_hash()` deterministic.** Hash over name, version, source bytes, and the manifest. Avoid clocks, environment variables, and randomness.
-- **Handle edge cases.** Empty inputs, NaN, ±Inf, zero qubits, mismatched parameter arrays — all of these will be thrown at you by the canary registry.
+- **Handle edge cases.** Empty inputs, NaN, ±Inf, zero qubits, mismatched parameter arrays — all of these will be exercised by the security validation pipeline.
 - **Test at `Untrusted` first.** If your plugin works under the strictest quotas, promotion to `Verified` is mechanical.
 - **Avoid hidden state.** Plugins are `Send + Sync` and may be invoked concurrently; mutate only through `Mutex`/`RwLock`.
-- **Surface execution time honestly.** `execution_time_ms` should reflect real wall-clock work; dishonest values trigger Layer 5 timing anomalies.
+- **Surface execution time honestly.** `execution_time_ms` should reflect real wall-clock work; dishonest values are detected by behavioral monitoring.
 - **Keep `output_data` small.** Multi-megabyte payloads trigger `OutputSizeExplosion`. Stream large results via dedicated APIs instead.
-- **Re-register on every release.** Version bumps without re-registration fail Layer 1.
+- **Re-register on every release.** Version bumps without re-registration fail signature verification.
 
 ---
 
@@ -1019,7 +1006,7 @@ No — and you don't need to. The bridge already forwards `input_data` and `num_
 The bridge holds plugins by `Arc<dyn AlgorithmPlugin>`. Replacing a plugin requires `unregister_plugin` followed by `register_plugin` — there is no in-place swap. In-flight executions complete against the previous `Arc`.
 
 **Q: How do I get promoted from Untrusted to Verified?**
-Sign your release with a key trusted by `CryptoVerifier::add_trusted_key`, then call `POST /api/v1/plugins/{name}/trust` with `{"level":"Verified"}` from an admin token. Trusted keys are managed out of band.
+Sign your release with a key trusted by the bridge's signature-verification system, then call `POST /api/v1/plugins/{name}/trust` with `{"level":"Verified"}` from an admin token. Trusted keys are managed out of band.
 
 **Q: Can plugins call other plugins?**
 Cross-plugin invocation is detected by the reentrancy guard and reported as `ReentrancyAttempt`. If you genuinely need composition, register a single plugin that links the dependent code statically.
@@ -1028,13 +1015,13 @@ Cross-plugin invocation is detected by the reentrancy guard and reported as `Ree
 The lower of (manifest `max_execution_time_ms`, trust-level hard cap). At `BuiltIn`, the global `execution_timeout_ms` (default 10 s strict, 600 s permissive) becomes the only ceiling.
 
 **Q: My plugin is being quarantined despite passing every validation. Why?**
-Inspect `/security/audit` for `AnomalyDetected`. Layer 5 compares each run against a `BehaviorBaseline` for that plugin; a sudden ×3-σ jump in execution time, output size, or memory delta will quarantine it even when individual fields look fine.
+Inspect `/security/audit` for `AnomalyDetected`. The behavioral monitoring stage compares each run against a behavioral profile for that plugin; significant deviations in execution time, output size, or memory usage will quarantine it even when individual fields look fine.
 
 **Q: Can I update the manifest without bumping the version?**
 No. The manifest is part of `integrity_hash()`. Any change must produce a new hash, which means a new `version()` and a fresh signature.
 
 **Q: How is `BuiltIn` different from `Trusted`?**
-`BuiltIn` is reserved for plugins compiled into the engine binary. They skip `CryptoVerifier::verify_plugin_hash` because their integrity is already guaranteed by the build pipeline. The runtime cannot promote a registered plugin to `BuiltIn`.
+`BuiltIn` is reserved for plugins compiled into the engine binary. They skip runtime signature verification because their integrity is already guaranteed by the build pipeline. The runtime cannot promote a registered plugin to `BuiltIn`.
 
 ---
 
