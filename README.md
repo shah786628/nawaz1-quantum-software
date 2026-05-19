@@ -20,7 +20,10 @@
 > |-----------|--------|-------------------|
 > | **Intel TDX** | Intel | Trust Domain Extensions — 4th Gen Xeon (Sapphire Rapids) or newer |
 > | **AMD SEV-SNP** | AMD | Secure Encrypted Virtualization — EPYC 7003 (Milan) or newer |
+> | **AMD SEV** | AMD | Secure Encrypted Virtualization — EPYC 7001 (Naples) or newer |
 > | **Intel SGX** | Intel | Software Guard Extensions — 6th Gen Core or Xeon E3 v6+ |
+> | **Intel Ultra Series** | Intel | Core Ultra 3, 5, 7, 9 (Meteor Lake / Arrow Lake) |
+> | **AMD Ryzen AES** | AMD | Ryzen 7, Ryzen 9 with AES-NI hardware acceleration |
 >
 > **Why?** The quantum engine uses hardware-isolated trusted execution environments (TEEs) for:
 > - Protecting quantum state data in memory (encrypted RAM)
@@ -103,20 +106,12 @@ Paid tier users can define custom data type mappings:
 
 ---
 
-## ⏱️ Free Tier Limits
+## Runtime
 
-| Parameter | Free Tier | Paid Tier |
-|-----------|-----------|-----------|
-| **Active Runtime** | 50 minutes | Unlimited |
-| **Cooldown** | 10 hours | None |
-| **Daily Active** | ~50 min/day | 24/7 |
-| **Domains** | 15 standard | All + custom |
-| **Max Qubits** | 65536 | Unlimited scale |
+> **Active 24/7 — No time restrictions on this build.**  
+> The quantum engine runs continuously with no session limits or cooldown periods.
 
-> **Free Tier Cycle:** 50 minutes active → 10 hours cooldown → repeats  
-> That means approximately **50 minutes of quantum computation per day**.
-
-### Paid Tier — Full Access Includes:
+### Full Access Includes:
 - ⏰ **Unlimited runtime** — no cooldown, no time limits
 - 📦 **More packages** — additional specialized domains
 - 🔌 **Extensions & Plugins** — custom algorithm extensions
