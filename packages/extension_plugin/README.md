@@ -35,6 +35,8 @@ The **Extension & Plugin System** lets you ship your own quantum algorithms into
 
 **Source of truth:** [`nawaz1_dev/src/api/extension_plugin_security.rs`](../../../nawaz1_dev/src/api/extension_plugin_security.rs). All trait shapes, request/result types, and security primitives in this guide are taken directly from that file.
 
+> `ExtensionPluginSecurity` is the public type alias for the security bridge. Both names are interchangeable in code.
+
 **Base URL:** `http://localhost:8080`
 
 ---
@@ -266,6 +268,8 @@ pub struct PluginMetadata {
 Returned by `metadata()` and surfaced verbatim through `GET /api/v1/plugins/list` and `GET /api/v1/plugins/{name}/metadata`.
 
 > **Note:** `max_qubits` in `PluginMetadata` is informational only. Actual qubit limits are enforced via `PluginSecurityManifest.max_qubits_requested`.
+
+> **Serialization:** All three types (`PluginAlgorithmRequest`, `PluginAlgorithmResult`, `PluginMetadata`) implement `serde::Serialize` and `serde::Deserialize` for seamless JSON integration.
 
 ### `PluginSecurityManifest`
 
@@ -3018,7 +3022,7 @@ All plugin executions pass through a comprehensive multi-layer security validati
 - Input validation and sanitization
 - Rate limiting per trust level
 - Execution sandboxing with hard timeouts
-- Continuous behavioral monitoring
+- Continuous behavioral monitoring (execution profiles are recorded *before* anomaly checking to ensure the baseline is always current when detection runs)
 - Complete audit logging
 
 Plugins that violate security policies are automatically quarantined. Repeated violations escalate the system-wide threat level, which progressively restricts what all plugins can do.
@@ -3082,6 +3086,8 @@ The system automatically escalates the global `ThreatLevel` when violations accu
 | Critical → Lockdown | Manual trigger or 60+ violations in 1 hour |
 
 Violations expire after 1 hour of inactivity. All escalations are logged in the forensic audit trail.
+
+> **Buffer limits:** Both the main audit entries buffer and the violation entries buffer are capped at 100,000 entries with FIFO eviction — oldest entries are discarded first when the cap is reached.
 
 ---
 
