@@ -734,27 +734,43 @@ The Algorithm Bridge compiles your selected algorithm onto the VQE execution sub
 
 ## Runtime
 
-> **Active 24/7 — No time restrictions on this build.**  
-> The quantum engine runs continuously with no session limits or cooldown periods.
+Active 24/7 — No time restrictions on this build.
 
-### Full Access Includes:
-- ⏰ **Unlimited runtime** — no cooldown, no time limits
-- 📦 **More packages** — additional specialized domains
-- 🔌 **Extensions & Plugins** — custom algorithm extensions
-- 🎯 **UDF (User-Defined Functions)** — custom quantum routines
-- 📊 **User-Defined Data Types** — custom input schemas
-- 💾 **Persistence** — quantum state storage & retrieval
-- 🔐 **Advanced Security** — enhanced encryption, audit logs
-- 📈 **Monitoring** — real-time performance dashboards
-- 🏗️ **Infrastructure** — dedicated compute resources
-- 📊 **Dashboard** — web-based management console
-- 🌐 **Unified Multi-Domain Engine** — seamless cross-domain orchestration
-- 🏢 **Multi-Datacenter** — geo-distributed quantum compute
-- 🔄 **Streaming Pipeline** — real-time quantum data streams
-- ⚡ **Maximum Qubits** — beyond 65536, scale to millions
-- 🎁 **Custom Packages** — bespoke domain packages on request
+The quantum engine runs continuously with no session limits or cooldown periods.
 
-**Contact:** For paid tier access, contact Shahnawaz Alam
+## Full Access Includes:
+
+⏰ Unlimited runtime — no cooldown, no time limits
+
+📦 More packages — additional specialized domains
+
+🔌 Extensions & Plugins — custom algorithm extensions
+
+🎯 UDF (User-Defined Functions) — custom quantum routines
+
+📊 User-Defined Data Types — custom input schemas
+
+💾 Persistence — quantum state storage & retrieval
+
+🔐 Advanced Security — enhanced encryption, audit logs
+
+📈 Monitoring — real-time performance dashboards
+
+🏗️ Infrastructure — dedicated compute resources
+
+📊 Dashboard — web-based management console
+
+🌐 Unified Multi-Domain Engine — seamless cross-domain orchestration
+
+🏢 Multi-Datacenter — geo-distributed quantum compute
+
+🔄 Streaming Pipeline — real-time quantum data streams
+
+⚡ Maximum Qubits — beyond 65536, scale to quadrillions
+
+🎁 Custom Packages — bespoke domain packages on request
+
+Contact: For paid tier access, contact Shahnawaz Alam
 
 ---
 
