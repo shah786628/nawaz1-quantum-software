@@ -12,7 +12,7 @@
 
 The nawaz1-server binary in this repository was compiled on Ubuntu 24.04 LTS (x86_64-unknown-linux-gnu) with the Rust 1.95.0 stable toolchain.
 
-You **MUST** run it on a compatible Ubuntu Linux VM (Ubuntu 24.04 LTS or a binary-compatible derivative on x86_64). Running on Windows, macOS, Alpine (musl), or other non-glibc / non-x86_64 systems is **not supported**.
+You **MUST** run it on a glibc-based Linux system (x86_64 or ARM64). Ubuntu 24.04+, Debian 12+, Fedora 38+, or any binary-compatible derivative are supported. Running on Windows, macOS, Alpine (musl), or other non-glibc systems is **not supported**.
 
 The host VM CPU **MUST** support at least one of the following hardware security extensions:
 
