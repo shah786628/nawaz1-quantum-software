@@ -8,53 +8,53 @@
 
 ---
 
-> **⚠️ IMPORTANT — Hardware Security & Build Requirements for Launch**
->
-> The `nawaz1-server` binary in this repository was compiled on **Ubuntu 22.04 LTS (`x86_64-unknown-linux-gnu`)** with the **Rust 1.70 stable toolchain**.
->
-> You **MUST** run it on a **compatible Ubuntu Linux VM** (Ubuntu 22.04 LTS or a binary-compatible derivative on `x86_64`). Running on Windows, macOS, Alpine (musl), or other non-glibc / non-x86_64 systems is **not supported**.
->
-> The host VM CPU **MUST** support at least one of the following hardware security extensions:
->
-> | Technology | Vendor | Minimum Requirement |
-> |-----------|--------|-------------------|
-> | **Intel TDX** | Intel | Trust Domain Extensions — 4th Gen Xeon (Sapphire Rapids) or newer |
-> | **AMD SEV-SNP** | AMD | Secure Encrypted Virtualization — EPYC 7003 (Milan) or newer |
-> | **AMD SEV** | AMD | Secure Encrypted Virtualization — EPYC 7001 (Naples) or newer |
-> | **Intel SGX** | Intel | Software Guard Extensions — 6th Gen Core or Xeon E3 v6+ |
-> | **Intel Ultra Series** | Intel | Core Ultra 3, 5, 7, 9 (Meteor Lake / Arrow Lake) |
-> | **AMD Ryzen AES** | AMD | Ryzen 7, Ryzen 9 with AES-NI hardware acceleration |
->
-> **Why?** The quantum engine uses hardware-isolated trusted execution environments (TEEs) for:
-> - Protecting quantum state data in memory (encrypted RAM)
-> - Secure key management and rotation
-> - Side-channel attack resistance
-> - Tamper-proof execution of quantum algorithms
->
-> **Verification:**
-> ```bash
-> # Confirm OS
-> lsb_release -a    # Expect: Ubuntu 22.04 LTS (or compatible)
-> uname -m          # Expect: x86_64
->
-> # Confirm hardware security support
-> dmesg | grep -i "tdx\|sev\|sgx"
-> ```
->
-> Launching on unsupported hardware or a non-Ubuntu / non-x86_64 system will result in immediate failure or degraded security posture.
+## IMPORTANT — Hardware Security & Build Requirements for Launch
 
----
+The nawaz1-server binary in this repository was compiled on Ubuntu 22.04 LTS (x86_64-unknown-linux-gnu) with the Rust 1.70 stable toolchain.
+
+You **MUST** run it on a compatible Ubuntu Linux VM (Ubuntu 22.04 LTS or a binary-compatible derivative on x86_64). Running on Windows, macOS, Alpine (musl), or other non-glibc / non-x86_64 systems is **not supported**.
+
+The host VM CPU **MUST** support at least one of the following hardware security extensions:
+
+| Technology | Vendor | Minimum Requirement |
+|---|---|---|
+| Intel TDX | Intel | Trust Domain Extensions — 4th Gen Xeon (Sapphire Rapids) or newer |
+| AMD SEV-SNP | AMD | Secure Encrypted Virtualization — EPYC 7003 (Milan) or newer |
+| AMD SEV | AMD | Secure Encrypted Virtualization — EPYC 7001 (Naples) or newer |
+| Intel SGX | Intel | Software Guard Extensions — 6th Gen Core or Xeon E3 v6+ |
+| Intel Ultra Series | Intel | Core Ultra 3, 5, 7, 9 (Meteor Lake / Arrow Lake) |
+| AMD Ryzen AES | AMD | Ryzen 7, Ryzen 9 with AES-NI hardware acceleration |
+
+**Why?** The quantum engine uses hardware-isolated trusted execution environments (TEEs) for:
+
+- Protecting quantum state data in memory (encrypted RAM)
+- Secure key management and rotation
+- Side-channel attack resistance
+- Tamper-proof execution of quantum algorithms
+
+**Verification:**
+
+```bash
+# Confirm OS
+lsb_release -a    # Expect: Ubuntu 22.04 LTS (or compatible)
+uname -m          # Expect: x86_64
+
+# Confirm hardware security support
+dmesg | grep -i "tdx\|sev\|sgx"
+```
+
+Launching on unsupported hardware or a non-Ubuntu / non-x86_64 system will result in immediate failure or degraded security posture.
 
 ## Binary Downloads
 
 Pre-compiled server binaries are included in the `bin/` directory:
 
 | Architecture | Path | Target | Supported CPUs |
-|-------------|------|--------|----------------|
-| **x86_64** | `bin/x86_64/nawaz1-server` | Intel/AMD 64-bit Linux | Intel TDX/SGX/Ultra 3,5,7,9 — AMD SEV/SEV-SNP/Ryzen 7,9 |
-| **ARM64** | `bin/arm64/nawaz1-server` | Apple Silicon Linux VM | Apple M1, M2, M3, M4, M5 series |
+|---|---|---|---|
+| x86_64 | `bin/x86_64/nawaz1-server` | Intel/AMD 64-bit Linux | Intel TDX/SGX/Ultra 3,5,7,9 — AMD SEV/SEV-SNP/Ryzen 7,9 |
+| ARM64 | `bin/arm64/nawaz1-server` | Apple Silicon Linux VM | Apple M1, M2, M3, M4, M5 series |
 
-### Quick Start
+## Quick Start
 
 ```bash
 # For x86_64 (Intel/AMD):
@@ -66,7 +66,7 @@ chmod +x bin/arm64/nawaz1-server
 ./bin/arm64/nawaz1-server
 ```
 
-### Binary Details
+## Binary Details
 
 - **Build Date:** 2026-05-19
 - **Expiration:** 18 months (November 2027)
