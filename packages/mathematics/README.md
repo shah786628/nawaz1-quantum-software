@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Mathematics package provides quantum-accelerated mathematical computations through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **11 specialized sub-modules** covering the full spectrum of mathematical physics foundations — from quantum algebra and topology to optimization theory and number theory.
+The Mathematics package provides quantum-accelerated mathematical computations through the unified L3 VQE circuit at 65536-qubit scale. It encompasses **22 specialized sub-modules** covering both quantum-native mathematics and classical mathematics with quantum speed acceleration — from quantum algebra and topology to classical linear algebra, calculus, differential equations, optimization, statistics, and beyond.
 
 **API Endpoint:** `POST http://localhost:8080/api/v1/quantum/execute`
 
@@ -10,7 +10,9 @@ The Mathematics package provides quantum-accelerated mathematical computations t
 
 ---
 
-## The 11 Quantum Mathematics Sub-Modules
+## The 22 Quantum Mathematics Sub-Modules
+
+### Quantum Mathematics (1–11)
 
 | # | Sub-Module | Source | Key Domain |
 |---|-----------|--------|------------|
@@ -25,6 +27,22 @@ The Mathematics package provides quantum-accelerated mathematical computations t
 | 9 | Quantum Optimization Theory | `quantum_optimization_theory.rs` | SDP & Game Theory |
 | 10 | Quantum Number Theory | `quantum_number_theory.rs` | Factoring & Error Codes |
 | 11 | Advanced Quantum Probability | `advanced_quantum_probability.rs` | Free Probability, RMT, Quantum CLT, Wasserstein, Schatten |
+
+### Classical Mathematics with Quantum Speed (12–22)
+
+| # | Sub-Module | Source | Key Domain |
+|---|-----------|--------|------------|
+| 12 | Classical Linear Algebra | `classical_linear_algebra.rs` | Matrix Decompositions & HHL |
+| 13 | Classical Calculus & Analysis | `classical_calculus.rs` | Integration & Fourier (QFT) |
+| 14 | Differential Equations | `differential_equations.rs` | ODE/PDE Solvers |
+| 15 | Classical Optimization | `classical_optimization.rs` | Convex, LP & QAOA Hybrid |
+| 16 | Classical Probability & Statistics | `classical_statistics.rs` | Monte Carlo & Bayesian |
+| 17 | Numerical Methods | `numerical_methods.rs` | Interpolation & Root Finding |
+| 18 | Discrete Mathematics & Combinatorics | `discrete_mathematics.rs` | Graphs & SAT |
+| 19 | Graph Theory | `graph_theory.rs` | Quantum Walks & Centrality |
+| 20 | Abstract Algebra | `abstract_algebra.rs` | Groups, Rings & Fields |
+| 21 | Number Theory | `classical_number_theory.rs` | Shor's & Discrete Log |
+| 22 | Geometry & Topology | `classical_geometry.rs` | Computational Geometry & TDA |
 
 ---
 
@@ -440,6 +458,415 @@ A comprehensive non-commutative / random-matrix probability suite for quantum sy
 
 ---
 
+## Classical Mathematics with Quantum Speed (12–22)
+
+The following sub-modules bring quantum acceleration to classical mathematics. Each leverages the L3 VQE circuit to deliver exponential or quadratic speedups over purely classical algorithms, making large-scale problems tractable on a single server.
+
+---
+
+## 12. Classical Linear Algebra
+
+**Source:** `classical_linear_algebra.rs`
+
+Quantum-accelerated matrix decompositions (QR, SVD, LU, Cholesky) and linear system solving via the HHL algorithm, delivering exponential speedup over classical methods for large-scale matrices. Supports sparse matrix operations with quantum amplitude encoding.
+
+**Key Capabilities:**
+- QR decomposition with quantum-accelerated Gram-Schmidt
+- Singular Value Decomposition (SVD) via quantum phase estimation
+- LU factorization with quantum pivoting strategies
+- Cholesky decomposition for positive-definite systems
+- Eigenvalue/eigenvector computation via HHL algorithm (exponential speedup)
+- Matrix inversion via HHL (O(log N) vs classical O(N³))
+- Sparse matrix handling with quantum amplitude encoding
+- Condition number estimation via quantum singular value estimation
+- Least squares solver with quantum linear regression
+
+**When to Use:** Large-scale linear systems (10⁶+ dimensions), structural engineering simulations, signal processing pipelines, machine learning kernel computations.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "hhl",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "classical_linear_algebra",
+    "task": "svd",
+    "matrix_rows": 65536,
+    "matrix_cols": 65536,
+    "num_singular_values": 100,
+    "sparse": true
+  }
+}
+```
+
+---
+
+## 13. Classical Calculus & Analysis
+
+**Source:** `classical_calculus.rs`
+
+Quantum-accelerated integration, differentiation, and Fourier analysis. Quantum quadrature provides quadratic speedup over classical numerical integration, while the Quantum Fourier Transform (QFT) delivers exponential speedup over the Fast Fourier Transform (FFT).
+
+**Key Capabilities:**
+- Quantum quadrature integration (quadratic speedup over classical)
+- High-dimensional numerical integration (Monte Carlo with quantum amplitude estimation)
+- Quantum gradient computation and automatic differentiation
+- Multivariable calculus: gradient, divergence, curl with quantum parallelism
+- Real analysis: series convergence testing and summation at quantum speed
+- Complex analysis: contour integration via quantum path simulation
+- Fourier transform via QFT (exponential speedup over FFT)
+- Laplace and Z-transforms with quantum acceleration
+- Wavelet transforms via quantum signal processing
+
+**When to Use:** High-dimensional integration (10+ dimensions), PDE solving, signal analysis, financial derivative pricing, quantum chemistry integral evaluation.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "qft",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "classical_calculus",
+    "task": "fourier_transform",
+    "signal_length": 65536,
+    "transform_type": "forward",
+    "precision": "double"
+  }
+}
+```
+
+---
+
+## 14. Differential Equations
+
+**Source:** `differential_equations.rs`
+
+ODE and PDE solvers accelerated by the HHL quantum linear system algorithm. Discretized differential equations become large sparse linear systems, where HHL provides exponential speedup. Spectral methods leverage QFT for efficient basis transformations.
+
+**Key Capabilities:**
+- ODE solvers with HHL-accelerated implicit time stepping
+- PDE solvers: heat equation, wave equation, Poisson equation
+- Navier-Stokes discretization with quantum-accelerated pressure solve
+- Spectral methods with Quantum Fourier Transform basis
+- Finite element method (FEM) with quantum-accelerated stiffness matrix assembly
+- Boundary value problem (BVP) solvers
+- Stiff system solvers with quantum-implicit methods
+- Adaptive time stepping with quantum error estimation
+- Multi-scale methods with quantum coarse-graining
+
+**When to Use:** Fluid dynamics (CFD), thermal modeling, structural mechanics, weather and climate prediction, electromagnetic field simulation.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "hhl",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "differential_equations",
+    "task": "pde_solver",
+    "equation": "navier_stokes",
+    "spatial_dim": 3,
+    "grid_size": 256,
+    "time_steps": 1000,
+    "method": "spectral"
+  }
+}
+```
+
+---
+
+## 15. Classical Optimization
+
+**Source:** `classical_optimization.rs`
+
+Quantum-accelerated convex and combinatorial optimization. Combines quantum interior point methods for continuous optimization with QAOA/Grover hybrids for integer programming, delivering speedups across the full optimization landscape.
+
+**Key Capabilities:**
+- Convex optimization via SDP relaxation with quantum solver
+- Linear programming with quantum interior point methods
+- Gradient descent with quantum gradient estimation (quadratic speedup)
+- Constrained optimization: penalty methods, augmented Lagrangian at quantum speed
+- Integer programming via QAOA/Grover hybrid approach
+- Quadratic programming with quantum acceleration
+- Multi-objective optimization with quantum Pareto front search
+- Stochastic optimization with quantum sampling
+- Global optimization with quantum annealing-inspired methods
+
+**When to Use:** Operations research, resource allocation, portfolio optimization, scheduling, supply chain management, network design.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "qaoa",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "classical_optimization",
+    "task": "linear_program",
+    "num_variables": 10000,
+    "num_constraints": 5000,
+    "method": "quantum_interior_point",
+    "objective": "minimize"
+  }
+}
+```
+
+---
+
+## 16. Classical Probability & Statistics
+
+**Source:** `classical_statistics.rs`
+
+Quantum-accelerated statistical methods delivering quadratic speedup for Monte Carlo sampling via quantum amplitude estimation and exponential improvements for certain Bayesian inference tasks. Full classical statistics suite running at quantum speed.
+
+**Key Capabilities:**
+- Quantum-accelerated Monte Carlo sampling (quadratic speedup)
+- Bayesian inference with quantum amplitude estimation
+- Hypothesis testing with quantum-accelerated p-value computation
+- Distribution fitting (normal, Poisson, exponential, etc.) at quantum speed
+- Regression analysis: linear, logistic, polynomial with quantum least squares
+- ANOVA and multivariate analysis at quantum speed
+- Markov Chain Monte Carlo (MCMC) with quantum walk acceleration
+- Kernel density estimation with quantum sampling
+- Principal component analysis (PCA) via quantum SVD
+
+**When to Use:** Data science pipelines, epidemiology modeling, clinical trial analysis, survey analysis, actuarial computations, quality control.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "hhl",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "classical_statistics",
+    "task": "monte_carlo",
+    "distribution": "multivariate_normal",
+    "dimensions": 1000,
+    "num_samples": 1000000,
+    "method": "quantum_amplitude_estimation"
+  }
+}
+```
+
+---
+
+## 17. Numerical Methods
+
+**Source:** `numerical_methods.rs`
+
+Quantum-accelerated numerical analysis primitives: interpolation, root finding, quadrature, and ODE stepping. Grover-accelerated bisection delivers quadratic speedup for root finding, while quantum integration outperforms classical quadrature rules.
+
+**Key Capabilities:**
+- Quantum-accelerated polynomial and spline interpolation
+- Extrapolation with quantum-enhanced Richardson method
+- Root finding with Grover-accelerated bisection (quadratic speedup)
+- Newton-Raphson with quantum Jacobian estimation
+- Numerical quadrature with quantum integration (Gauss, Clenshaw-Curtis)
+- Runge-Kutta and Adams-Bashforth with quantum linear algebra backend
+- Error analysis and adaptive precision control
+- Chebyshev approximation with quantum coefficient computation
+- Padé approximants with quantum rational fitting
+
+**When to Use:** Scientific computing, engineering simulation, computational physics, numerical solutions where classical methods hit precision or performance walls.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "hhl",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "numerical_methods",
+    "task": "root_finding",
+    "method": "grover_bisection",
+    "function": "polynomial",
+    "degree": 100,
+    "interval": [-10.0, 10.0],
+    "precision": 1e-12
+  }
+}
+```
+
+---
+
+## 18. Discrete Mathematics & Combinatorics
+
+**Source:** `discrete_mathematics.rs`
+
+Quantum-accelerated combinatorial algorithms leveraging Grover's quadratic speedup for search problems and QAOA for optimization over discrete structures. Boolean satisfiability, graph algorithms, and enumeration at quantum speed.
+
+**Key Capabilities:**
+- Quantum-accelerated graph algorithms: shortest path, minimum spanning tree (Grover)
+- Community detection with quantum spectral methods
+- Combinatorial search with Grover's algorithm (quadratic speedup)
+- Boolean satisfiability (SAT) with quantum backtracking
+- Permutation and combination enumeration with quantum parallelism
+- Network flow optimization with QAOA
+- Counting problems with quantum approximate counting
+- Set cover and hitting set with quantum search
+- Constraint satisfaction problems (CSP) with quantum solvers
+
+**When to Use:** Cryptanalysis, circuit design, scheduling, network analysis, logistics, compiler optimization.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "qaoa",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "discrete_mathematics",
+    "task": "boolean_sat",
+    "num_variables": 1000,
+    "num_clauses": 4000,
+    "method": "quantum_backtracking"
+  }
+}
+```
+
+---
+
+## 19. Graph Theory
+
+**Source:** `graph_theory.rs`
+
+Quantum random walks on graphs providing exponential speedup for certain graph properties, combined with Grover-accelerated classical graph algorithms. Supports centrality measures, isomorphism testing, and spectral graph theory at quantum speed.
+
+**Key Capabilities:**
+- Quantum random walk on graphs (exponential speedup for certain properties)
+- Graph isomorphism testing with quantum algorithms
+- Centrality measures: betweenness, closeness, PageRank with quantum walk
+- Minimum spanning tree with Grover acceleration
+- Maximum matching and maximum flow with quantum search
+- Community detection with quantum spectral clustering
+- Graph coloring with QAOA
+- Planarity testing and graph decomposition
+- Spectral graph theory with quantum eigenvalue computation
+
+**When to Use:** Social network analysis, infrastructure planning, bioinformatics (protein interaction networks), recommendation systems, transportation network optimization.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "hhl",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "graph_theory",
+    "task": "pagerank",
+    "num_nodes": 65536,
+    "method": "quantum_walk",
+    "damping_factor": 0.85,
+    "convergence_threshold": 1e-8
+  }
+}
+```
+
+---
+
+## 20. Abstract Algebra
+
+**Source:** `abstract_algebra.rs`
+
+Group theory, ring theory, and field theory computations accelerated by quantum Fourier sampling and quantum eigenvalue decomposition. Enables efficient computation of group-theoretic structures essential for cryptography and physics.
+
+**Key Capabilities:**
+- Group theory: permutation groups, character tables with quantum Fourier sampling
+- Ring and field theory: polynomial factorization with quantum speedup
+- Representation theory with quantum eigenvalue decomposition
+- Galois theory computations and field extension analysis
+- Homomorphism detection and isomorphism classification
+- Sylow subgroup computation with quantum search
+- Module theory and ideal computations
+- Gröbner basis computation with quantum polynomial arithmetic
+
+**When to Use:** Cryptography (group-based protocols), coding theory, symmetry analysis, particle physics (gauge group structure), algebraic geometry.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "qft",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "abstract_algebra",
+    "task": "character_table",
+    "group_type": "symmetric",
+    "group_order": 120,
+    "method": "quantum_fourier_sampling"
+  }
+}
+```
+
+---
+
+## 21. Number Theory
+
+**Source:** `classical_number_theory.rs`
+
+Quantum integer factorization via Shor's algorithm (exponential speedup), discrete logarithm computation, and quantum-accelerated primality testing. The foundation for cryptographic security assessment and post-quantum migration analysis.
+
+**Key Capabilities:**
+- Quantum integer factorization via Shor's algorithm (exponential speedup)
+- Discrete logarithm with quantum period finding
+- Primality testing with quantum-accelerated Miller-Rabin
+- Modular arithmetic and Chinese Remainder Theorem at quantum speed
+- Elliptic curve computations with quantum acceleration
+- Quadratic residuosity with quantum sampling
+- Continued fraction expansion with quantum precision
+- Lattice problems (SVP, CVP) with quantum search
+
+**When to Use:** Cryptographic security assessment, RSA/ECC analysis, blockchain and digital signature verification, computational number theory research.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "hhl",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "classical_number_theory",
+    "task": "factoring",
+    "number": 340282366920938463463374607431768211297,
+    "algorithm": "shor",
+    "bit_length": 128
+  }
+}
+```
+
+---
+
+## 22. Geometry & Topology
+
+**Source:** `classical_geometry.rs`
+
+Computational geometry with quantum search acceleration and topological data analysis (TDA) via quantum algorithms. Grover-accelerated geometric constructions and quantum persistent homology for high-dimensional data topology.
+
+**Key Capabilities:**
+- Computational geometry with quantum search acceleration
+- Convex hull construction with Grover-accelerated point processing
+- Voronoi diagrams and Delaunay triangulation at quantum speed
+- Point location and nearest neighbor with quantum spatial indexing
+- Classical topology: Betti numbers, homology groups with quantum TDA
+- Persistent homology with quantum linear algebra
+- Geometric intersection testing with quantum parallelism
+- Mesh generation and refinement with quantum optimization
+- Manifold learning with quantum dimensionality reduction
+
+**When to Use:** Computer graphics, CAD/CAM systems, robotics path planning, geographic information systems (GIS), 3D printing, molecular surface computation.
+
+```json
+{
+  "domain": "mathematics",
+  "algorithm": "hhl",
+  "input_data": [0.001, -0.003, 0.002, "...65536 floats..."],
+  "config": {
+    "sub_module": "classical_geometry",
+    "task": "persistent_homology",
+    "point_cloud_size": 65536,
+    "max_dimension": 3,
+    "filtration": "vietoris_rips",
+    "threshold": 0.5
+  }
+}
+```
+
+---
+
 ## General Request Format
 
 All sub-modules are accessed through the unified quantum execution endpoint:
@@ -474,7 +901,7 @@ POST http://localhost:8080/api/v1/quantum/mathematics/demo
 - **Qubits:** 65536
 - **Maximum matrix dimension:** 65536×65536
 - **Integer factorization:** Up to 65536-bit numbers
-- **Total mathematics source:** 11 modules covering all quantum mathematical foundations
+- **Total mathematics source:** 22 modules — 11 quantum-native + 11 classical with quantum speed
 
 ---
 
@@ -518,6 +945,58 @@ response = requests.post(API, headers=HEADERS, json={
     }
 })
 print(response.json())
+
+# --- Classical Mathematics with Quantum Speed ---
+
+# Example: Solve a 65536-dimensional linear system via HHL
+# (exponential speedup over classical Gaussian elimination)
+A_flat = rng.normal(0, 1, 65536)
+A_encoded = (A_flat / np.linalg.norm(A_flat)).tolist()
+
+response = requests.post(API, headers=HEADERS, json={
+    "domain": "mathematics",
+    "algorithm": "hhl",
+    "input_data": A_encoded,
+    "config": {
+        "sub_module": "classical_linear_algebra",
+        "task": "solve_linear_system",
+        "matrix_dim": 65536,
+        "sparse": True,
+        "method": "hhl"
+    }
+})
+print("Linear system (HHL):", response.json())
+
+# Example: Quantum-accelerated Monte Carlo integration
+# (quadratic speedup for high-dimensional integrals)
+response = requests.post(API, headers=HEADERS, json={
+    "domain": "mathematics",
+    "algorithm": "hhl",
+    "input_data": amplitudes,
+    "config": {
+        "sub_module": "classical_statistics",
+        "task": "monte_carlo",
+        "distribution": "multivariate_normal",
+        "dimensions": 100,
+        "num_samples": 1000000,
+        "method": "quantum_amplitude_estimation"
+    }
+})
+print("Monte Carlo integration:", response.json())
+
+# Example: Quantum Fourier Transform (exponential speedup over FFT)
+response = requests.post(API, headers=HEADERS, json={
+    "domain": "mathematics",
+    "algorithm": "qft",
+    "input_data": amplitudes,
+    "config": {
+        "sub_module": "classical_calculus",
+        "task": "fourier_transform",
+        "signal_length": 65536,
+        "transform_type": "forward"
+    }
+})
+print("QFT result:", response.json())
 ```
 
 ---
@@ -536,3 +1015,13 @@ print(response.json())
 | **Quantum Geometry & Phases** | Quantum Differential Geometry, Quantum Topology |
 | **Quantum Algorithms Design** | Quantum Optimization Theory, Quantum Probability |
 | **Random Matrix Theory** | Advanced Quantum Probability, Quantum Algebra |
+| **Engineering & Structural Analysis** | Classical Linear Algebra, Differential Equations, Numerical Methods |
+| **Data Science & Machine Learning** | Classical Statistics, Classical Optimization, Classical Linear Algebra |
+| **Cryptography & Security** | Number Theory, Abstract Algebra, Discrete Mathematics |
+| **Computer Science & Algorithms** | Graph Theory, Discrete Mathematics, Classical Optimization |
+| **Computational Physics** | Differential Equations, Numerical Methods, Classical Calculus |
+| **Financial Modeling** | Classical Statistics, Classical Optimization, Classical Calculus |
+| **Bioinformatics & Drug Discovery** | Graph Theory, Classical Statistics, Geometry & Topology |
+| **Operations Research & Logistics** | Classical Optimization, Discrete Mathematics, Graph Theory |
+| **Signal & Image Processing** | Classical Calculus (QFT), Classical Linear Algebra (SVD), Numerical Methods |
+| **Computer Graphics & CAD** | Geometry & Topology, Classical Linear Algebra, Numerical Methods |
