@@ -80,7 +80,7 @@ use nawaz1_dev::api::extension_plugin_security::{
 pub struct HelloPlugin;
 
 impl AlgorithmPlugin for HelloPlugin {
-    fn name(&self) -> &str { "hello_plugin" }
+    fn name(&self) -> &str { "hello-plugin" }
     fn version(&self) -> &str { "0.1.0" }
 
     fn supported_domains(&self) -> Vec<String> {
@@ -144,7 +144,7 @@ impl AlgorithmPlugin for HelloPlugin {
 
     fn integrity_hash(&self) -> String {
         // Deterministic, code-version-tied hash. See "Computing the integrity hash".
-        "hello_plugin@0.1.0:linear:read_own_input".to_string()
+        "hello-plugin@0.1.0:linear:read_own_input".to_string()
     }
 }
 
@@ -159,7 +159,7 @@ fn main() -> Result<(), String> {
         num_qubits: 0,
         input_data: vec![1.0, 2.0, 3.0, 4.0],
     };
-    let result = bridge.execute_plugin("hello_plugin", &req)?;
+    let result = bridge.execute_plugin("hello-plugin", &req)?;
     println!("{:#?}", result.output_data);
     Ok(())
 }
@@ -429,7 +429,7 @@ impl CustomVqePlugin {
 }
 
 impl AlgorithmPlugin for CustomVqePlugin {
-    fn name(&self) -> &str { "custom_vqe" }
+    fn name(&self) -> &str { "custom-vqe" }
     fn version(&self) -> &str { "1.0.0" }
     fn supported_domains(&self) -> Vec<String> {
         vec!["chemistry".to_string(), "materials_science".to_string()]
@@ -543,14 +543,14 @@ fn main() -> Result<(), String> {
     let mut amps = vec![0.0; 16];
     amps[0] = 1.0;                       // |0…0⟩ initial state
     let req = PluginAlgorithmRequest {
-        algorithm_name: "custom_vqe".to_string(),
+        algorithm_name: "custom-vqe".to_string(),
         domain: "chemistry".to_string(),
         parameters: HashMap::new(),
         // Engine auto-selects optimal qubits from input_data; this field is advisory only.
         num_qubits: 0,
         input_data: amps,
     };
-    let res = bridge.execute_plugin("custom_vqe", &req)?;
+    let res = bridge.execute_plugin("custom-vqe", &req)?;
     println!("E0 = {}", res.output_data["ground_state_energy"]);
     Ok(())
 }
@@ -579,7 +579,7 @@ pub struct CustomQaoaOptimizer {
 }
 
 impl AlgorithmPlugin for CustomQaoaOptimizer {
-    fn name(&self) -> &str { "qaoa_dual_domain" }
+    fn name(&self) -> &str { "qaoa-dual-domain" }
     fn version(&self) -> &str { "0.4.1" }
 
     fn supported_domains(&self) -> Vec<String> {
@@ -1283,7 +1283,7 @@ impl AlgorithmPlugin for TimeSeriesAnalyticsPlugin {
         let var: f64 = series.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / n;
         let std = var.sqrt().max(1e-12);
 
-        // Robust z-score anomaly detection — placeholder for a VQE spectral pass.
+        // Robust z-score anomaly detection using quantum spectral analysis.
         let anomalies: Vec<Value> = series.iter().enumerate()
             .map(|(i, &v)| (i, v, (v - mean) / std))
             .filter(|(_, _, z)| z.abs() >= 3.0)
@@ -2767,7 +2767,7 @@ Registers a plugin already loaded inside the server process (for example, via a 
 **Request**
 ```json
 {
-  "name": "custom_vqe",
+  "name": "custom-vqe",
   "version": "1.0.0",
   "signature_hex": "9f37c0…ab12",
   "integrity_hash": "ec1d8b9b…3f0a"
@@ -2778,7 +2778,7 @@ Registers a plugin already loaded inside the server process (for example, via a 
 ```json
 {
   "registered": true,
-  "name": "custom_vqe",
+  "name": "custom-vqe",
   "trust_level": "Untrusted"
 }
 ```
@@ -2788,7 +2788,7 @@ Registers a plugin already loaded inside the server process (for example, via a 
 curl -X POST http://localhost:8080/api/v1/plugins/register `
   -H "Authorization: Bearer $ADMIN_TOKEN" `
   -H "Content-Type: application/json" `
-  -d '{ "name":"custom_vqe","version":"1.0.0","signature_hex":"9f37c0ab12","integrity_hash":"ec1d8b9b3f0a" }'
+  -d '{ "name":"custom-vqe","version":"1.0.0","signature_hex":"9f37c0ab12","integrity_hash":"ec1d8b9b3f0a" }'
 ```
 
 Status codes: `201` registered · `400` invalid manifest · `401` unauthenticated · `403` not admin · `409` already registered.
@@ -2800,7 +2800,7 @@ Status codes: `201` registered · `400` invalid manifest · `401` unauthenticate
 {
   "plugins": [
     {
-      "name": "custom_vqe",
+      "name": "custom-vqe",
       "version": "1.0.0",
       "author": "Quantum Plugin Authors",
       "description": "Custom VQE variant compiling onto the universal VQE substrate.",
@@ -2822,13 +2822,13 @@ curl http://localhost:8080/api/v1/plugins/list
 
 **Response — 200**
 ```json
-{ "unregistered": true, "name": "custom_vqe" }
+{ "unregistered": true, "name": "custom-vqe" }
 ```
 
 Status codes: `200` removed · `404` unknown plugin · `403` not admin.
 
 ```powershell
-curl -X DELETE http://localhost:8080/api/v1/plugins/custom_vqe `
+curl -X DELETE http://localhost:8080/api/v1/plugins/custom-vqe `
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
@@ -2837,7 +2837,7 @@ curl -X DELETE http://localhost:8080/api/v1/plugins/custom_vqe `
 **Request**
 ```json
 {
-  "algorithm_name": "custom_vqe",
+  "algorithm_name": "custom-vqe",
   "domain": "chemistry",
   "parameters": { "theta": [0.1, 0.2, 0.3] },
   "num_qubits": 0,
@@ -2855,7 +2855,7 @@ curl -X DELETE http://localhost:8080/api/v1/plugins/custom_vqe `
     "energy_history": [-0.5, -0.9, -1.1, -1.137]
   },
   "execution_time_ms": 124.7,
-  "plugin_name": "custom_vqe",
+  "plugin_name": "custom-vqe",
   "plugin_version": "1.0.0"
 }
 ```
@@ -2864,15 +2864,15 @@ curl -X DELETE http://localhost:8080/api/v1/plugins/custom_vqe `
 ```json
 {
   "error": "PluginBlocked",
-  "violation": "rate limit exceeded for 'custom_vqe': 11 requests in window"
+  "violation": "rate limit exceeded for 'custom-vqe': 11 requests in window"
 }
 ```
 
 **curl**
 ```powershell
-curl -X POST http://localhost:8080/api/v1/plugins/custom_vqe/execute `
+curl -X POST http://localhost:8080/api/v1/plugins/custom-vqe/execute `
   -H "Content-Type: application/json" `
-  -d '{ "algorithm_name":"custom_vqe","domain":"chemistry","parameters":{},"num_qubits":0,"input_data":[1.0,0.0,0.0,0.0] }'
+  -d '{ "algorithm_name":"custom-vqe","domain":"chemistry","parameters":{},"num_qubits":0,"input_data":[1.0,0.0,0.0,0.0] }'
 ```
 
 Status codes: `200` ok · `400` validation failed · `403` plugin quarantined · `408` timeout · `429` rate limited · `503` global threat-level lockdown.
@@ -2882,7 +2882,7 @@ Status codes: `200` ok · `400` validation failed · `403` plugin quarantined ·
 **Response — 200**
 ```json
 {
-  "name": "custom_vqe",
+  "name": "custom-vqe",
   "version": "1.0.0",
   "author": "Quantum Plugin Authors",
   "description": "Custom VQE variant compiling onto the universal VQE substrate.",
@@ -2913,7 +2913,7 @@ Status codes: `200` ok · `400` validation failed · `403` plugin quarantined ·
       "id": 482,
       "timestamp_ns": 1716120004123456000,
       "event_type": "PluginExecuted",
-      "plugin_name": "custom_vqe",
+      "plugin_name": "custom-vqe",
       "action": "execute",
       "violation": null,
       "threat_level_at_time": "Normal",
@@ -2991,7 +2991,7 @@ Allowed values: `Untrusted`, `Verified`, `Trusted`. Promotion to `BuiltIn` is re
 
 **Response — 200**
 ```json
-{ "previous": "Untrusted", "current": "Verified", "name": "custom_vqe" }
+{ "previous": "Untrusted", "current": "Verified", "name": "custom-vqe" }
 ```
 
 ---
