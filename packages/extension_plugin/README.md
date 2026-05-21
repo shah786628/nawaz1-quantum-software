@@ -13,8 +13,16 @@ The **Extension & Plugin System** lets you ship your own quantum algorithms into
                               │ implements AlgorithmPlugin
                               ▼
        ┌─────────────────────────────────────────────────┐
-       │   AlgorithmBridgeExtended                       │
+       │   Extension Plugin Security                     │
        │   (Multi-layer security validation pipeline)    │
+       └─────────────────────────────┬───────────────────┘
+                                     │ validated
+                                     ▼
+       ┌─────────────────────────────────────────────────┐
+       │   Algorithm Bridge                              │
+       │   (Universal algorithm → VQE compiler)          │
+       │   (Auto-compiles any algorithm, including       │
+       │    unknown algorithms via adaptive fallback)    │
        └─────────────────────────────┬───────────────────┘
                                      │ parameter vector
                                      ▼
@@ -59,7 +67,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use serde_json::json;
 use nawaz1_dev::api::algorithm_bridge::{
-    AlgorithmBridgeExtended,
+    ExtensionPluginSecurity,
     AlgorithmPlugin,
     PluginAlgorithmRequest,
     PluginAlgorithmResult,
@@ -141,7 +149,7 @@ impl AlgorithmPlugin for HelloPlugin {
 }
 
 fn main() -> Result<(), String> {
-    let mut bridge = AlgorithmBridgeExtended::new();
+    let mut bridge = ExtensionPluginSecurity::new();
     bridge.register_plugin(Arc::new(HelloPlugin))?;
     let req = PluginAlgorithmRequest {
         algorithm_name: "hello".to_string(),
@@ -362,8 +370,8 @@ The system stores this hash at registration time and verifies it on **every** ca
 ### 4. Register with the bridge
 
 ```rust
-let mut bridge = AlgorithmBridgeExtended::new();      // strict (default)
-// or AlgorithmBridgeExtended::new_permissive() for development
+let mut bridge = ExtensionPluginSecurity::new();      // strict (default)
+// or ExtensionPluginSecurity::new_permissive() for development
 let registered_name = bridge.register_plugin(Arc::new(MyPlugin))?;
 ```
 
@@ -391,7 +399,7 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha512};
 
 use nawaz1_dev::api::algorithm_bridge::{
-    AlgorithmBridgeExtended, AlgorithmPlugin,
+    ExtensionPluginSecurity, AlgorithmPlugin,
     ComplexityClass, DataAccessScope,
     PluginAlgorithmRequest, PluginAlgorithmResult,
     PluginMetadata, PluginSecurityManifest,
@@ -527,7 +535,7 @@ impl AlgorithmPlugin for CustomVqePlugin {
 }
 
 fn main() -> Result<(), String> {
-    let mut bridge = AlgorithmBridgeExtended::new();
+    let mut bridge = ExtensionPluginSecurity::new();
     bridge.register_plugin(Arc::new(CustomVqePlugin::new()))?;
 
     let mut amps = vec![0.0; 16];
@@ -690,7 +698,7 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha512};
 
 use nawaz1_dev::api::algorithm_bridge::{
-    AlgorithmBridgeExtended, AlgorithmPlugin,
+    ExtensionPluginSecurity, AlgorithmPlugin,
     ComplexityClass, DataAccessScope,
     PluginAlgorithmRequest, PluginAlgorithmResult,
     PluginMetadata, PluginSecurityManifest,
@@ -827,7 +835,7 @@ impl AlgorithmPlugin for SqlQueryOptimizerPlugin {
 }
 
 // Registration
-let mut bridge = AlgorithmBridgeExtended::new();
+let mut bridge = ExtensionPluginSecurity::new();
 bridge.register_plugin(Arc::new(SqlQueryOptimizerPlugin))?;
 ```
 
