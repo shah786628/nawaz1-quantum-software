@@ -738,6 +738,10 @@ Active 24/7 — No time restrictions on this build.
 
 The quantum engine runs continuously with no session limits or cooldown periods.
 
+### Free Tier Limits
+
+📦 Input Data Limit: 500 MB maximum per import
+
 ## Full Access Includes:
 
 ⏰ Unlimited runtime — no cooldown, no time limits
@@ -770,7 +774,28 @@ The quantum engine runs continuously with no session limits or cooldown periods.
 
 🎁 Custom Packages — bespoke domain packages on request
 
+💻 Multiple Hardware Support — CPU, GPU (NVIDIA A10/A100/H100, AMD MI350X), FPGA, and future quantum hardware
+
+📦 Unlimited Input Data — no 500MB limit, scale to EB (Exabytes), PB (Petabytes), ZB (Zettabytes) — limited only by your hardware capacity
+
+⚡ No Qubit Limit — scale qubits to the maximum your hardware can support, no software cap
+
 Contact: For paid tier access, contact Shahnawaz Alam
+
+---
+
+## Hardware Support (Paid Tier)
+
+| Hardware | Support |
+|----------|---------|
+| CPU | x86_64, ARM64 (aarch64) |
+| GPU | NVIDIA A10, A100, H100; AMD MI350X |
+| FPGA | Custom quantum gate acceleration |
+| Quantum Hardware | Future integration ready |
+| Memory | Scale to available system RAM |
+| Storage | Scale to available disk — EB, PB, ZB capable |
+
+> Free tier runs on CPU only (x86_64, ARM64). Paid tier unlocks GPU acceleration and multi-hardware orchestration.
 
 ---
 
