@@ -4,7 +4,7 @@
 
 The **Extension & Plugin System** lets you ship your own quantum algorithms into the running engine without forking the codebase. Plugins are first-class Rust types that implement a single trait, get vetted by a **multi-layer security validation pipeline**, and then run on the same universal **VQE execution substrate** that powers every built-in domain.
 
-**Core principle:** plugins do *not* select a different quantum backend, **and they do not choose qubit counts either**. The Algorithm Bridge **compiles** your custom algorithm onto the VQE execution substrate; only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate. The number of qubits used per call is **auto-selected by the engine's internal `QubitManager`** from your `input_data` — via Born normalization, Shannon-entropy complexity analysis, element count, and bond-dimension requirements — up to the engine's ceiling of 65 536 qubits. Plugins just hand over meaningful amplitude data; the engine handles qubit allocation, normalization, and quantum state preparation automatically.
+**Core principle:** plugins do *not* select a different quantum backend, **and they do not choose qubit counts either**. The Algorithm Bridge **compiles** your custom algorithm onto the VQE execution substrate; only the parameter vectors, metadata, and post-processing change — the underlying execution remains the universal VQE substrate. The number of qubits used per call is **auto-selected by the engine's qubit allocation logic** from your `input_data` — via Born normalization, Shannon-entropy complexity analysis, element count, and quantum state complexity — up to the engine's ceiling of 65 536 qubits. Plugins just hand over meaningful amplitude data; the engine handles qubit allocation, normalization, and quantum state preparation automatically.
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -47,10 +47,10 @@ When your plugin provides `input_data`, the engine:
 
 1. **Normalizes** the data to a valid quantum state (Born normalization, ‖ψ‖₂ = 1).
 2. **Analyzes complexity** via Shannon entropy measurement on the normalized amplitudes.
-3. **Evaluates** element count, bond-dimension requirements, and entanglement structure.
-4. **Auto-selects** the optimal qubit width from these factors (the internal `QubitManager` takes the maximum of the three lower bounds, capped at the engine's ceiling of 65 536 qubits).
+3. **Evaluates** element count, quantum state complexity, and entanglement structure.
+4. **Auto-selects** the optimal qubit width from these factors (the engine's qubit allocation logic takes the maximum of the three lower bounds, capped at the engine's ceiling of 65 536 qubits).
 
-The `num_qubits` field in `PluginAlgorithmRequest` is **advisory only** — the engine's internal `QubitManager` makes the final decision and will override it whenever its analysis demands a different width. Setting it to `0` (or any reasonable default) is fine; the engine will pick the right number regardless.
+The `num_qubits` field in `PluginAlgorithmRequest` is **advisory only** — the engine's qubit allocation logic makes the final decision and will override it whenever its analysis demands a different width. Setting it to `0` (or any reasonable default) is fine; the engine will pick the right number regardless.
 
 The `max_qubits_requested` field in `PluginSecurityManifest` is a **security cap**, not an allocation. It declares the upper bound your plugin is allowed to consume so the bridge can refuse runs that would exceed your declared budget — set it honestly to the largest width your most complex use case could legitimately need.
 
@@ -228,7 +228,7 @@ pub struct PluginAlgorithmRequest {
 | `algorithm_name` | Logical name selected by the caller (the plugin can ignore or branch on it). |
 | `domain` | One of the 16 supported quantum domains. Must intersect `supported_domains()`. |
 | `parameters` | Free-form JSON parameter map. Validated for depth, entropy, and injection patterns. |
-| `num_qubits` | **Advisory hint only — the engine's internal `QubitManager` auto-selects the optimal qubit width** from `input_data` (Born normalization → Shannon entropy → element count → bond-dimension requirements) and will override this value whenever its analysis demands a different width. Setting it to `0` is fine. The actual width is still bounded by the manifest's `max_qubits_requested` security cap. |
+| `num_qubits` | **Advisory hint only — the engine's qubit allocation logic auto-selects the optimal qubit width** from `input_data` (Born normalization → Shannon entropy → element count → quantum state complexity) and will override this value whenever its analysis demands a different width. Setting it to `0` is fine. The actual width is still bounded by the manifest's `max_qubits_requested` security cap. |
 | `input_data` | Raw amplitude vector. Treated as quantum amplitudes by the VQE substrate. |
 
 ### `PluginAlgorithmResult`
@@ -264,6 +264,8 @@ pub struct PluginMetadata {
 ```
 
 Returned by `metadata()` and surfaced verbatim through `GET /api/v1/plugins/list` and `GET /api/v1/plugins/{name}/metadata`.
+
+> **Note:** `max_qubits` in `PluginMetadata` is informational only. Actual qubit limits are enforced via `PluginSecurityManifest.max_qubits_requested`.
 
 ### `PluginSecurityManifest`
 
@@ -448,8 +450,8 @@ impl AlgorithmPlugin for CustomVqePlugin {
             return Err("input_data contains NaN or Inf".into());
         }
         // Note: do NOT validate `req.num_qubits` here — it is an advisory hint;
-        // the engine's internal QubitManager auto-selects the actual qubit width
-        // from input_data (Born normalization → Shannon entropy → bond dimension).
+        // the engine's qubit allocation logic auto-selects the actual qubit width
+        // from input_data (Born normalization → Shannon entropy → quantum state complexity).
         Ok(())
     }
 
@@ -715,7 +717,7 @@ Quantum-optimised query planning for relational engines. The plugin receives tab
 pub struct SqlQueryOptimizerPlugin;
 
 impl AlgorithmPlugin for SqlQueryOptimizerPlugin {
-    fn name(&self) -> &str { "sql_query_optimizer" }
+    fn name(&self) -> &str { "sql-query-optimizer" }
     fn version(&self) -> &str { "1.2.0" }
 
     fn supported_domains(&self) -> Vec<String> {
@@ -842,10 +844,10 @@ bridge.register_plugin(Arc::new(SqlQueryOptimizerPlugin))?;
 **curl — execute the SQL optimiser**
 
 ```powershell
-curl -X POST http://localhost:8080/api/v1/plugins/sql_query_optimizer/execute `
+curl -X POST http://localhost:8080/api/v1/plugins/sql-query-optimizer/execute `
   -H "Content-Type: application/json" `
   -d '{
-    "algorithm_name": "sql_query_optimizer",
+    "algorithm_name": "sql-query-optimizer",
     "domain": "machine_learning",
     "parameters": {
       "query": "SELECT u.id, o.total FROM users u JOIN orders o ON o.user_id = u.id WHERE o.created_at > NOW() - INTERVAL ''7 days''",
@@ -870,7 +872,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/sql_query_optimizer/execute `
     "relations_considered": 2
   },
   "execution_time_ms": 2.71,
-  "plugin_name": "sql_query_optimizer",
+  "plugin_name": "sql-query-optimizer",
   "plugin_version": "1.2.0"
 }
 ```
@@ -885,7 +887,7 @@ Quantum-enhanced partition pruning, file-layout optimisation, and probabilistic 
 pub struct DataLakeOptimizerPlugin;
 
 impl AlgorithmPlugin for DataLakeOptimizerPlugin {
-    fn name(&self) -> &str { "data_lake_optimizer" }
+    fn name(&self) -> &str { "data-lake-optimizer" }
     fn version(&self) -> &str { "0.9.0" }
 
     fn supported_domains(&self) -> Vec<String> {
@@ -1008,10 +1010,10 @@ bridge.register_plugin(Arc::new(DataLakeOptimizerPlugin))?;
 **curl**
 
 ```powershell
-curl -X POST http://localhost:8080/api/v1/plugins/data_lake_optimizer/execute `
+curl -X POST http://localhost:8080/api/v1/plugins/data-lake-optimizer/execute `
   -H "Content-Type: application/json" `
   -d '{
-    "algorithm_name": "data_lake_optimizer",
+    "algorithm_name": "data-lake-optimizer",
     "domain": "machine_learning",
     "parameters": {
       "bucket_path": "s3://corp-events-prod/year=2026/",
@@ -1038,7 +1040,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/data_lake_optimizer/execute `
     "scan_strategy": "vqe_amplitude_pruning"
   },
   "execution_time_ms": 1.84,
-  "plugin_name": "data_lake_optimizer",
+  "plugin_name": "data-lake-optimizer",
   "plugin_version": "0.9.0"
 }
 ```
@@ -1053,7 +1055,7 @@ Materialised-view selection, workload scheduling, and cardinality estimation at 
 pub struct DataWarehouseOptimizerPlugin;
 
 impl AlgorithmPlugin for DataWarehouseOptimizerPlugin {
-    fn name(&self) -> &str { "data_warehouse_optimizer" }
+    fn name(&self) -> &str { "data-warehouse-optimizer" }
     fn version(&self) -> &str { "1.0.3" }
 
     fn supported_domains(&self) -> Vec<String> {
@@ -1172,10 +1174,10 @@ bridge.register_plugin(Arc::new(DataWarehouseOptimizerPlugin))?;
 **curl**
 
 ```powershell
-curl -X POST http://localhost:8080/api/v1/plugins/data_warehouse_optimizer/execute `
+curl -X POST http://localhost:8080/api/v1/plugins/data-warehouse-optimizer/execute `
   -H "Content-Type: application/json" `
   -d '{
-    "algorithm_name": "data_warehouse_optimizer",
+    "algorithm_name": "data-warehouse-optimizer",
     "domain": "finance",
     "parameters": {
       "warehouse": { "vendor": "snowflake", "size": "X-LARGE", "region": "us-east-1" },
@@ -1213,7 +1215,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/data_warehouse_optimizer/execu
     "strategy": "vqe_workload_concentration"
   },
   "execution_time_ms": 4.92,
-  "plugin_name": "data_warehouse_optimizer",
+  "plugin_name": "data-warehouse-optimizer",
   "plugin_version": "1.0.3"
 }
 ```
@@ -1228,7 +1230,7 @@ Anomaly detection, predictive trends, and optimal downsampling for sensor and me
 pub struct TimeSeriesAnalyticsPlugin;
 
 impl AlgorithmPlugin for TimeSeriesAnalyticsPlugin {
-    fn name(&self) -> &str { "timeseries_analytics" }
+    fn name(&self) -> &str { "timeseries-analytics" }
     fn version(&self) -> &str { "2.1.0" }
 
     fn supported_domains(&self) -> Vec<String> {
@@ -1366,10 +1368,10 @@ bridge.register_plugin(Arc::new(TimeSeriesAnalyticsPlugin))?;
 **curl**
 
 ```powershell
-curl -X POST http://localhost:8080/api/v1/plugins/timeseries_analytics/execute `
+curl -X POST http://localhost:8080/api/v1/plugins/timeseries-analytics/execute `
   -H "Content-Type: application/json" `
   -d '{
-    "algorithm_name": "timeseries_analytics",
+    "algorithm_name": "timeseries-analytics",
     "domain": "real_time",
     "parameters": {
       "metric": "cpu.utilisation.percent",
@@ -1400,7 +1402,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/timeseries_analytics/execute `
     "strategy": "vqe_spectral_anomaly"
   },
   "execution_time_ms": 0.41,
-  "plugin_name": "timeseries_analytics",
+  "plugin_name": "timeseries-analytics",
   "plugin_version": "2.1.0"
 }
 ```
@@ -1415,7 +1417,7 @@ Optimal path finding, community detection, and partitioning over knowledge graph
 pub struct GraphDatabasePlugin;
 
 impl AlgorithmPlugin for GraphDatabasePlugin {
-    fn name(&self) -> &str { "graph_database_optimizer" }
+    fn name(&self) -> &str { "graph-database-optimizer" }
     fn version(&self) -> &str { "0.7.2" }
 
     fn supported_domains(&self) -> Vec<String> {
@@ -1553,10 +1555,10 @@ bridge.register_plugin(Arc::new(GraphDatabasePlugin))?;
 **curl**
 
 ```powershell
-curl -X POST http://localhost:8080/api/v1/plugins/graph_database_optimizer/execute `
+curl -X POST http://localhost:8080/api/v1/plugins/graph-database-optimizer/execute `
   -H "Content-Type: application/json" `
   -d '{
-    "algorithm_name": "graph_database_optimizer",
+    "algorithm_name": "graph-database-optimizer",
     "domain": "logistics",
     "parameters": {
       "graph_query": "MATCH (a:Warehouse)-[:SHIPS_TO*1..4]->(b:Customer) RETURN b",
@@ -1587,7 +1589,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/graph_database_optimizer/execu
     "strategy": "vqe_amplitude_walk"
   },
   "execution_time_ms": 0.36,
-  "plugin_name": "graph_database_optimizer",
+  "plugin_name": "graph-database-optimizer",
   "plugin_version": "0.7.2"
 }
 ```
@@ -1619,7 +1621,7 @@ impl UniversalDbConnectorPlugin {
 }
 
 impl AlgorithmPlugin for UniversalDbConnectorPlugin {
-    fn name(&self) -> &str { "universal_db_connector" }
+    fn name(&self) -> &str { "universal-db-connector" }
     fn version(&self) -> &str { "0.5.0" }
 
     fn supported_domains(&self) -> Vec<String> {
@@ -1732,10 +1734,10 @@ bridge.register_plugin(Arc::new(UniversalDbConnectorPlugin))?;
 **curl**
 
 ```powershell
-curl -X POST http://localhost:8080/api/v1/plugins/universal_db_connector/execute `
+curl -X POST http://localhost:8080/api/v1/plugins/universal-db-connector/execute `
   -H "Content-Type: application/json" `
   -d '{
-    "algorithm_name": "universal_db_connector",
+    "algorithm_name": "universal-db-connector",
     "domain": "machine_learning",
     "parameters": {
       "db_type": "vector",
@@ -1760,7 +1762,7 @@ curl -X POST http://localhost:8080/api/v1/plugins/universal_db_connector/execute
     "strategy": "vqe_universal_dispatch"
   },
   "execution_time_ms": 0.18,
-  "plugin_name": "universal_db_connector",
+  "plugin_name": "universal-db-connector",
   "plugin_version": "0.5.0"
 }
 ```
@@ -1872,9 +1874,6 @@ impl AlgorithmPlugin for KafkaStreamingPlugin {
             author: "Quantum Plugin Authors".to_string(),
             description: "Quantum-optimised partition layout and consumer rebalancing for Apache Kafka".to_string(),
             supported_domains: self.supported_domains(),
-            classical_complexity: "O(P · C)".to_string(),
-            quantum_complexity: "O(log(P · C))".to_string(),
-            min_qubits: 4,
             max_qubits: 4096,
         }
     }
@@ -2053,9 +2052,6 @@ impl AlgorithmPlugin for PulsarStreamingPlugin {
             author: "Quantum Plugin Authors".to_string(),
             description: "Topic-subscription, geo-routing and tiered-storage optimiser for Apache Pulsar".to_string(),
             supported_domains: self.supported_domains(),
-            classical_complexity: "O(R · S)".to_string(),
-            quantum_complexity: "O(log(R · S))".to_string(),
-            min_qubits: 4,
             max_qubits: 2048,
         }
     }
@@ -2278,9 +2274,6 @@ impl AlgorithmPlugin for VectorDatabasePlugin {
             author: "Quantum Plugin Authors".to_string(),
             description: "Index, recall and partition optimiser across Milvus, Pinecone, Weaviate, Qdrant and ChromaDB".to_string(),
             supported_domains: self.supported_domains(),
-            classical_complexity: "O(N · log N)".to_string(),
-            quantum_complexity: "O(log² N)".to_string(),
-            min_qubits: 4,
             max_qubits: 16384,
         }
     }
@@ -2450,9 +2443,6 @@ impl AlgorithmPlugin for RedisStreamsPlugin {
             author: "Quantum Plugin Authors".to_string(),
             description: "Redis Streams and pub/sub partition + memory optimiser".to_string(),
             supported_domains: self.supported_domains(),
-            classical_complexity: "O(S · G)".to_string(),
-            quantum_complexity: "O(log(S · G))".to_string(),
-            min_qubits: 4,
             max_qubits: 1024,
         }
     }
@@ -2637,9 +2627,6 @@ impl AlgorithmPlugin for FlinkStreamingPlugin {
             author: "Quantum Plugin Authors".to_string(),
             description: "DAG, checkpoint, watermark and state-backend optimiser for Apache Flink".to_string(),
             supported_domains: self.supported_domains(),
-            classical_complexity: "O(V + E)".to_string(),
-            quantum_complexity: "O(log(V + E))".to_string(),
-            min_qubits: 4,
             max_qubits: 4096,
         }
     }
@@ -3084,6 +3071,17 @@ Treat `429 RateLimitExceeded` as advisory. The recommended client behaviour is e
 ### Threat-level escalation
 
 The system automatically escalates the global `ThreatLevel` when violations accumulate. At `Lockdown`, **all non-`BuiltIn` execute calls** return `503`. Operators can de-escalate explicitly via `POST /api/v1/plugins/security/threat-level` with `{"level":"Normal"}` after triage.
+
+**Threat Level Escalation Rules:**
+
+| Transition | Trigger |
+|------------|---------|
+| Normal → Elevated | 5+ violations in 1 hour |
+| Elevated → High | 15+ violations in 1 hour |
+| High → Critical | 30+ violations in 1 hour |
+| Critical → Lockdown | Manual trigger or 60+ violations in 1 hour |
+
+Violations expire after 1 hour of inactivity. All escalations are logged in the forensic audit trail.
 
 ---
 
