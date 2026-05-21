@@ -33,7 +33,7 @@ The **Extension & Plugin System** lets you ship your own quantum algorithms into
                 └─────────────────────────────────┘
 ```
 
-**Source of truth:** [`nawaz1_dev/src/api/algorithm_bridge.rs`](../../../nawaz1_dev/src/api/algorithm_bridge.rs). All trait shapes, request/result types, and security primitives in this guide are taken directly from that file.
+**Source of truth:** [`nawaz1_dev/src/api/extension_plugin_security.rs`](../../../nawaz1_dev/src/api/extension_plugin_security.rs). All trait shapes, request/result types, and security primitives in this guide are taken directly from that file.
 
 **Base URL:** `http://localhost:8080`
 
@@ -66,7 +66,7 @@ A minimal, working `AlgorithmPlugin` looks like this:
 use std::collections::HashMap;
 use std::sync::Arc;
 use serde_json::json;
-use nawaz1_dev::api::algorithm_bridge::{
+use nawaz1_dev::api::extension_plugin_security::{
     ExtensionPluginSecurity,
     AlgorithmPlugin,
     PluginAlgorithmRequest,
@@ -171,7 +171,7 @@ That is the entire contract. Every method on `AlgorithmPlugin` is required.
 
 ## The `AlgorithmPlugin` Trait
 
-The trait is defined in `algorithm_bridge.rs`:
+The trait is defined in `extension_plugin_security.rs`:
 
 ```rust
 pub trait AlgorithmPlugin: Send + Sync {
@@ -400,7 +400,7 @@ use std::sync::Arc;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha512};
 
-use nawaz1_dev::api::algorithm_bridge::{
+use nawaz1_dev::api::extension_plugin_security::{
     ExtensionPluginSecurity, AlgorithmPlugin,
     ComplexityClass, DataAccessScope,
     PluginAlgorithmRequest, PluginAlgorithmResult,
@@ -568,7 +568,7 @@ use std::sync::Arc;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha512};
 
-use nawaz1_dev::api::algorithm_bridge::{
+use nawaz1_dev::api::extension_plugin_security::{
     AlgorithmPlugin, ComplexityClass, DataAccessScope,
     PluginAlgorithmRequest, PluginAlgorithmResult,
     PluginMetadata, PluginSecurityManifest,
@@ -699,7 +699,7 @@ use std::sync::Arc;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha512};
 
-use nawaz1_dev::api::algorithm_bridge::{
+use nawaz1_dev::api::extension_plugin_security::{
     ExtensionPluginSecurity, AlgorithmPlugin,
     ComplexityClass, DataAccessScope,
     PluginAlgorithmRequest, PluginAlgorithmResult,
@@ -3000,7 +3000,7 @@ Allowed values: `Untrusted`, `Verified`, `Trusted`. Promotion to `BuiltIn` is re
 
 ### Trust Levels
 
-`TrustLevel` (defined in `algorithm_bridge.rs`) controls every quota a plugin sees.
+`TrustLevel` (defined in `extension_plugin_security.rs`) controls every quota a plugin sees.
 
 | Level | How obtained | Rate limit | Hard timeout | Max input amplitudes | Notes |
 |-------|--------------|------------|--------------|----------------------|-------|
@@ -3039,7 +3039,7 @@ Exceeding declared limits results in quarantine. Declare only what you actually 
 
 ## Error Handling
 
-Every failure path surfaces a `SecurityViolation` (see `algorithm_bridge.rs`). The HTTP layer maps these to JSON `error.violation` strings whose body matches `Display`.
+Every failure path surfaces a `SecurityViolation` (see `extension_plugin_security.rs`). The HTTP layer maps these to JSON `error.violation` strings whose body matches `Display`.
 
 Common variants you will encounter:
 
@@ -3155,4 +3155,4 @@ Declaring a domain outside this set produces `DomainNotAllowed` at registration.
 
 ---
 
-**Source files referenced:** [`nawaz1_dev/src/api/algorithm_bridge.rs`](../../../nawaz1_dev/src/api/algorithm_bridge.rs) — the canonical definitions for every type, trait, and security primitive in this guide.
+**Source files referenced:** [`nawaz1_dev/src/api/extension_plugin_security.rs`](../../../nawaz1_dev/src/api/extension_plugin_security.rs) — the canonical definitions for every type, trait, and security primitive in this guide.
