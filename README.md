@@ -10,9 +10,9 @@
 
 ## IMPORTANT — Hardware Security & Build Requirements for Launch
 
-The nawaz1-server binary in this repository was compiled on Ubuntu 22.04 LTS (x86_64-unknown-linux-gnu) with the Rust 1.70 stable toolchain.
+The nawaz1-server binary in this repository was compiled on Ubuntu 24.04 LTS (x86_64-unknown-linux-gnu) with the Rust 1.95.0 stable toolchain.
 
-You **MUST** run it on a compatible Ubuntu Linux VM (Ubuntu 22.04 LTS or a binary-compatible derivative on x86_64). Running on Windows, macOS, Alpine (musl), or other non-glibc / non-x86_64 systems is **not supported**.
+You **MUST** run it on a compatible Ubuntu Linux VM (Ubuntu 24.04 LTS or a binary-compatible derivative on x86_64). Running on Windows, macOS, Alpine (musl), or other non-glibc / non-x86_64 systems is **not supported**.
 
 The host VM CPU **MUST** support at least one of the following hardware security extensions:
 
@@ -36,7 +36,7 @@ The host VM CPU **MUST** support at least one of the following hardware security
 
 ```bash
 # Confirm OS
-lsb_release -a    # Expect: Ubuntu 22.04 LTS (or compatible)
+lsb_release -a    # Expect: Ubuntu 24.04 LTS (or compatible)
 uname -m          # Expect: x86_64
 
 # Confirm hardware security support
