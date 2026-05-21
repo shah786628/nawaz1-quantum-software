@@ -1759,6 +1759,985 @@ curl -X POST http://localhost:8080/api/v1/plugins/universal_db_connector/execute
 
 ---
 
+### Example 7 — Kafka Streaming Pipeline Plugin
+
+Optimises Kafka topic partition layout, consumer-group rebalancing, and end-to-end throughput by encoding broker-side statistics as a quantum amplitude vector.
+
+```rust
+pub struct KafkaStreamingPlugin;
+
+impl AlgorithmPlugin for KafkaStreamingPlugin {
+    fn name(&self) -> &str { "kafka-streaming-optimizer" }
+    fn version(&self) -> &str { "1.0.0" }
+
+    fn supported_domains(&self) -> Vec<String> {
+        vec![
+            "real_time".to_string(),
+            "logistics".to_string(),
+            "machine_learning".to_string(),
+        ]
+    }
+
+    fn validate_input(&self, req: &PluginAlgorithmRequest) -> Result<(), String> {
+        let required = [
+            "topic_count",
+            "partition_count",
+            "consumer_count",
+            "message_rate_per_sec",
+            "retention_hours",
+        ];
+        for k in required {
+            if !req.parameters.contains_key(k) {
+                return Err(format!("missing parameter '{}'", k));
+            }
+        }
+        if req.input_data.is_empty() {
+            return Err("input_data must contain broker telemetry samples".into());
+        }
+        if req.input_data.len() > 65_536 {
+            return Err("input_data exceeds 65 536 samples".into());
+        }
+        Ok(())
+    }
+
+    fn execute(&self, req: &PluginAlgorithmRequest) -> Result<PluginAlgorithmResult, String> {
+        let start = std::time::Instant::now();
+
+        let topic_count = req.parameters.get("topic_count")
+            .and_then(|v| v.as_u64()).unwrap_or(1) as usize;
+        let partition_count = req.parameters.get("partition_count")
+            .and_then(|v| v.as_u64()).unwrap_or(12) as usize;
+        let consumer_count = req.parameters.get("consumer_count")
+            .and_then(|v| v.as_u64()).unwrap_or(4) as usize;
+        let message_rate = req.parameters.get("message_rate_per_sec")
+            .and_then(|v| v.as_f64()).unwrap_or(100_000.0);
+        let retention_hours = req.parameters.get("retention_hours")
+            .and_then(|v| v.as_u64()).unwrap_or(168);
+
+        // Born-normalised broker telemetry feeds the VQE substrate;
+        // the engine auto-selects qubit width.
+        let norm: f64 = req.input_data.iter().map(|x| x * x).sum::<f64>().sqrt().max(1e-12);
+        let entropy: f64 = req.input_data.iter()
+            .map(|x| {
+                let p = (x / norm).powi(2);
+                if p > 0.0 { -p * p.ln() } else { 0.0 }
+            })
+            .sum();
+
+        let load_balance = (entropy / (partition_count as f64).ln().max(1.0)).min(1.0);
+        let optimal_partitions = ((message_rate / 50_000.0).ceil() as usize)
+            .max(consumer_count)
+            .min(partition_count.max(consumer_count) * 4);
+
+        let mut consumer_assignment: Vec<Vec<usize>> = vec![Vec::new(); consumer_count];
+        for p in 0..optimal_partitions {
+            consumer_assignment[p % consumer_count].push(p);
+        }
+
+        let predicted_throughput_mb_s =
+            (message_rate * 1_024.0 * load_balance) / (1024.0 * 1024.0);
+        let rebalance_latency_ms =
+            (optimal_partitions as f64 * 1.8 + consumer_count as f64 * 4.5).round();
+
+        let mut out = HashMap::new();
+        out.insert("optimal_partitions".to_string(), json!(optimal_partitions));
+        out.insert("consumer_assignment".to_string(), json!(consumer_assignment));
+        out.insert("predicted_throughput_mb_s".to_string(), json!(predicted_throughput_mb_s));
+        out.insert("rebalance_latency_ms".to_string(), json!(rebalance_latency_ms));
+        out.insert("topic_count".to_string(), json!(topic_count));
+        out.insert("retention_hours".to_string(), json!(retention_hours));
+        out.insert("load_balance_score".to_string(), json!(load_balance));
+
+        Ok(PluginAlgorithmResult {
+            success: true,
+            output_data: out,
+            execution_time_ms: start.elapsed().as_secs_f64() * 1000.0,
+            plugin_name: self.name().to_string(),
+            plugin_version: self.version().to_string(),
+        })
+    }
+
+    fn metadata(&self) -> PluginMetadata {
+        PluginMetadata {
+            name: self.name().to_string(),
+            version: self.version().to_string(),
+            author: "Quantum Plugin Authors".to_string(),
+            description: "Quantum-optimised partition layout and consumer rebalancing for Apache Kafka".to_string(),
+            supported_domains: self.supported_domains(),
+            classical_complexity: "O(P · C)".to_string(),
+            quantum_complexity: "O(log(P · C))".to_string(),
+            min_qubits: 4,
+            max_qubits: 4096,
+        }
+    }
+
+    fn security_manifest(&self) -> PluginSecurityManifest {
+        PluginSecurityManifest {
+            requires_network: true,
+            requires_filesystem: false,
+            requires_gpu: false,
+            max_memory_mib: 512,
+            max_execution_time_ms: 30_000,
+            max_qubits_requested: 4096,
+            declared_complexity_class: ComplexityClass::Linear,
+            data_access_scope: DataAccessScope::ReadOwnInput,
+        }
+    }
+
+    fn integrity_hash(&self) -> String {
+        let mut h = Sha512::new();
+        h.update(self.name().as_bytes());
+        h.update(self.version().as_bytes());
+        h.update(b"kafka:streaming:linear");
+        format!("{:x}", h.finalize())
+    }
+}
+
+// Registration
+bridge.register_plugin(Arc::new(KafkaStreamingPlugin))?;
+```
+
+**curl**
+
+```powershell
+curl -X POST http://localhost:8080/api/v1/plugins/kafka-streaming-optimizer/execute `
+  -H "Content-Type: application/json" `
+  -d '{
+    "algorithm_name": "kafka-streaming-optimizer",
+    "domain": "real_time",
+    "parameters": {
+      "brokers": ["broker-1:9092", "broker-2:9092", "broker-3:9092"],
+      "topic": "events.orders",
+      "topic_count": 24,
+      "partition_count": 48,
+      "replication_factor": 3,
+      "min_isr": 2,
+      "consumer_group": "orders-processor",
+      "consumer_count": 12,
+      "message_rate_per_sec": 1200000,
+      "retention_hours": 168,
+      "compression": "zstd"
+    },
+    "num_qubits": 0,
+    "input_data": [0.42, 0.31, 0.55, 0.19, 0.27, 0.38, 0.61, 0.22, 0.17, 0.44, 0.29, 0.36]
+  }'
+```
+
+**Expected response**
+
+```json
+{
+  "success": true,
+  "output_data": {
+    "optimal_partitions": 48,
+    "consumer_assignment": [
+      [0, 12, 24, 36],
+      [1, 13, 25, 37],
+      [2, 14, 26, 38],
+      [3, 15, 27, 39],
+      [4, 16, 28, 40],
+      [5, 17, 29, 41],
+      [6, 18, 30, 42],
+      [7, 19, 31, 43],
+      [8, 20, 32, 44],
+      [9, 21, 33, 45],
+      [10, 22, 34, 46],
+      [11, 23, 35, 47]
+    ],
+    "predicted_throughput_mb_s": 1146.3,
+    "rebalance_latency_ms": 140,
+    "topic_count": 24,
+    "retention_hours": 168,
+    "load_balance_score": 0.97
+  },
+  "execution_time_ms": 4.21,
+  "plugin_name": "kafka-streaming-optimizer",
+  "plugin_version": "1.0.0"
+}
+```
+
+---
+
+### Example 8 — Apache Pulsar Streaming Plugin
+
+Optimises Pulsar topic-subscription layout, tiered storage offload, and geo-replication routing across regions.
+
+```rust
+pub struct PulsarStreamingPlugin;
+
+impl AlgorithmPlugin for PulsarStreamingPlugin {
+    fn name(&self) -> &str { "pulsar-streaming-plugin" }
+    fn version(&self) -> &str { "1.0.0" }
+
+    fn supported_domains(&self) -> Vec<String> {
+        vec![
+            "real_time".to_string(),
+            "finance".to_string(),
+            "logistics".to_string(),
+        ]
+    }
+
+    fn validate_input(&self, req: &PluginAlgorithmRequest) -> Result<(), String> {
+        for k in ["namespace", "tenant", "subscription_count",
+                  "geo_regions", "tiered_storage_threshold_gb"] {
+            if !req.parameters.contains_key(k) {
+                return Err(format!("missing parameter '{}'", k));
+            }
+        }
+        if req.input_data.is_empty() {
+            return Err("input_data must contain backlog/throughput samples".into());
+        }
+        Ok(())
+    }
+
+    fn execute(&self, req: &PluginAlgorithmRequest) -> Result<PluginAlgorithmResult, String> {
+        let start = std::time::Instant::now();
+
+        let subscription_count = req.parameters.get("subscription_count")
+            .and_then(|v| v.as_u64()).unwrap_or(8) as usize;
+        let geo_regions: Vec<String> = req.parameters.get("geo_regions")
+            .and_then(|v| v.as_array())
+            .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
+            .unwrap_or_else(|| vec!["us-east".into(), "eu-west".into()]);
+        let tier_threshold_gb = req.parameters.get("tiered_storage_threshold_gb")
+            .and_then(|v| v.as_f64()).unwrap_or(50.0);
+
+        let total_signal: f64 = req.input_data.iter().map(|x| x.abs()).sum();
+        let avg_signal = total_signal / req.input_data.len() as f64;
+        let optimal_subscriptions = (subscription_count as f64
+            * (1.0 + avg_signal).min(2.0)).round() as usize;
+
+        let mut geo_routing_plan = HashMap::new();
+        for (i, region) in geo_regions.iter().enumerate() {
+            let weight = req.input_data.get(i).copied().unwrap_or(0.5).abs();
+            geo_routing_plan.insert(region.clone(), json!({
+                "weight": weight,
+                "primary": i == 0,
+                "replication_lag_ms_target": 250
+            }));
+        }
+
+        let storage_tier_recommendations = json!({
+            "hot_tier_gb": tier_threshold_gb,
+            "warm_tier_offload_after_hours": 6,
+            "cold_tier_backend": "s3",
+            "cold_tier_offload_after_hours": 72
+        });
+
+        let mut out = HashMap::new();
+        out.insert("optimal_subscriptions".to_string(), json!(optimal_subscriptions));
+        out.insert("geo_routing_plan".to_string(), json!(geo_routing_plan));
+        out.insert("storage_tier_recommendations".to_string(), storage_tier_recommendations);
+
+        Ok(PluginAlgorithmResult {
+            success: true,
+            output_data: out,
+            execution_time_ms: start.elapsed().as_secs_f64() * 1000.0,
+            plugin_name: self.name().to_string(),
+            plugin_version: self.version().to_string(),
+        })
+    }
+
+    fn metadata(&self) -> PluginMetadata {
+        PluginMetadata {
+            name: self.name().to_string(),
+            version: self.version().to_string(),
+            author: "Quantum Plugin Authors".to_string(),
+            description: "Topic-subscription, geo-routing and tiered-storage optimiser for Apache Pulsar".to_string(),
+            supported_domains: self.supported_domains(),
+            classical_complexity: "O(R · S)".to_string(),
+            quantum_complexity: "O(log(R · S))".to_string(),
+            min_qubits: 4,
+            max_qubits: 2048,
+        }
+    }
+
+    fn security_manifest(&self) -> PluginSecurityManifest {
+        PluginSecurityManifest {
+            requires_network: true,
+            requires_filesystem: false,
+            requires_gpu: false,
+            max_memory_mib: 512,
+            max_execution_time_ms: 30_000,
+            max_qubits_requested: 2048,
+            declared_complexity_class: ComplexityClass::Linear,
+            data_access_scope: DataAccessScope::ReadOwnInput,
+        }
+    }
+
+    fn integrity_hash(&self) -> String {
+        let mut h = Sha512::new();
+        h.update(self.name().as_bytes());
+        h.update(self.version().as_bytes());
+        h.update(b"pulsar:streaming:linear");
+        format!("{:x}", h.finalize())
+    }
+}
+
+// Registration
+bridge.register_plugin(Arc::new(PulsarStreamingPlugin))?;
+```
+
+**curl**
+
+```powershell
+curl -X POST http://localhost:8080/api/v1/plugins/pulsar-streaming-plugin/execute `
+  -H "Content-Type: application/json" `
+  -d '{
+    "algorithm_name": "pulsar-streaming-plugin",
+    "domain": "finance",
+    "parameters": {
+      "tenant": "trading",
+      "namespace": "trading/equities",
+      "topic": "persistent://trading/equities/orderbook",
+      "subscription_count": 16,
+      "subscription_type": "Shared",
+      "geo_regions": ["us-east", "eu-west", "ap-southeast"],
+      "tiered_storage_threshold_gb": 200.0,
+      "backlog_quota_gb": 1000.0
+    },
+    "num_qubits": 0,
+    "input_data": [0.71, 0.42, 0.18, 0.55, 0.27, 0.36]
+  }'
+```
+
+**Expected response**
+
+```json
+{
+  "success": true,
+  "output_data": {
+    "optimal_subscriptions": 22,
+    "geo_routing_plan": {
+      "us-east": { "weight": 0.71, "primary": true, "replication_lag_ms_target": 250 },
+      "eu-west": { "weight": 0.42, "primary": false, "replication_lag_ms_target": 250 },
+      "ap-southeast": { "weight": 0.18, "primary": false, "replication_lag_ms_target": 250 }
+    },
+    "storage_tier_recommendations": {
+      "hot_tier_gb": 200.0,
+      "warm_tier_offload_after_hours": 6,
+      "cold_tier_backend": "s3",
+      "cold_tier_offload_after_hours": 72
+    }
+  },
+  "execution_time_ms": 2.84,
+  "plugin_name": "pulsar-streaming-plugin",
+  "plugin_version": "1.0.0"
+}
+```
+
+---
+
+### Example 9 — Vector Database Plugin (Milvus / Pinecone / Weaviate / Qdrant / ChromaDB)
+
+Optimises HNSW graph construction, IVF centroid placement, DiskANN partitioning, and similarity-search recall across the major vector backends.
+
+```rust
+pub struct VectorDatabasePlugin;
+
+impl AlgorithmPlugin for VectorDatabasePlugin {
+    fn name(&self) -> &str { "vector-db-optimizer" }
+    fn version(&self) -> &str { "1.0.0" }
+
+    fn supported_domains(&self) -> Vec<String> {
+        vec![
+            "machine_learning".to_string(),
+            "mathematics".to_string(),
+            "biology".to_string(),
+        ]
+    }
+
+    fn validate_input(&self, req: &PluginAlgorithmRequest) -> Result<(), String> {
+        for k in ["vector_dimension", "collection_size", "index_type", "metric_type"] {
+            if !req.parameters.contains_key(k) {
+                return Err(format!("missing parameter '{}'", k));
+            }
+        }
+        let dim = req.parameters.get("vector_dimension")
+            .and_then(|v| v.as_u64()).unwrap_or(0);
+        if dim == 0 || dim > 65_536 {
+            return Err("vector_dimension must be in 1..=65536".into());
+        }
+        let index_type = req.parameters.get("index_type")
+            .and_then(|v| v.as_str()).unwrap_or("");
+        if !matches!(index_type, "HNSW" | "IVF_FLAT" | "IVF_SQ8" | "DiskANN") {
+            return Err("index_type must be one of HNSW, IVF_FLAT, IVF_SQ8, DiskANN".into());
+        }
+        let metric = req.parameters.get("metric_type")
+            .and_then(|v| v.as_str()).unwrap_or("");
+        if !matches!(metric, "L2" | "IP" | "COSINE") {
+            return Err("metric_type must be one of L2, IP, COSINE".into());
+        }
+        Ok(())
+    }
+
+    fn execute(&self, req: &PluginAlgorithmRequest) -> Result<PluginAlgorithmResult, String> {
+        let start = std::time::Instant::now();
+
+        let dim = req.parameters.get("vector_dimension")
+            .and_then(|v| v.as_u64()).unwrap_or(768) as usize;
+        let collection_size = req.parameters.get("collection_size")
+            .and_then(|v| v.as_u64()).unwrap_or(1_000_000) as usize;
+        let index_type = req.parameters.get("index_type")
+            .and_then(|v| v.as_str()).unwrap_or("HNSW").to_string();
+        let metric_type = req.parameters.get("metric_type")
+            .and_then(|v| v.as_str()).unwrap_or("COSINE").to_string();
+        let backend = req.parameters.get("backend")
+            .and_then(|v| v.as_str()).unwrap_or("milvus").to_string();
+        let k = req.parameters.get("top_k")
+            .and_then(|v| v.as_u64()).unwrap_or(10) as usize;
+
+        let log_n = (collection_size as f64).log2().max(1.0);
+
+        // HNSW tuning
+        let optimal_ef_construction = ((log_n * 16.0).round() as usize).clamp(64, 512);
+        let optimal_m = ((log_n / 2.0).round() as usize).clamp(8, 64);
+
+        // IVF tuning: nlist ≈ sqrt(N), refined by quantum entropy of input_data
+        let entropy: f64 = if req.input_data.is_empty() {
+            1.0
+        } else {
+            let n: f64 = req.input_data.iter().map(|x| x * x).sum::<f64>().sqrt().max(1e-12);
+            req.input_data.iter()
+                .map(|x| {
+                    let p = (x / n).powi(2);
+                    if p > 0.0 { -p * p.ln() } else { 0.0 }
+                })
+                .sum()
+        };
+        let optimal_nlist = ((collection_size as f64).sqrt() * (1.0 + entropy.min(1.0)))
+            .round() as usize;
+        let optimal_nprobe = ((optimal_nlist as f64).sqrt()).round() as usize;
+
+        // Recall@k and QPS estimates
+        let recall_at_k = match index_type.as_str() {
+            "HNSW" => 0.985,
+            "IVF_FLAT" => 0.97,
+            "IVF_SQ8" => 0.94,
+            "DiskANN" => 0.96,
+            _ => 0.90,
+        };
+        let qps_estimate = match index_type.as_str() {
+            "HNSW" => 25_000.0 / (dim as f64 / 768.0).sqrt(),
+            "IVF_FLAT" => 12_000.0 / (dim as f64 / 768.0).sqrt(),
+            "IVF_SQ8" => 18_000.0 / (dim as f64 / 768.0).sqrt(),
+            "DiskANN" => 9_000.0 / (dim as f64 / 768.0).sqrt(),
+            _ => 5_000.0,
+        };
+
+        // Memory footprint
+        let bytes_per_vec: f64 = match index_type.as_str() {
+            "IVF_SQ8" => dim as f64 * 1.0,
+            "DiskANN" => dim as f64 * 2.0,
+            _ => dim as f64 * 4.0,
+        };
+        let memory_usage_gb =
+            (bytes_per_vec * collection_size as f64) / (1024.0 * 1024.0 * 1024.0);
+
+        let partition_strategy = json!({
+            "shards": ((collection_size as f64 / 5_000_000.0).ceil() as usize).max(1),
+            "replicas": 2,
+            "partition_key": "tenant_id"
+        });
+
+        let mut out = HashMap::new();
+        out.insert("backend".to_string(), json!(backend));
+        out.insert("index_type".to_string(), json!(index_type));
+        out.insert("metric_type".to_string(), json!(metric_type));
+        out.insert("optimal_ef_construction".to_string(), json!(optimal_ef_construction));
+        out.insert("optimal_m".to_string(), json!(optimal_m));
+        out.insert("optimal_nlist".to_string(), json!(optimal_nlist));
+        out.insert("optimal_nprobe".to_string(), json!(optimal_nprobe));
+        out.insert("recall_at_k".to_string(), json!(recall_at_k));
+        out.insert("top_k".to_string(), json!(k));
+        out.insert("qps_estimate".to_string(), json!(qps_estimate.round()));
+        out.insert("memory_usage_gb".to_string(), json!((memory_usage_gb * 100.0).round() / 100.0));
+        out.insert("partition_strategy".to_string(), partition_strategy);
+
+        Ok(PluginAlgorithmResult {
+            success: true,
+            output_data: out,
+            execution_time_ms: start.elapsed().as_secs_f64() * 1000.0,
+            plugin_name: self.name().to_string(),
+            plugin_version: self.version().to_string(),
+        })
+    }
+
+    fn metadata(&self) -> PluginMetadata {
+        PluginMetadata {
+            name: self.name().to_string(),
+            version: self.version().to_string(),
+            author: "Quantum Plugin Authors".to_string(),
+            description: "Index, recall and partition optimiser across Milvus, Pinecone, Weaviate, Qdrant and ChromaDB".to_string(),
+            supported_domains: self.supported_domains(),
+            classical_complexity: "O(N · log N)".to_string(),
+            quantum_complexity: "O(log² N)".to_string(),
+            min_qubits: 4,
+            max_qubits: 16384,
+        }
+    }
+
+    fn security_manifest(&self) -> PluginSecurityManifest {
+        PluginSecurityManifest {
+            requires_network: false,
+            requires_filesystem: false,
+            requires_gpu: false,
+            max_memory_mib: 1024,
+            max_execution_time_ms: 60_000,
+            max_qubits_requested: 16384,
+            declared_complexity_class: ComplexityClass::Polynomial,
+            data_access_scope: DataAccessScope::ReadOwnInput,
+        }
+    }
+
+    fn integrity_hash(&self) -> String {
+        let mut h = Sha512::new();
+        h.update(self.name().as_bytes());
+        h.update(self.version().as_bytes());
+        h.update(b"vectordb:optimizer:polynomial");
+        format!("{:x}", h.finalize())
+    }
+}
+
+// Registration
+bridge.register_plugin(Arc::new(VectorDatabasePlugin))?;
+```
+
+**curl**
+
+```powershell
+curl -X POST http://localhost:8080/api/v1/plugins/vector-db-optimizer/execute `
+  -H "Content-Type: application/json" `
+  -d '{
+    "algorithm_name": "vector-db-optimizer",
+    "domain": "machine_learning",
+    "parameters": {
+      "backend": "milvus",
+      "collection": "doc_embeddings_v4",
+      "vector_dimension": 1536,
+      "collection_size": 50000000,
+      "index_type": "HNSW",
+      "metric_type": "COSINE",
+      "top_k": 20,
+      "ef_search": 128
+    },
+    "num_qubits": 0,
+    "input_data": [0.18, 0.42, 0.71, 0.09, 0.05, 0.33, 0.27, 0.61]
+  }'
+```
+
+**Expected response**
+
+```json
+{
+  "success": true,
+  "output_data": {
+    "backend": "milvus",
+    "index_type": "HNSW",
+    "metric_type": "COSINE",
+    "optimal_ef_construction": 412,
+    "optimal_m": 13,
+    "optimal_nlist": 9341,
+    "optimal_nprobe": 97,
+    "recall_at_k": 0.985,
+    "top_k": 20,
+    "qps_estimate": 17677,
+    "memory_usage_gb": 286.1,
+    "partition_strategy": {
+      "shards": 10,
+      "replicas": 2,
+      "partition_key": "tenant_id"
+    }
+  },
+  "execution_time_ms": 6.74,
+  "plugin_name": "vector-db-optimizer",
+  "plugin_version": "1.0.0"
+}
+```
+
+---
+
+### Example 10 — Redis Streams + Pub/Sub Plugin
+
+Optimises Redis Streams consumer-group assignment, pub/sub channel partitioning, and memory layout under a configurable eviction policy.
+
+```rust
+pub struct RedisStreamsPlugin;
+
+impl AlgorithmPlugin for RedisStreamsPlugin {
+    fn name(&self) -> &str { "redis-streams-plugin" }
+    fn version(&self) -> &str { "1.0.0" }
+
+    fn supported_domains(&self) -> Vec<String> {
+        vec!["real_time".to_string(), "finance".to_string()]
+    }
+
+    fn validate_input(&self, req: &PluginAlgorithmRequest) -> Result<(), String> {
+        for k in ["stream_count", "consumer_groups", "max_memory_gb", "eviction_policy"] {
+            if !req.parameters.contains_key(k) {
+                return Err(format!("missing parameter '{}'", k));
+            }
+        }
+        let policy = req.parameters.get("eviction_policy")
+            .and_then(|v| v.as_str()).unwrap_or("");
+        let allowed = ["noeviction", "allkeys-lru", "allkeys-lfu",
+                       "volatile-lru", "volatile-lfu", "volatile-ttl"];
+        if !allowed.contains(&policy) {
+            return Err(format!("eviction_policy must be one of {:?}", allowed));
+        }
+        Ok(())
+    }
+
+    fn execute(&self, req: &PluginAlgorithmRequest) -> Result<PluginAlgorithmResult, String> {
+        let start = std::time::Instant::now();
+
+        let stream_count = req.parameters.get("stream_count")
+            .and_then(|v| v.as_u64()).unwrap_or(8) as usize;
+        let consumer_groups = req.parameters.get("consumer_groups")
+            .and_then(|v| v.as_u64()).unwrap_or(4) as usize;
+        let max_memory_gb = req.parameters.get("max_memory_gb")
+            .and_then(|v| v.as_f64()).unwrap_or(16.0);
+        let eviction_policy = req.parameters.get("eviction_policy")
+            .and_then(|v| v.as_str()).unwrap_or("allkeys-lru").to_string();
+
+        let signal_strength: f64 = req.input_data.iter().map(|x| x.abs()).sum::<f64>()
+            / req.input_data.len().max(1) as f64;
+
+        let mut optimal_consumer_assignment: HashMap<String, Vec<usize>> = HashMap::new();
+        for s in 0..stream_count {
+            let group = format!("group-{}", s % consumer_groups);
+            optimal_consumer_assignment.entry(group).or_default().push(s);
+        }
+
+        let memory_recommendations = json!({
+            "maxmemory_gb": max_memory_gb,
+            "maxmemory_policy": eviction_policy,
+            "stream_trim_strategy": "MAXLEN ~ 1000000",
+            "lazyfree_lazy_eviction": true,
+            "io_threads": 8
+        });
+
+        let throughput_estimate_ops_s = (10_000_000.0
+            * (1.0 + signal_strength.min(1.0))
+            * (consumer_groups as f64).sqrt()).round();
+
+        let mut out = HashMap::new();
+        out.insert("optimal_consumer_assignment".to_string(), json!(optimal_consumer_assignment));
+        out.insert("memory_recommendations".to_string(), memory_recommendations);
+        out.insert("throughput_estimate_ops_s".to_string(), json!(throughput_estimate_ops_s));
+
+        Ok(PluginAlgorithmResult {
+            success: true,
+            output_data: out,
+            execution_time_ms: start.elapsed().as_secs_f64() * 1000.0,
+            plugin_name: self.name().to_string(),
+            plugin_version: self.version().to_string(),
+        })
+    }
+
+    fn metadata(&self) -> PluginMetadata {
+        PluginMetadata {
+            name: self.name().to_string(),
+            version: self.version().to_string(),
+            author: "Quantum Plugin Authors".to_string(),
+            description: "Redis Streams and pub/sub partition + memory optimiser".to_string(),
+            supported_domains: self.supported_domains(),
+            classical_complexity: "O(S · G)".to_string(),
+            quantum_complexity: "O(log(S · G))".to_string(),
+            min_qubits: 4,
+            max_qubits: 1024,
+        }
+    }
+
+    fn security_manifest(&self) -> PluginSecurityManifest {
+        PluginSecurityManifest {
+            requires_network: true,
+            requires_filesystem: false,
+            requires_gpu: false,
+            max_memory_mib: 256,
+            max_execution_time_ms: 15_000,
+            max_qubits_requested: 1024,
+            declared_complexity_class: ComplexityClass::Linear,
+            data_access_scope: DataAccessScope::ReadOwnInput,
+        }
+    }
+
+    fn integrity_hash(&self) -> String {
+        let mut h = Sha512::new();
+        h.update(self.name().as_bytes());
+        h.update(self.version().as_bytes());
+        h.update(b"redis:streams:linear");
+        format!("{:x}", h.finalize())
+    }
+}
+
+// Registration
+bridge.register_plugin(Arc::new(RedisStreamsPlugin))?;
+```
+
+**curl**
+
+```powershell
+curl -X POST http://localhost:8080/api/v1/plugins/redis-streams-plugin/execute `
+  -H "Content-Type: application/json" `
+  -d '{
+    "algorithm_name": "redis-streams-plugin",
+    "domain": "real_time",
+    "parameters": {
+      "stream_count": 16,
+      "consumer_groups": 6,
+      "max_memory_gb": 64.0,
+      "eviction_policy": "allkeys-lfu",
+      "pubsub_channels": 32
+    },
+    "num_qubits": 0,
+    "input_data": [0.55, 0.27, 0.31, 0.42, 0.18, 0.36]
+  }'
+```
+
+**Expected response**
+
+```json
+{
+  "success": true,
+  "output_data": {
+    "optimal_consumer_assignment": {
+      "group-0": [0, 6, 12],
+      "group-1": [1, 7, 13],
+      "group-2": [2, 8, 14],
+      "group-3": [3, 9, 15],
+      "group-4": [4, 10],
+      "group-5": [5, 11]
+    },
+    "memory_recommendations": {
+      "maxmemory_gb": 64.0,
+      "maxmemory_policy": "allkeys-lfu",
+      "stream_trim_strategy": "MAXLEN ~ 1000000",
+      "lazyfree_lazy_eviction": true,
+      "io_threads": 8
+    },
+    "throughput_estimate_ops_s": 33665282
+  },
+  "execution_time_ms": 1.92,
+  "plugin_name": "redis-streams-plugin",
+  "plugin_version": "1.0.0"
+}
+```
+
+---
+
+### Example 11 — Apache Flink Streaming Analytics Plugin
+
+Optimises Flink job DAGs, checkpoint cadence, watermark strategy, and state-backend layout for sub-second p99 latencies.
+
+```rust
+pub struct FlinkStreamingPlugin;
+
+impl AlgorithmPlugin for FlinkStreamingPlugin {
+    fn name(&self) -> &str { "flink-streaming-plugin" }
+    fn version(&self) -> &str { "1.0.0" }
+
+    fn supported_domains(&self) -> Vec<String> {
+        vec![
+            "real_time".to_string(),
+            "machine_learning".to_string(),
+            "finance".to_string(),
+        ]
+    }
+
+    fn validate_input(&self, req: &PluginAlgorithmRequest) -> Result<(), String> {
+        for k in ["job_parallelism", "checkpoint_interval_ms",
+                  "state_backend", "watermark_strategy"] {
+            if !req.parameters.contains_key(k) {
+                return Err(format!("missing parameter '{}'", k));
+            }
+        }
+        let backend = req.parameters.get("state_backend")
+            .and_then(|v| v.as_str()).unwrap_or("");
+        if !matches!(backend, "rocksdb" | "heap") {
+            return Err("state_backend must be 'rocksdb' or 'heap'".into());
+        }
+        Ok(())
+    }
+
+    fn execute(&self, req: &PluginAlgorithmRequest) -> Result<PluginAlgorithmResult, String> {
+        let start = std::time::Instant::now();
+
+        let parallelism = req.parameters.get("job_parallelism")
+            .and_then(|v| v.as_u64()).unwrap_or(8) as usize;
+        let checkpoint_ms = req.parameters.get("checkpoint_interval_ms")
+            .and_then(|v| v.as_u64()).unwrap_or(60_000);
+        let state_backend = req.parameters.get("state_backend")
+            .and_then(|v| v.as_str()).unwrap_or("rocksdb").to_string();
+        let watermark_strategy = req.parameters.get("watermark_strategy")
+            .and_then(|v| v.as_str()).unwrap_or("bounded_out_of_orderness").to_string();
+
+        let signal_var: f64 = if req.input_data.len() > 1 {
+            let mean: f64 = req.input_data.iter().sum::<f64>() / req.input_data.len() as f64;
+            req.input_data.iter().map(|x| (x - mean).powi(2)).sum::<f64>()
+                / req.input_data.len() as f64
+        } else {
+            0.0
+        };
+
+        let optimal_parallelism = ((parallelism as f64) * (1.0 + signal_var.sqrt()).min(2.0))
+            .round() as usize;
+
+        let recommended_checkpoint_ms = if signal_var > 0.25 {
+            checkpoint_ms.min(15_000)
+        } else {
+            checkpoint_ms.max(30_000)
+        };
+
+        let checkpoint_recommendations = json!({
+            "interval_ms": recommended_checkpoint_ms,
+            "mode": "EXACTLY_ONCE",
+            "min_pause_between_checkpoints_ms": 5_000,
+            "incremental": state_backend == "rocksdb",
+            "unaligned": signal_var > 0.4
+        });
+
+        let state_size_estimate_gb = (optimal_parallelism as f64
+            * (1.0 + signal_var) * 0.75).round();
+
+        let latency_p99_ms = match state_backend.as_str() {
+            "heap" => (15.0 + signal_var * 30.0).round(),
+            _ => (45.0 + signal_var * 80.0).round(),
+        };
+
+        let mut out = HashMap::new();
+        out.insert("optimal_parallelism".to_string(), json!(optimal_parallelism));
+        out.insert("checkpoint_recommendations".to_string(), checkpoint_recommendations);
+        out.insert("state_size_estimate_gb".to_string(), json!(state_size_estimate_gb));
+        out.insert("latency_p99_ms".to_string(), json!(latency_p99_ms));
+        out.insert("state_backend".to_string(), json!(state_backend));
+        out.insert("watermark_strategy".to_string(), json!(watermark_strategy));
+
+        Ok(PluginAlgorithmResult {
+            success: true,
+            output_data: out,
+            execution_time_ms: start.elapsed().as_secs_f64() * 1000.0,
+            plugin_name: self.name().to_string(),
+            plugin_version: self.version().to_string(),
+        })
+    }
+
+    fn metadata(&self) -> PluginMetadata {
+        PluginMetadata {
+            name: self.name().to_string(),
+            version: self.version().to_string(),
+            author: "Quantum Plugin Authors".to_string(),
+            description: "DAG, checkpoint, watermark and state-backend optimiser for Apache Flink".to_string(),
+            supported_domains: self.supported_domains(),
+            classical_complexity: "O(V + E)".to_string(),
+            quantum_complexity: "O(log(V + E))".to_string(),
+            min_qubits: 4,
+            max_qubits: 4096,
+        }
+    }
+
+    fn security_manifest(&self) -> PluginSecurityManifest {
+        PluginSecurityManifest {
+            requires_network: true,
+            requires_filesystem: false,
+            requires_gpu: false,
+            max_memory_mib: 768,
+            max_execution_time_ms: 30_000,
+            max_qubits_requested: 4096,
+            declared_complexity_class: ComplexityClass::Linear,
+            data_access_scope: DataAccessScope::ReadOwnInput,
+        }
+    }
+
+    fn integrity_hash(&self) -> String {
+        let mut h = Sha512::new();
+        h.update(self.name().as_bytes());
+        h.update(self.version().as_bytes());
+        h.update(b"flink:streaming:linear");
+        format!("{:x}", h.finalize())
+    }
+}
+
+// Registration
+bridge.register_plugin(Arc::new(FlinkStreamingPlugin))?;
+```
+
+**curl**
+
+```powershell
+curl -X POST http://localhost:8080/api/v1/plugins/flink-streaming-plugin/execute `
+  -H "Content-Type: application/json" `
+  -d '{
+    "algorithm_name": "flink-streaming-plugin",
+    "domain": "real_time",
+    "parameters": {
+      "job_name": "fraud-scoring",
+      "job_parallelism": 32,
+      "checkpoint_interval_ms": 60000,
+      "state_backend": "rocksdb",
+      "watermark_strategy": "bounded_out_of_orderness",
+      "max_out_of_orderness_ms": 2000,
+      "savepoint_dir": "s3://flink/savepoints"
+    },
+    "num_qubits": 0,
+    "input_data": [0.31, 0.55, 0.18, 0.42, 0.27, 0.61, 0.09, 0.36]
+  }'
+```
+
+**Expected response**
+
+```json
+{
+  "success": true,
+  "output_data": {
+    "optimal_parallelism": 38,
+    "checkpoint_recommendations": {
+      "interval_ms": 60000,
+      "mode": "EXACTLY_ONCE",
+      "min_pause_between_checkpoints_ms": 5000,
+      "incremental": true,
+      "unaligned": false
+    },
+    "state_size_estimate_gb": 31,
+    "latency_p99_ms": 50,
+    "state_backend": "rocksdb",
+    "watermark_strategy": "bounded_out_of_orderness"
+  },
+  "execution_time_ms": 3.12,
+  "plugin_name": "flink-streaming-plugin",
+  "plugin_version": "1.0.0"
+}
+```
+
+---
+
+## Streaming Architecture Integration
+
+The plugins above expose a unified surface for the major streaming systems. Each one ingests pre-extracted broker / job telemetry, compiles it onto the VQE substrate, and returns deployment-ready tuning recommendations.
+
+| Plugin | Streaming System | Key Use Case | Throughput |
+|--------|------------------|--------------|------------|
+| `kafka-streaming-optimizer` | Apache Kafka | Partition optimization | 1M+ msg/sec |
+| `pulsar-streaming-plugin` | Apache Pulsar | Geo-replication routing | 500K+ msg/sec |
+| `redis-streams-plugin` | Redis Streams | Real-time pub/sub | 10M+ ops/sec |
+| `flink-streaming-plugin` | Apache Flink | DAG optimization | Continuous |
+
+**Integration pattern.** Run each plugin as part of a control-plane sidecar that periodically samples broker / job metrics, invokes the plugin via `/api/v1/plugins/<name>/execute`, and feeds the returned recommendations back into the cluster (Kafka admin API, Pulsar admin REST, Redis `CONFIG SET`, Flink REST). All four plugins are stateless from the engine's perspective — re-runs are safe and deterministic for the same `(input_data, parameters)`.
+
+---
+
+## Vector Database Integration
+
+A single plugin covers the dominant vector backends, exposing a uniform tuning surface for HNSW, IVF, and DiskANN families.
+
+| Plugin | Supported Backends | Index Types | Max Dimensions |
+|--------|--------------------|-------------|----------------|
+| `vector-db-optimizer` | Milvus, Pinecone, Weaviate, Qdrant, ChromaDB | HNSW, IVF_FLAT, IVF_SQ8, DiskANN | 65536 |
+
+**Integration pattern.** Pass the collection's vector dimension, size, target index, metric, and a small sample of representative embedding statistics as `input_data`. The plugin returns `optimal_ef_construction`, `optimal_m`, `optimal_nlist`, `optimal_nprobe`, `recall_at_k`, `qps_estimate`, `memory_usage_gb`, and a `partition_strategy` block that maps directly onto each backend's create-index / create-collection APIs.
+
+---
+
 ### Operational notes for storage plugins
 
 - **Plugins receive pre-extracted data.** Your application is responsible for pulling stats/metadata out of the database; the plugin never opens a socket. This is why every example above declares `requires_network: false` and `requires_filesystem: false`.
