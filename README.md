@@ -774,7 +774,7 @@ The quantum engine runs continuously with no session limits or cooldown periods.
 
 🎁 Custom Packages — bespoke domain packages on request
 
-💻 Multiple Hardware Support — CPU, GPU (NVIDIA A10/A100/H100, AMD MI350X), FPGA, and future quantum hardware
+💻 Multiple Hardware Support — CUDA GPU (NVIDIA A10/A100/H100), AMD ROCm GPU (MI350X), SIMD, FPGA, and any custom hardware on user demand
 
 📦 Unlimited Input Data — no 500MB limit, scale to EB (Exabytes), PB (Petabytes), ZB (Zettabytes) — limited only by your hardware capacity
 
@@ -788,14 +788,16 @@ Contact: For paid tier access, contact Shahnawaz Alam
 
 | Hardware | Support |
 |----------|---------|
-| CPU | x86_64, ARM64 (aarch64) |
-| GPU | NVIDIA A10, A100, H100; AMD MI350X |
+| CPU | x86_64, ARM64 (aarch64), SIMD (AVX-512, NEON) |
+| CUDA GPU | NVIDIA A10, A100, H100 |
+| AMD ROCm GPU | AMD MI350X |
 | FPGA | Custom quantum gate acceleration |
-| Quantum Hardware | Future integration ready |
+| SIMD | AVX-512, AVX2, ARM NEON vectorization |
+| Custom Hardware | Any hardware on user demand |
 | Memory | Scale to available system RAM |
 | Storage | Scale to available disk — EB, PB, ZB capable |
 
-> Free tier runs on CPU only (x86_64, ARM64). Paid tier unlocks GPU acceleration and multi-hardware orchestration.
+> Free tier runs on CPU only (x86_64, ARM64). Paid tier unlocks CUDA GPU, AMD ROCm GPU, SIMD optimization, FPGA acceleration, and custom hardware integration on demand.
 
 ---
 
