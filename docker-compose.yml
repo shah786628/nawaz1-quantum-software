@@ -1,0 +1,22 @@
+services:
+  nawaz1:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      RUST_LOG: info
+      NAWAZ1_LOG_LEVEL: info
+    volumes:
+      - nawaz1-data:/var/lib/nawaz1
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 16G
+        reservations:
+          cpus: "4"
+          memory: 8G
+
+volumes:
+  nawaz1-data:
