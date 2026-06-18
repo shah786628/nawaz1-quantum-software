@@ -1,11 +1,16 @@
-__pycache__/
-*.pyc
-*.pyo
+# Build artifacts
+/target/
+*.dll
+*.so
+*.dylib
+
+# Allow binaries in bin/ directory
+!bin/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
 .env
-.venv/
-venv/
-*.egg-info/
-dist/
-build/
-.DS_Store
-Thumbs.db
+*.pdb
