@@ -1,0 +1,79 @@
+LicenseRef-PRIVATE
+
+© 2025-2026 Shahnawaz Alam. All rights reserved.
+
+PRIVATE PROPRIETARY LICENSE AGREEMENT
+
+Copyright (c) 2025-2026 Shahnawaz Alam
+
+This software and associated documentation files (the "Software") are the exclusive property of Shahnawaz Alam ("Owner").
+
+SINGLE PROPRIETARY LICENSE:
+All modules, components, and files in this project are proprietary. No part of this Software is available under any open-source license. All usage requires a license from the Owner.
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION:
+
+1. OWNERSHIP AND INTELLECTUAL PROPERTY
+The Software is owned by Shahnawaz Alam and is protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties.
+
+INTELLECTUAL PROPERTY RIGHTS:
+a) All proprietary algorithms, including but not limited to:
+   - Quantum Variational Quantum Eigensolver (VQE) engine
+   - Multidimensional compression algorithms
+   - Hybrid quantum-classical database architecture
+   - Adaptive precision optimization
+   - Quantum error mitigation techniques
+   are the exclusive intellectual property of Shahnawaz Alam.
+
+b) All patents, patent applications, trade secrets, copyrights, and other intellectual property rights in and to the Software are owned exclusively by Shahnawaz Alam.
+
+c) No license is granted to any patents, patent applications, or other intellectual property rights of Shahnawaz Alam except as expressly set forth herein.
+
+d) The Software contains trade secrets and proprietary information of Shahnawaz Alam. Unauthorized disclosure, use, or distribution is strictly prohibited.
+
+e) All copies of the Software, including modified versions, derivative works, and portions thereof, remain the exclusive property of Shahnawaz Alam.
+
+2. GRANTED RIGHTS
+Permission is hereby granted to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, subject to the following conditions:
+
+a) Any distribution of the Software must retain this license file and the above copyright notice.
+b) Modifications to the Software must be clearly marked and documented.
+c) Commercial use requires explicit written permission from the Owner.
+d) Use of the Software in a service provider capacity (SaaS, cloud services, hosted solutions) requires explicit written permission from the Owner.
+e) Creation of derivative works based on the Software requires explicit written permission from the Owner.
+
+3. RESTRICTIONS
+You may not:
+a) Reverse engineer, decompile, or disassemble the Software.
+b) Remove or alter any proprietary notices or labels on the Software.
+c) Use the Software for any illegal purpose.
+d) Use the Software to create competing products or services without explicit written permission.
+e) Distribute derivative works without explicit written permission.
+f) Use any part of the Software without a valid license from the Owner.
+
+4. LICENSE TIERS
+The Owner offers the following license tiers:
+- Community Tier: Free for basic usage with limited features
+- Professional Tier: For professional use with extended features
+- Enterprise Tier: Full access to all features for enterprise use
+- Custom Tier: Negotiated terms for specific requirements
+
+Contact the Owner for licensing details and pricing.
+
+5. COMPLIANCE AUTOMATION AND THIRD-PARTY ATTRIBUTIONS
+a) All users of this Software agree to implement automated license scanning tools (e.g., cargo-deny) to ensure dependencies do not conflict with this private license. Any dependency found to be incompatible with this license must be removed or replaced with a compatible alternative.
+
+b) The Software includes third-party open-source components. All third-party licenses and attributions are listed in the THIRD-PARTY-NOTICES file included with this Software. Users must comply with the terms of those licenses, which generally require only attribution.
+
+c) All third-party dependencies have been verified to use permissive licenses compatible with proprietary commercial use. No copyleft licenses (GPL, LGPL, AGPL, MPL, SSPL) are present in the dependency tree.
+
+6. DISCLAIMER OF WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+7. LIMITATION OF LIABILITY
+IN NO EVENT SHALL THE OWNER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+8. TERMINATION
+This license is effective until terminated. Your rights under this license will terminate automatically without notice if you fail to comply with any term(s) of this license.
+
+For licensing inquiries, contact: shahnawaz512001@gmail.com
