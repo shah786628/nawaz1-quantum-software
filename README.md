@@ -18,13 +18,13 @@ Proprietary quantum computing engine. Binary-only distribution.
 - ✅ **Native OS only** — Each binary runs directly on its target operating system
 
 ### Security Enforcement:
-All binaries include advanced reverse-engineering (RE) protection:
-- **Debugger Detection**: Automatically detects attached debuggers (Linux: ptrace/TracerPid, Windows: IsDebuggerPresent)
-- **Auto Kill-Switch**: Binary self-revokes after 2 RE attack detections
-- **Binary Integrity**: SHA-256 hash verification prevents tampering
-- **Telemetry Logging**: All execution attempts logged to private repository
+All binaries include built-in protection mechanisms:
+- **Debugger Detection**: Automatically detects and blocks debuggers
+- **Auto Protection**: Binary disables itself after tampering attempts
+- **Binary Integrity**: Verification prevents unauthorized modifications
+- **Execution Logging**: All runs logged for security monitoring
 
-**Running in debug mode will trigger the auto kill-switch and permanently revoke the binary.**
+**WARNING: Running in debug mode will permanently disable the binary.**
 
 ---
 
