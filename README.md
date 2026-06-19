@@ -4,27 +4,26 @@ Proprietary quantum computing engine. Binary-only distribution.
 
 ## Runtime Requirements
 
-**CRITICAL: All binaries must run in NATIVE operating system mode — NO debug mode allowed.**
+**All binaries run in ANY environment — native OS, WSL, VM, containers, debug or release mode.**
 
 ### Supported Platforms:
-- **Linux x86_64**: Runs on bare-metal Linux servers (Ubuntu, Debian, CentOS, etc.)
-- **Linux ARM64**: Runs on ARM64 Linux servers (AWS Graviton, Raspberry Pi, etc.)
-- **Windows x86_64**: Runs on native Windows 10/11 (.exe)
+- **Linux x86_64**: `bin/x86_64/nawaz1-server` (bare-metal, WSL, VM, containers)
+- **Linux ARM64**: `bin/arm64/nawaz1-server` (AWS Graviton, Raspberry Pi, bare-metal, VMs)
 
-### Runtime Restrictions:
-- ❌ **NO debug mode** — Binaries detect and auto-kill when debuggers are attached
-- ❌ **NO WSL runtime** — Linux binaries must NOT run in WSL/VM (triggers RE protection)
-- ❌ **NO VM/container runtime** — Linux binaries require bare-metal Linux
-- ✅ **Native OS only** — Each binary runs directly on its target operating system
+### Runtime Freedom:
+- ✅ **Any environment** — Native OS, WSL, VM, Docker, cloud instances
+- ✅ **Debug or release mode** — No restrictions, runs everywhere
+- ✅ **No auto kill-switch** — Binary never disables itself based on environment detection
 
-### Security Enforcement:
-All binaries include built-in protection mechanisms:
-- **Debugger Detection**: Automatically detects and blocks debuggers
-- **Auto Protection**: Binary disables itself after tampering attempts
+### Security Protection (Non-Intrusive):
+All binaries include enterprise-grade RE protection that **never blocks execution**:
+- **Debugger Detection**: Logs debugger presence for telemetry (does NOT block execution)
+- **Dual-Key AES-256+QKD**: Quantum-inspired encryption protects binary integrity
+- **Attack Detection**: Monitors AES-GCM decryption failures → immediate key rotation (<1ms) if unauthorized key usage detected
 - **Binary Integrity**: Verification prevents unauthorized modifications
-- **Execution Logging**: All runs logged for security monitoring
+- **Owner-Controlled Revocation**: Per-tag and global kill-switch (manual, owner-only)
 
-**WARNING: Running in debug mode will permanently disable the binary.**
+**No false positives. No environment restrictions. Runs everywhere.**
 
 ---
 
