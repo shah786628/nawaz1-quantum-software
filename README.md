@@ -16,12 +16,9 @@ Proprietary quantum computing engine. Binary-only distribution.
 - ✅ **No auto kill-switch** — Binary never disables itself based on environment detection
 
 ### Security Protection (Non-Intrusive):
-All binaries include enterprise-grade RE protection that **never blocks execution**:
-- **Debugger Detection**: Logs debugger presence for telemetry (does NOT block execution)
-- **Dual-Key AES-256+QKD**: Quantum-inspired encryption protects binary integrity
-- **Attack Detection**: Monitors AES-GCM decryption failures → immediate key rotation (<1ms) if unauthorized key usage detected
-- **Binary Integrity**: Verification prevents unauthorized modifications
-- **Owner-Controlled Revocation**: Per-tag and global kill-switch (manual, owner-only)
+All binaries include enterprise-grade protection that **never blocks execution**:
+- **Runtime Monitoring**: Telemetry logging for security analysis
+- **Owner-Controlled**: Manual revocation available if needed
 
 **No false positives. No environment restrictions. Runs everywhere.**
 
