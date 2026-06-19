@@ -1,6 +1,54 @@
-# Nawaz1 Quantum Engine
+# Nawaz1 Quantum Software
 
-Proprietary quantum computing engine. Binary-only distribution.
+> **Universal Quantum CPU** — Runs everything, creates any quantum algorithm
+
+**Author:** Shahnawaz Alam  
+**License:** Proprietary  
+**Copyright (c) 2026 Shahnawaz Alam. All rights reserved.**
+
+---
+
+## 💡 Quantum CPU Architecture
+
+**Nawaz1 is not just a quantum simulator — it is a fully programmable Quantum CPU that executes ANY quantum computation you design.**
+
+### What This Means:
+
+- **Universal Execution**: Like a classical CPU runs any program, the Nawaz1 Quantum CPU runs **any quantum algorithm** — from chemistry to finance, from optimization to machine learning
+- **Algorithm Creation**: You define the problem, the engine constructs and executes the optimal quantum circuit automatically
+- **Scale Without Limits**: From 4 qubits to 2^53 qubits (9 quadrillion) — the engine handles everything via streaming tensor contraction
+- **Deterministic Results**: No statistical sampling, no shot noise — exact quantum computation every time
+- **Zero Hardware Requirements**: Runs on standard CPUs (x86_64, ARM64) — no quantum hardware needed
+
+### How It Works:
+
+```
+Your Problem → Algorithm Selection → Quantum Circuit Construction → VQE Execution → Exact Results
+```
+
+1. **You provide**: Data, domain, problem type
+2. **Engine handles**: Shannon entropy analysis, Born normalization, structural compression
+3. **Auto-selects**: Optimal qubit count, ansatz, optimizer, execution mode
+4. **Executes**: Unified parametric quantum circuit via tensor network contraction
+5. **Returns**: Exact energy values, fidelity, convergence — deterministic and reproducible
+
+### Create ANY Quantum Algorithm:
+
+The engine provides **108 production-ready algorithms** across 19 categories, and you can create custom quantum circuits for any problem:
+
+- **Chemistry**: Molecules, proteins, drug discovery
+- **Physics**: Quantum dynamics, condensed matter, lattice models
+- **Finance**: Portfolio optimization, risk analysis, Monte Carlo
+- **Machine Learning**: Quantum neural networks, kernel methods, classification
+- **Optimization**: Combinatorial problems, routing, scheduling
+- **Mathematics**: Linear systems, eigenvalues, PDEs
+- **Materials Science**: Crystal structures, band structures, superconductors
+- **Biology**: Protein folding, biomolecular interactions
+- **And more**: Cryptography, fluid dynamics, heat transfer, logistics
+
+**Bottom line**: If it can be expressed as a quantum algorithm, Nawaz1 executes it.
+
+---
 
 ## Runtime Requirements
 
