@@ -335,4 +335,4 @@ All test scripts and JSON input files are available in this repository:
 ---
 
 **Repository:** https://github.com/shah786628/nawaz1-quantum-software  
-**Author:** Nawaz Shah
+**Author:** shahnawaz Alam
