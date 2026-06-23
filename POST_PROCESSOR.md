@@ -114,7 +114,7 @@ Define custom calculations using simple expressions:
       "computed": {
         "energy_ev": "aggregate_energy * 27.2114",
         "fidelity_percent": "fidelity * 100",
-        "quality_score": "fidelity * 1000"
+        "error_rate_ppm": "(1 - fidelity) * 1000000"
       }
     }
   }
@@ -128,7 +128,7 @@ Define custom calculations using simple expressions:
   "fidelity": 0.999999999999,
   "energy_ev": -2068.75,
   "fidelity_percent": 99.9999999999,
-  "quality_score": 999.999999999
+  "error_rate_ppm": 0.000001
 }
 ```
 
@@ -174,7 +174,8 @@ Use all features together:
       "fields": ["aggregate_energy", "homo_lumo_gap_ev", "fidelity"],
       "computed": {
         "stability_index": "fidelity * 100",
-        "gap_kj_mol": "homo_lumo_gap_ev * 96.485"
+        "gap_kj_mol": "homo_lumo_gap_ev * 96.485",
+        "error_rate_percent": "(1 - fidelity) * 100"
       },
       "format": "eV"
     }
@@ -189,7 +190,8 @@ Use all features together:
   "homo_lumo_gap_ev": 8.42,
   "fidelity": 0.999999999999,
   "stability_index": 99.9999999999,
-  "gap_kj_mol": 812.40
+  "gap_kj_mol": 812.40,
+  "error_rate_percent": 0.0000000001
 }
 ```
 
@@ -231,7 +233,8 @@ Use all features together:
       "fields": ["aggregate_energy", "fidelity", "converged"],
       "computed": {
         "risk_score": "(1 - fidelity) * 100",
-        "expected_return": "aggregate_energy * -1000"
+        "expected_return": "aggregate_energy * -1000",
+        "confidence_level": "fidelity * 100"
       }
     }
   }
@@ -253,7 +256,8 @@ Use all features together:
       "fields": ["aggregate_energy", "fidelity"],
       "computed": {
         "binding_affinity": "aggregate_energy * -1.5",
-        "drug_score": "fidelity * 100"
+        "drug_score": "fidelity * 100",
+        "prediction_confidence": "fidelity > 0.999 ? 'HIGH' : 'LOW'"
       },
       "format": "kJ/mol"
     }
@@ -286,7 +290,8 @@ Use all features together:
       "fields": ["fidelity", "converged", "iteration_count"],
       "computed": {
         "training_accuracy": "fidelity * 100",
-        "convergence_speed": "1000 / iteration_count"
+        "convergence_speed": "1000 / iteration_count",
+        "model_reliability": "(1 - (1 - fidelity) * 1000000)"
       }
     }
   }
@@ -351,7 +356,8 @@ Use all features together:
     "custom_output": {
       "computed": {
         "band_gap_ev": "aggregate_energy * 27.2114",
-        "stability_score": "fidelity * 100"
+        "stability_score": "fidelity * 100",
+        "defect_probability": "(1 - fidelity) * 100"
       },
       "format": "eV"
     }
@@ -419,8 +425,6 @@ This is guaranteed by Rust's `_` catch-all pattern in the post-processor archite
 | `parallel_lines_used` | usize | Number of parallel computations |
 | `compression_ratio` | f64 | Tensor network compression achieved |
 | `fidelity` | f64 | Quantum state fidelity (0-1) |
-| `execution_time_us` | u64 | Execution time in microseconds |
-| `l3_circuit_time_us` | u64 | L3 circuit generation time |
 | `converged` | bool | Whether VQE converged |
 | `iteration_count` | u64 | Number of VQE iterations |
 | `barren_plateau_detected` | bool | Whether barren plateau detected |
